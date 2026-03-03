@@ -22,7 +22,23 @@ const createOrderValidation = [
     .withMessage('预算必须大于0'),
   body('duration')
     .isInt({ min: 1 })
-    .withMessage('工期必须大于0天')
+    .withMessage('工期必须大于0天'),
+  body('startTime')
+    .notEmpty()
+    .withMessage('请选择开始时间')
+    .isISO8601()
+    .withMessage('开始时间格式不正确'),
+  body('endTime')
+    .notEmpty()
+    .withMessage('请选择结束时间')
+    .isISO8601()
+    .withMessage('结束时间格式不正确')
+    .custom((endTime, { req }) => {
+      if (new Date(endTime) <= new Date(req.body.startTime)) {
+        throw new Error('结束时间必须晚于开始时间');
+      }
+      return true;
+    })
 ];
 
 // 更新订单状态验证规则

@@ -52,6 +52,8 @@ export default function PostOrder() {
     dubbing: '普通话',
     platform: '',
     coverImages: [] as string[],
+    startTime: '',
+    endTime: '',
   })
 
   useEffect(() => {
@@ -74,6 +76,14 @@ export default function PostOrder() {
   const handleSubmit = () => {
     if (!formData.title || !formData.type || !formData.budget || !formData.duration || !formData.description) {
       alert('请填写必填项')
+      return
+    }
+    if (!formData.startTime || !formData.endTime) {
+      alert('请选择开始时间和结束时间')
+      return
+    }
+    if (new Date(formData.endTime) <= new Date(formData.startTime)) {
+      alert('结束时间必须晚于开始时间')
       return
     }
     setShowConfirmModal(true)
@@ -470,6 +480,32 @@ export default function PostOrder() {
                         <option key={platform} value={platform}>{platform}</option>
                       ))}
                     </select>
+                  </div>
+
+                  {/* 开始时间 */}
+                  <div>
+                    <label className="block text-xs text-[#74767e] mb-1.5">
+                      开始时间 <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="datetime-local"
+                      value={formData.startTime}
+                      onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
+                      className="w-full px-3 py-2 text-sm border border-[#e4e5e7] rounded focus:outline-none focus:border-[#1dbf73]"
+                    />
+                  </div>
+
+                  {/* 结束时间 */}
+                  <div>
+                    <label className="block text-xs text-[#74767e] mb-1.5">
+                      结束时间 <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="datetime-local"
+                      value={formData.endTime}
+                      onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
+                      className="w-full px-3 py-2 text-sm border border-[#e4e5e7] rounded focus:outline-none focus:border-[#1dbf73]"
+                    />
                   </div>
                 </div>
               </div>

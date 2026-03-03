@@ -48,6 +48,12 @@ module.exports = (sequelize, DataTypes) => {
     duration: {
       type: DataTypes.STRING(50)
     },
+    startTime: {
+      type: DataTypes.DATE
+    },
+    endTime: {
+      type: DataTypes.DATE
+    },
     deadline: {
       type: DataTypes.DATE
     },
