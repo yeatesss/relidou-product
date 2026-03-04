@@ -106,6 +106,7 @@ export default function CreatorWorkspace() {
   const [incomeStartDate, setIncomeStartDate] = useState('')
   const [incomeEndDate, setIncomeEndDate] = useState('')
   const [creatorProfile, setCreatorProfile] = useState<any>(null)
+  const [orderStatusFilter, setOrderStatusFilter] = useState<'全部' | '待上传视频' | '待审核' | '待交付' | '已完成' | '审核未通过' | '订单冻结'>('全部')
 
   useEffect(() => {
     // 检查登录状态
@@ -325,26 +326,83 @@ export default function CreatorWorkspace() {
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2">
                   <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-                    <div className="p-5 border-b border-slate-100">
-                      <div className="flex items-center gap-4">
-                        <input
-                          type="text"
-                          placeholder="搜索任务..."
-                          className="flex-1 max-w-md px-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#1dbf73]"
-                        />
-                        <select className="px-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#1dbf73]">
-                          <option>全部状态</option>
-                          <option>待上传视频</option>
-                          <option>待审核</option>
-                          <option>待交付</option>
-                          <option>已完成</option>
-                          <option>审核未通过</option>
-                          <option>订单冻结</option>
-                        </select>
+                    {/* 任务状态Tab切换 */}
+                    <div className="p-3 border-b border-slate-100">
+                      <div className="flex gap-2 overflow-x-auto pb-1">
+                        <button
+                          onClick={() => setOrderStatusFilter('全部')}
+                          className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+                            orderStatusFilter === '全部'
+                              ? 'bg-[#1dbf73] text-white'
+                              : 'text-[#74767e] hover:bg-[#f5f5f5]'
+                          }`}
+                        >
+                          全部
+                        </button>
+                        <button
+                          onClick={() => setOrderStatusFilter('待上传视频')}
+                          className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+                            orderStatusFilter === '待上传视频'
+                              ? 'bg-[#1dbf73] text-white'
+                              : 'text-[#74767e] hover:bg-[#f5f5f5]'
+                          }`}
+                        >
+                          待上传
+                        </button>
+                        <button
+                          onClick={() => setOrderStatusFilter('待审核')}
+                          className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+                            orderStatusFilter === '待审核'
+                              ? 'bg-[#1dbf73] text-white'
+                              : 'text-[#74767e] hover:bg-[#f5f5f5]'
+                          }`}
+                        >
+                          待审核
+                        </button>
+                        <button
+                          onClick={() => setOrderStatusFilter('待交付')}
+                          className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+                            orderStatusFilter === '待交付'
+                              ? 'bg-[#1dbf73] text-white'
+                              : 'text-[#74767e] hover:bg-[#f5f5f5]'
+                          }`}
+                        >
+                          待交付
+                        </button>
+                        <button
+                          onClick={() => setOrderStatusFilter('已完成')}
+                          className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+                            orderStatusFilter === '已完成'
+                              ? 'bg-[#1dbf73] text-white'
+                              : 'text-[#74767e] hover:bg-[#f5f5f5]'
+                          }`}
+                        >
+                          已完成
+                        </button>
+                        <button
+                          onClick={() => setOrderStatusFilter('审核未通过')}
+                          className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+                            orderStatusFilter === '审核未通过'
+                              ? 'bg-[#1dbf73] text-white'
+                              : 'text-[#74767e] hover:bg-[#f5f5f5]'
+                          }`}
+                        >
+                          未通过
+                        </button>
+                        <button
+                          onClick={() => setOrderStatusFilter('订单冻结')}
+                          className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+                            orderStatusFilter === '订单冻结'
+                              ? 'bg-[#1dbf73] text-white'
+                              : 'text-[#74767e] hover:bg-[#f5f5f5]'
+                          }`}
+                        >
+                          已冻结
+                        </button>
                       </div>
                     </div>
                     <div className="divide-y divide-slate-100">
-                      {myOrders.map((order) => (
+                      {myOrders.filter((order) => orderStatusFilter === '全部' || order.status === orderStatusFilter).map((order) => (
                         <div key={order.id} className="p-5 hover:bg-slate-50 cursor-pointer" onClick={() => { setSelectedOrder(order); setShowOrderDetailModal(true) }}>
                           <div className="flex items-center justify-between">
                             <div className="flex-1">

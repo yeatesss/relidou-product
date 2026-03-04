@@ -317,12 +317,8 @@ export default function ClientWorkspace() {
       if (certificationStatus === 'not_submitted' || certificationStatus === 'rejected') {
         navigate('/advertiser-certification')
         return
-      } else if (certificationStatus === 'pending') {
-        // 显示审核中提示，阻止进入工作台
-        alert('您的企业认证正在审核中，请耐心等待')
-        navigate('/login')
-        return
       }
+      // pending状态允许进入工作台，只是限制某些操作
     }
 
     setIsVisible(true)
@@ -599,6 +595,21 @@ export default function ClientWorkspace() {
             </Button>
           </div>
         </div>
+
+        {/* 认证状态提示横幅 */}
+        {getAdvertiserCertificationStatus() === 'pending' && (
+          <div className="mb-6 bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg transition-all duration-500">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-amber-500 rounded-full flex items-center justify-center flex-shrink-0">
+                <Clock className="w-5 h-5 text-white" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-amber-900">您的企业认证正在审核中</p>
+                <p className="text-xs text-amber-700 mt-1">预计1-3个工作日完成审核，审核通过后即可发布任务。您可以先浏览平台功能。</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Stats */}
         <div className={`grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 transition-all duration-500 delay-100 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>

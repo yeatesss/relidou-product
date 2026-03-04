@@ -68,16 +68,16 @@ export default function Login() {
           // 首次登录，未提交认证
           alert('请先完成企业认证')
           navigate('/advertiser-certification')
-        } else if (certificationStatus === 'pending') {
-          // 认证审核中
-          alert('您的企业认证正在审核中，请耐心等待')
-        } else if (certificationStatus === 'approved') {
-          // 认证通过
-          navigate('/client-workspace')
         } else if (certificationStatus === 'rejected') {
           // 认证被拒绝
           alert('您的企业认证未通过，请重新提交')
           navigate('/advertiser-certification')
+        } else {
+          // 认证审核中或已通过，都可以进入工作台
+          if (certificationStatus === 'pending') {
+            alert('您的企业认证正在审核中，可以浏览平台功能')
+          }
+          navigate('/client-workspace')
         }
       } else {
         // 创作者跳转到任务大厅
