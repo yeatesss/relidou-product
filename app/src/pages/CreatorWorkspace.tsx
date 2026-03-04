@@ -14,6 +14,8 @@ import {
   Award,
   X,
   AlertCircle,
+  User,
+  Settings,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -86,7 +88,7 @@ const getStatusColor = (status: string) => {
 
 export default function CreatorWorkspace() {
   const navigate = useNavigate()
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, isCreatorProfileComplete, user } = useAuth()
   const [activeTab, setActiveTab] = useState('orders')
   const [isVisible, setIsVisible] = useState(false)
   const [selectedOrder, setSelectedOrder] = useState<typeof myOrders[0] | null>(null)
@@ -103,6 +105,7 @@ export default function CreatorWorkspace() {
   const [incomeFilterType, setIncomeFilterType] = useState<'all' | 'commission' | 'withdraw'>('all')
   const [incomeStartDate, setIncomeStartDate] = useState('')
   const [incomeEndDate, setIncomeEndDate] = useState('')
+  const [creatorProfile, setCreatorProfile] = useState<any>(null)
 
   useEffect(() => {
     // 检查登录状态
@@ -110,8 +113,25 @@ export default function CreatorWorkspace() {
       navigate('/login')
       return
     }
+
+    // 检查创作者个人信息是否完整
+    if (!isCreatorProfileComplete()) {
+      navigate('/creator-profile-setup')
+      return
+    }
+
+    // 加载创作者个人信息
+    const savedProfile = localStorage.getItem('creatorProfile')
+    if (savedProfile) {
+      try {
+        setCreatorProfile(JSON.parse(savedProfile))
+      } catch (error) {
+        console.error('加载个人信息失败:', error)
+      }
+    }
+
     setIsVisible(true)
-  }, [isAuthenticated, navigate])
+  }, [isAuthenticated, isCreatorProfileComplete, navigate])
 
   const handleFileUpload = (type: 'highlight' | 'watermarked' | 'fullQuality', file: File | null) => {
     if (file) {
@@ -234,6 +254,22 @@ export default function CreatorWorkspace() {
               <Search className="w-4 h-4 mr-2" />
               找任务
             </Button>
+            {/* 用户信息卡片 */}
+            <div
+              className="flex items-center gap-3 bg-white rounded-xl px-4 py-2 shadow-sm border border-slate-100 cursor-pointer hover:shadow-md transition-shadow"
+              onClick={() => navigate('/creator-profile-setup')}
+            >
+              <div className="text-right">
+                <p className="text-sm font-medium text-[#404145]">{creatorProfile?.realName || '创作者'}</p>
+                <p className="text-xs text-[#1dbf73] hover:underline cursor-pointer">{user?.phone || ''}</p>
+              </div>
+              <Avatar className="w-10 h-10 bg-gradient-to-br from-[#1dbf73] to-[#003912]">
+                <AvatarFallback className="text-white font-medium">
+                  {creatorProfile?.realName?.[0] || user?.phone[0] || '创'}
+                </AvatarFallback>
+              </Avatar>
+              <Settings className="w-4 h-4 text-[#74767e]" />
+            </div>
           </div>
         </div>
 

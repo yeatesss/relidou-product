@@ -22,6 +22,10 @@ const dubbingOptions = ['普通话', '方言', '英语', '不限']
 
 const platformOptions = ['抖音', '快手', '小红书', '腾讯广告', '其他信息流']
 
+const sceneOptions = ['不限', '实景', '外景', '特殊']
+
+const styleOptions = ['不限', '正式', '幽默', '特殊']
+
 type AiFeedback = {
   status: 'success' | 'warning' | 'info'
   title: string
@@ -39,21 +43,37 @@ export default function PostOrder() {
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [aiFeedback, setAiFeedback] = useState<AiFeedback | null>(null)
   const [isLoadingAi, setIsLoadingAi] = useState(false)
+  const [hasAiReviewed, setHasAiReviewed] = useState(false) // 是否已AI预审
+
+  // 表单数据更新时重置AI预审状态
+  const updateFormData = (updates: Partial<typeof formData>) => {
+    setFormData({ ...formData, ...updates })
+    // 如果已经AI预审过，但用户修改了内容，则重置预审状态
+    if (hasAiReviewed) {
+      setHasAiReviewed(false)
+      setAiFeedback(null)
+    }
+  }
+
   const [formData, setFormData] = useState({
-    title: '',
-    type: '',
-    budget: '',
-    duration: '',
-    description: '',
-    items: '',
-    acceptAI: '不接受',
-    scene: '不限',
-    style: '不限',
-    dubbing: '普通话',
-    platform: '',
-    coverImages: [] as string[],
-    startTime: '',
-    endTime: '',
+    title: '', // 任务标题
+    type: '', // 任务类型（爆款复刻、原创内容）
+    budget: '', // 佣金价格
+    basicRequirements: '', // 基础要求
+    mandatoryRequirements: '', // 硬性要求
+    optionalRequirements: '', // 非硬性要求
+    supplementaryInfo: '', // 补充说明
+    items: '', // 素材条数
+    acceptAI: '不接受', // AI创作（接受、不接受）
+    scene: '不限', // 场景要求（不限、实景、外景、特殊）
+    style: '不限', // 视频风格（不限、正式、幽默、特殊）
+    dubbing: '普通话', // 配音要求（不限、普通话、方言）
+    platform: '', // 投放平台（全平台、抖音、小红书、视频号）
+    resolution: '9:16', // 分辨率（9:16、4:3、1:1）
+    taskTime: '72小时', // 任务时效（72小时、48小时、24小时）
+    coverImages: [] as string[], // 参考视频/图片
+    startTime: '', // 任务开始时间
+    endTime: '', // 任务结束时间
   })
 
   useEffect(() => {
@@ -73,9 +93,10 @@ export default function PostOrder() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  const handleSubmit = () => {
-    if (!formData.title || !formData.type || !formData.budget || !formData.duration || !formData.description) {
-      alert('请填写必填项')
+  // AI预审
+  const handleAiReview = async () => {
+    if (!formData.title || !formData.type || !formData.budget || !formData.mandatoryRequirements) {
+      alert('请填写必填项（任务标题、视频类型、佣金价格、硬性要求）')
       return
     }
     if (!formData.startTime || !formData.endTime) {
@@ -86,11 +107,23 @@ export default function PostOrder() {
       alert('结束时间必须晚于开始时间')
       return
     }
-    setShowConfirmModal(true)
+
+    // 调用AI预审
+    setIsLoadingAi(true)
+    setAiFeedback(null)
+
+    // 模拟AI分析
+    setTimeout(() => {
+      const feedback = generateMockAiFeedback(formData)
+      setAiFeedback(feedback)
+      setIsLoadingAi(false)
+      setHasAiReviewed(true)
+    }, 1500)
   }
 
+  // 确认发布（提交给运营审核）
   const confirmPublish = () => {
-    alert('任务发布成功！')
+    alert('任务已提交运营审核！')
     navigate('/client-workspace')
   }
 
@@ -98,13 +131,12 @@ export default function PostOrder() {
     const files = e.target.files
     if (files) {
       const newImages = Array.from(files).slice(0, 4).map(file => URL.createObjectURL(file))
-      setFormData({ ...formData, coverImages: [...formData.coverImages, ...newImages].slice(0, 4) })
+      updateFormData({ coverImages: [...formData.coverImages, ...newImages].slice(0, 4) })
     }
   }
 
   const removeImage = (index: number) => {
-    setFormData({
-      ...formData,
+    updateFormData({
       coverImages: formData.coverImages.filter((_, i) => i !== index)
     })
   }
@@ -118,24 +150,6 @@ export default function PostOrder() {
   }
 
   const price = calculatePrice()
-
-  // 获取AI反馈
-  const handleGetAiFeedback = async () => {
-    if (!formData.description) {
-      alert('请先填写任务描述')
-      return
-    }
-
-    setIsLoadingAi(true)
-    setAiFeedback(null)
-
-    // 模拟AI分析（实际应用中应该调用真实的AI API）
-    setTimeout(() => {
-      const feedback = generateMockAiFeedback(formData)
-      setAiFeedback(feedback)
-      setIsLoadingAi(false)
-    }, 1500)
-  }
 
   // 生成模拟AI反馈
   const generateMockAiFeedback = (data: typeof formData): AiFeedback => {
@@ -155,9 +169,22 @@ export default function PostOrder() {
       issues.push('预算金额偏低，可能难以吸引有经验的创作者')
     }
 
-    // 检查描述长度
-    if (data.description.length < 20) {
-      issues.push('任务描述过于简单，建议详细说明视频风格、参考案例、特殊要求等')
+    // 检查描述内容
+    const totalDescLength = (data.basicRequirements?.length || 0) +
+                            (data.mandatoryRequirements?.length || 0) +
+                            (data.optionalRequirements?.length || 0) +
+                            (data.supplementaryInfo?.length || 0)
+
+    if (totalDescLength < 20) {
+      issues.push('任务描述过于简单，建议详细说明基础要求、硬性要求等内容')
+    }
+
+    if (!data.basicRequirements) {
+      suggestions.push('建议填写基础要求，说明视频的基本信息和目标')
+    }
+
+    if (!data.mandatoryRequirements) {
+      suggestions.push('建议填写硬性要求，明确必须满足的条件')
     }
 
     // 检查必要信息
@@ -169,8 +196,8 @@ export default function PostOrder() {
       suggestions.push('建议指定投放平台，以便创作者制作符合平台风格的内容')
     }
 
-    if (data.duration === '') {
-      suggestions.push('建议设置出片时间，明确项目周期')
+    if (data.taskTime === '72小时') {
+      suggestions.push('当前任务时效为72小时，如需加急可选择48小时或24小时')
     }
 
     // 根据视频类型给出建议
@@ -241,7 +268,7 @@ export default function PostOrder() {
                   type="text"
                   placeholder="例如：美妆品牌抖音短视频拍摄"
                   value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  onChange={(e) => updateFormData({ title: e.target.value })}
                   className="w-full p-3 border border-[#e4e5e7] rounded-lg focus:outline-none focus:border-[#1dbf73]"
                 />
               </div>
@@ -255,7 +282,7 @@ export default function PostOrder() {
                   {videoTypes.map((type) => (
                     <button
                       key={type}
-                      onClick={() => setFormData({ ...formData, type })}
+                      onClick={() => updateFormData({ type })}
                       className={`px-4 py-2 rounded-lg border transition-all text-sm ${
                         formData.type === type
                           ? 'bg-[#1dbf73] text-white border-[#1dbf73]'
@@ -300,26 +327,105 @@ export default function PostOrder() {
                   )}
                 </div>
               </div>
+
+              {/* 任务时间 */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-[#404145] mb-2">
+                    开始时间 <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={formData.startTime}
+                    onChange={(e) => updateFormData({ startTime: e.target.value })}
+                    className="w-full px-3 py-2 border border-[#e4e5e7] rounded-lg focus:outline-none focus:border-[#1dbf73]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#404145] mb-2">
+                    结束时间 <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={formData.endTime}
+                    onChange={(e) => updateFormData({ endTime: e.target.value })}
+                    className="w-full px-3 py-2 border border-[#e4e5e7] rounded-lg focus:outline-none focus:border-[#1dbf73]"
+                  />
+                </div>
+              </div>
             </div>
 
-            {/* 详细描述 */}
+            {/* 任务详情 */}
             <div className={`bg-white rounded-xl p-6 shadow-sm transition-all duration-500 delay-75 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-              <h2 className="text-base font-bold text-[#1a1a1a] mb-4">详细描述</h2>
+              <h2 className="text-base font-bold text-[#1a1a1a] mb-4">任务详情</h2>
 
-              <div>
-                <label className="block text-sm font-medium text-[#404145] mb-2">
-                  任务描述 <span className="text-red-500">*</span>
-                </label>
-                <textarea
-                  placeholder="详细描述您的视频需求，包括：&#10;• 视频用途和平台&#10;• 风格要求&#10;• 参考案例&#10;• 其他特殊要求"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  rows={12}
-                  className="w-full p-3 border border-[#e4e5e7] rounded-lg focus:outline-none focus:border-[#1dbf73] resize-none"
-                />
-                <div className="text-right text-sm text-[#74767e] mt-1">
-                  {formData.description.length}/500 字
+              {/* 统一的大输入框 */}
+              <div className="border border-[#e4e5e7] rounded-lg overflow-hidden focus-within:border-[#1dbf73] focus-within:ring-1 focus-within:ring-[#1dbf73] transition-all">
+                {/* 基础要求 */}
+                <div className="border-b border-[#e4e5e7] last:border-b-0">
+                  <div className="bg-gray-50 px-3 py-1.5 border-b border-[#e4e5e7]">
+                    <span className="text-xs font-medium text-[#1a1a1a]">基础要求</span>
+                  </div>
+                  <textarea
+                    placeholder="说明视频的基本信息，例如：视频时长、投放平台、目标受众、品牌调性等"
+                    value={formData.basicRequirements}
+                    onChange={(e) => updateFormData({ basicRequirements: e.target.value })}
+                    rows={3}
+                    className="w-full px-3 py-2 text-sm border-0 focus:outline-none focus:ring-0 resize-none bg-white"
+                  />
                 </div>
+
+                {/* 硬性要求 */}
+                <div className="border-b border-[#e4e5e7] last:border-b-0">
+                  <div className="bg-gray-50 px-3 py-1.5 border-b border-[#e4e5e7]">
+                    <span className="text-xs font-medium text-[#1a1a1a]">硬性要求 <span className="text-red-500">*</span></span>
+                  </div>
+                  <textarea
+                    placeholder="必须满足的条件，例如：必须出现的元素、禁止使用的内容、合规要求等"
+                    value={formData.mandatoryRequirements}
+                    onChange={(e) => updateFormData({ mandatoryRequirements: e.target.value })}
+                    rows={3}
+                    className="w-full px-3 py-2 text-sm border-0 focus:outline-none focus:ring-0 resize-none bg-white"
+                  />
+                </div>
+
+                {/* 非硬性要求 */}
+                <div className="border-b border-[#e4e5e7] last:border-b-0">
+                  <div className="bg-gray-50 px-3 py-1.5 border-b border-[#e4e5e7]">
+                    <span className="text-xs font-medium text-[#1a1a1a]">非硬性要求</span>
+                  </div>
+                  <textarea
+                    placeholder="建议性的内容，例如：风格偏好、参考案例、创意方向等"
+                    value={formData.optionalRequirements}
+                    onChange={(e) => updateFormData({ optionalRequirements: e.target.value })}
+                    rows={3}
+                    className="w-full px-3 py-2 text-sm border-0 focus:outline-none focus:ring-0 resize-none bg-white"
+                  />
+                </div>
+
+                {/* 补充说明 */}
+                <div>
+                  <div className="bg-gray-50 px-3 py-1.5 border-b border-[#e4e5e7]">
+                    <span className="text-xs font-medium text-[#1a1a1a]">补充说明</span>
+                  </div>
+                  <textarea
+                    placeholder="其他需要说明的内容，例如：交付格式、联系方式等"
+                    value={formData.supplementaryInfo}
+                    onChange={(e) => updateFormData({ supplementaryInfo: e.target.value })}
+                    rows={3}
+                    className="w-full px-3 py-2 text-sm border-0 focus:outline-none focus:ring-0 resize-none bg-white"
+                  />
+                </div>
+              </div>
+
+              {/* 字数统计 */}
+              <div className="text-right text-xs text-[#74767e] mt-2">
+                总字数：{
+                  (formData.basicRequirements.length +
+                   formData.mandatoryRequirements.length +
+                   formData.optionalRequirements.length +
+                   formData.supplementaryInfo.length)
+                }/2000 字
               </div>
             </div>
           </div>
@@ -359,7 +465,7 @@ export default function PostOrder() {
                       type="number"
                       placeholder="输入金额"
                       value={formData.budget}
-                      onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
+                      onChange={(e) => updateFormData({ budget: e.target.value })}
                       className="flex-1 text-3xl font-bold text-[#1dbf73] bg-transparent border-0 border-b-2 border-[#1dbf73]/30 focus:border-[#1dbf73] focus:outline-none px-0 py-1"
                     />
                   </div>
@@ -380,49 +486,27 @@ export default function PostOrder() {
                   </div>
                 </div>
 
-                {/* 简要描述 */}
-                <div className="px-5 py-4 border-b border-[#f0f0f0]">
-                  <p className="text-sm text-[#74767e] leading-relaxed line-clamp-3">
-                    {formData.description || '暂无描述'}
-                  </p>
-                </div>
-
                 {/* 任务参数列表 */}
-                <div className="px-5 pt-4 pb-4 space-y-3">
+                <div className="px-5 pt-4 pb-4 space-y-2.5">
                   {/* 素材条数 */}
-                  <div>
-                    <label className="block text-xs text-[#74767e] mb-1.5">素材条数</label>
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs text-[#74767e] w-20 flex-shrink-0">素材条数</label>
                     <input
                       type="number"
                       placeholder="例如：4"
                       value={formData.items}
-                      onChange={(e) => setFormData({ ...formData, items: e.target.value })}
-                      className="w-full px-3 py-2 text-sm border border-[#e4e5e7] rounded focus:outline-none focus:border-[#1dbf73]"
+                      onChange={(e) => updateFormData({ items: e.target.value })}
+                      className="flex-1 px-3 py-1.5 text-sm border border-[#e4e5e7] rounded focus:outline-none focus:border-[#1dbf73]"
                     />
                   </div>
 
-                  {/* 出片时间 */}
-                  <div>
-                    <label className="block text-xs text-[#74767e] mb-1.5">出片时间</label>
-                    <select
-                      value={formData.duration}
-                      onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                      className="w-full px-3 py-2 text-sm border border-[#e4e5e7] rounded focus:outline-none focus:border-[#1dbf73]"
-                    >
-                      <option value="">请选择</option>
-                      {durations.map((duration) => (
-                        <option key={duration} value={duration}>{duration}</option>
-                      ))}
-                    </select>
-                  </div>
-
                   {/* AI创作 */}
-                  <div>
-                    <label className="block text-xs text-[#74767e] mb-1.5">AI创作</label>
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs text-[#74767e] w-20 flex-shrink-0">AI创作</label>
                     <select
                       value={formData.acceptAI}
-                      onChange={(e) => setFormData({ ...formData, acceptAI: e.target.value })}
-                      className="w-full px-3 py-2 text-sm border border-[#e4e5e7] rounded focus:outline-none focus:border-[#1dbf73]"
+                      onChange={(e) => updateFormData({ acceptAI: e.target.value })}
+                      className="flex-1 px-3 py-1.5 text-sm border border-[#e4e5e7] rounded focus:outline-none focus:border-[#1dbf73]"
                     >
                       <option value="不接受">不接受</option>
                       <option value="接受">接受</option>
@@ -430,36 +514,40 @@ export default function PostOrder() {
                   </div>
 
                   {/* 场景要求 */}
-                  <div>
-                    <label className="block text-xs text-[#74767e] mb-1.5">场景要求</label>
-                    <input
-                      type="text"
-                      placeholder="例如：室内、室外"
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs text-[#74767e] w-20 flex-shrink-0">场景要求</label>
+                    <select
                       value={formData.scene}
-                      onChange={(e) => setFormData({ ...formData, scene: e.target.value })}
-                      className="w-full px-3 py-2 text-sm border border-[#e4e5e7] rounded focus:outline-none focus:border-[#1dbf73]"
-                    />
+                      onChange={(e) => updateFormData({ scene: e.target.value })}
+                      className="flex-1 px-3 py-1.5 text-sm border border-[#e4e5e7] rounded focus:outline-none focus:border-[#1dbf73] bg-white"
+                    >
+                      {sceneOptions.map((option) => (
+                        <option key={option} value={option}>{option}</option>
+                      ))}
+                    </select>
                   </div>
 
                   {/* 视频风格 */}
-                  <div>
-                    <label className="block text-xs text-[#74767e] mb-1.5">视频风格</label>
-                    <input
-                      type="text"
-                      placeholder="例如：简约、活泼"
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs text-[#74767e] w-20 flex-shrink-0">视频风格</label>
+                    <select
                       value={formData.style}
-                      onChange={(e) => setFormData({ ...formData, style: e.target.value })}
-                      className="w-full px-3 py-2 text-sm border border-[#e4e5e7] rounded focus:outline-none focus:border-[#1dbf73]"
-                    />
+                      onChange={(e) => updateFormData({ style: e.target.value })}
+                      className="flex-1 px-3 py-1.5 text-sm border border-[#e4e5e7] rounded focus:outline-none focus:border-[#1dbf73] bg-white"
+                    >
+                      {styleOptions.map((option) => (
+                        <option key={option} value={option}>{option}</option>
+                      ))}
+                    </select>
                   </div>
 
                   {/* 配音要求 */}
-                  <div>
-                    <label className="block text-xs text-[#74767e] mb-1.5">配音要求</label>
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs text-[#74767e] w-20 flex-shrink-0">配音要求</label>
                     <select
                       value={formData.dubbing}
-                      onChange={(e) => setFormData({ ...formData, dubbing: e.target.value })}
-                      className="w-full px-3 py-2 text-sm border border-[#e4e5e7] rounded focus:outline-none focus:border-[#1dbf73]"
+                      onChange={(e) => updateFormData({ dubbing: e.target.value })}
+                      className="flex-1 px-3 py-1.5 text-sm border border-[#e4e5e7] rounded focus:outline-none focus:border-[#1dbf73]"
                     >
                       {dubbingOptions.map((option) => (
                         <option key={option} value={option}>{option}</option>
@@ -468,12 +556,12 @@ export default function PostOrder() {
                   </div>
 
                   {/* 投放平台 */}
-                  <div>
-                    <label className="block text-xs text-[#74767e] mb-1.5">投放平台</label>
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs text-[#74767e] w-20 flex-shrink-0">投放平台</label>
                     <select
                       value={formData.platform}
-                      onChange={(e) => setFormData({ ...formData, platform: e.target.value })}
-                      className="w-full px-3 py-2 text-sm border border-[#e4e5e7] rounded focus:outline-none focus:border-[#1dbf73]"
+                      onChange={(e) => updateFormData({ platform: e.target.value })}
+                      className="flex-1 px-3 py-1.5 text-sm border border-[#e4e5e7] rounded focus:outline-none focus:border-[#1dbf73]"
                     >
                       <option value="">请选择平台</option>
                       {platformOptions.map((platform) => (
@@ -482,30 +570,32 @@ export default function PostOrder() {
                     </select>
                   </div>
 
-                  {/* 开始时间 */}
-                  <div>
-                    <label className="block text-xs text-[#74767e] mb-1.5">
-                      开始时间 <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="datetime-local"
-                      value={formData.startTime}
-                      onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
-                      className="w-full px-3 py-2 text-sm border border-[#e4e5e7] rounded focus:outline-none focus:border-[#1dbf73]"
-                    />
+                  {/* 分辨率 */}
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs text-[#74767e] w-20 flex-shrink-0">分辨率</label>
+                    <select
+                      value={formData.resolution}
+                      onChange={(e) => updateFormData({ resolution: e.target.value })}
+                      className="flex-1 px-3 py-1.5 text-sm border border-[#e4e5e7] rounded focus:outline-none focus:border-[#1dbf73]"
+                    >
+                      <option value="9:16">9:16（竖版）</option>
+                      <option value="4:3">4:3（横版）</option>
+                      <option value="1:1">1:1（方形）</option>
+                    </select>
                   </div>
 
-                  {/* 结束时间 */}
-                  <div>
-                    <label className="block text-xs text-[#74767e] mb-1.5">
-                      结束时间 <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="datetime-local"
-                      value={formData.endTime}
-                      onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
-                      className="w-full px-3 py-2 text-sm border border-[#e4e5e7] rounded focus:outline-none focus:border-[#1dbf73]"
-                    />
+                  {/* 任务时效 */}
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs text-[#74767e] w-20 flex-shrink-0">任务时效</label>
+                    <select
+                      value={formData.taskTime}
+                      onChange={(e) => updateFormData({ taskTime: e.target.value })}
+                      className="flex-1 px-3 py-1.5 text-sm border border-[#e4e5e7] rounded focus:outline-none focus:border-[#1dbf73]"
+                    >
+                      <option value="72小时">72小时（普通）</option>
+                      <option value="48小时">48小时（加急）</option>
+                      <option value="24小时">24小时（特急）</option>
+                    </select>
                   </div>
                 </div>
               </div>
@@ -515,41 +605,34 @@ export default function PostOrder() {
         </div>
       </div>
 
-      {/* AI意见反馈模块 */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
-        <div className={`bg-white rounded-xl p-6 shadow-sm transition-all duration-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
-                <Bot className="w-5 h-5 text-white" />
+      {/* AI预审结果弹窗 */}
+      {aiFeedback && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-2xl w-full shadow-2xl max-h-[90vh] overflow-hidden flex flex-col">
+            {/* 弹窗标题 */}
+            <div className="px-6 py-4 border-b border-[#e4e5e7] flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
+                  <Bot className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-[#1a1a1a]">AI预审结果</h3>
+                  <p className="text-xs text-[#74767e]">智能分析任务信息，提供优化建议</p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-lg font-bold text-[#1a1a1a]">AI 意见反馈</h3>
-                <p className="text-sm text-[#74767e]">智能分析任务描述，提供优化建议</p>
-              </div>
+              <button
+                onClick={() => {
+                  setAiFeedback(null)
+                  setHasAiReviewed(false)
+                }}
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#f5f5f5] transition-colors"
+              >
+                <X className="w-5 h-5 text-[#74767e]" />
+              </button>
             </div>
-            <Button
-              onClick={handleGetAiFeedback}
-              disabled={isLoadingAi}
-              className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white"
-            >
-              {isLoadingAi ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
-                  分析中...
-                </>
-              ) : (
-                <>
-                  <Bot className="w-4 h-4 mr-2" />
-                  获取AI建议
-                </>
-              )}
-            </Button>
-          </div>
 
-          {/* AI反馈结果 */}
-          {aiFeedback && (
-            <div className="mt-4 border-t border-[#e4e5e7] pt-4">
+            {/* 弹窗内容 */}
+            <div className="flex-1 overflow-y-auto px-6 py-4">
               {aiFeedback.status === 'success' && (
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                   <div className="flex items-start gap-3">
@@ -620,18 +703,40 @@ export default function PostOrder() {
                   )}
                 </div>
               )}
-            </div>
-          )}
 
-          {/* 未获取反馈时的提示 */}
-          {!aiFeedback && !isLoadingAi && (
-            <div className="text-center py-8 text-[#74767e]">
-              <Bot className="w-12 h-12 text-[#d1d5db] mx-auto mb-3" />
-              <p className="text-sm">填写任务信息后，点击上方按钮获取AI智能建议</p>
+              {/* 提示信息 */}
+              <div className="mt-4 p-3 bg-[#f0faf5] border border-[#1dbf73]/30 rounded-lg">
+                <p className="text-xs text-[#74767e]">
+                  您可以根据AI建议继续优化任务信息，或直接点击下方按钮提交运营审核
+                </p>
+              </div>
             </div>
-          )}
+
+            {/* 弹窗底部按钮 */}
+            <div className="px-6 py-4 border-t border-[#e4e5e7] bg-gray-50 flex gap-3">
+              <button
+                onClick={() => {
+                  setAiFeedback(null)
+                  setHasAiReviewed(false)
+                }}
+                className="flex-1 py-3 border border-[#e4e5e7] text-[#404145] rounded-lg hover:bg-[#f5f5f5] transition-colors font-medium"
+              >
+                继续修改
+              </button>
+              <button
+                onClick={() => {
+                  setAiFeedback(null)
+                  setShowConfirmModal(true)
+                }}
+                className="flex-1 py-3 bg-[#1dbf73] text-white rounded-lg hover:bg-[#19a463] transition-colors font-medium flex items-center justify-center gap-2"
+              >
+                <CheckCircle className="w-4 h-4" />
+                确认发布
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* 确认发布弹窗 */}
       {showConfirmModal && (
@@ -641,10 +746,10 @@ export default function PostOrder() {
               <div className="w-12 h-12 bg-[#1dbf73]/10 rounded-full flex items-center justify-center flex-shrink-0">
                 <CheckCircle className="w-6 h-6 text-[#1dbf73]" />
               </div>
-              <h3 className="text-lg font-bold text-[#1a1a1a]">确认发布</h3>
+              <h3 className="text-lg font-bold text-[#1a1a1a]">确认提交审核</h3>
             </div>
             <p className="text-[#74767e] text-sm leading-relaxed mb-6">
-              发布任务后需要平台审核，确认发布任务吗？
+              确认后将提交给运营审核，预计24小时内完成审核，确认提交吗？
             </p>
             <div className="flex gap-3">
               <button
@@ -657,7 +762,7 @@ export default function PostOrder() {
                 onClick={confirmPublish}
                 className="flex-1 py-2.5 bg-[#1dbf73] text-white rounded-lg hover:bg-[#19a463] transition-colors font-medium"
               >
-                确认发布
+                确认提交
               </button>
             </div>
           </div>
@@ -676,10 +781,21 @@ export default function PostOrder() {
               取消
             </Button>
             <Button
-              onClick={handleSubmit}
-              className="bg-[#1dbf73] hover:bg-[#19a463] text-white px-8"
+              onClick={handleAiReview}
+              disabled={isLoadingAi}
+              className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white px-8"
             >
-              发布任务
+              {isLoadingAi ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                  AI预审中...
+                </>
+              ) : (
+                <>
+                  <Bot className="w-4 h-4 mr-2" />
+                  AI预审
+                </>
+              )}
             </Button>
           </div>
         </div>

@@ -59,7 +59,7 @@ export default function CTASection() {
             }`}
         >
           <button
-            onClick={() => navigate('/register')}
+            onClick={() => navigate('/login')}
             className="group inline-flex items-center justify-center gap-2 bg-[#1dbf73] hover:bg-[#19a463] text-white font-bold text-lg px-10 py-4 rounded-lg shadow-xl shadow-[#1dbf73]/30 hover:scale-105 transition-all duration-200"
           >
             加入热力豆

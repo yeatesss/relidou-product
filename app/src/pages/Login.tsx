@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Phone } from 'lucide-react'
+import { Phone, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '../contexts/AuthContext'
 
 export default function Login() {
   const navigate = useNavigate()
-  const { login } = useAuth()
+  const { authenticate, getAdvertiserCertificationStatus } = useAuth()
   const [isVisible, setIsVisible] = useState(false)
   const [countdown, setCountdown] = useState(0)
+  const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
     phone: '',
     code: '',
@@ -31,25 +32,61 @@ export default function Login() {
       alert('请先输入手机号')
       return
     }
+    // 简单的手机号验证
+    const phoneRegex = /^1[3-9]\d{9}$/
+    if (!phoneRegex.test(formData.phone)) {
+      alert('请输入正确的手机号')
+      return
+    }
     // 模拟发送验证码
     setCountdown(60)
-    alert('验证码已发送')
+    alert('验证码已发送（测试验证码：123456）')
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!formData.phone || !formData.code) {
       alert('请填写完整信息')
       return
     }
-    // 登录成功，保存用户信息
-    login(formData.phone, formData.role)
-    alert('登录成功！')
-    // 根据角色跳转到不同的页面
-    if (formData.role === 'advertiser') {
-      navigate('/client-workspace')
-    } else {
-      navigate('/orders')
+
+    setIsLoading(true)
+    try {
+      const result = await authenticate(formData.phone, formData.code, formData.role)
+
+      if (result.isNewUser) {
+        alert('欢迎加入热力豆！账号已自动创建')
+      } else {
+        alert('登录成功！')
+      }
+
+      // 根据角色跳转到不同的页面
+      if (formData.role === 'advertiser') {
+        // 检查广告主认证状态
+        const certificationStatus = getAdvertiserCertificationStatus()
+        if (certificationStatus === 'not_submitted') {
+          // 首次登录，未提交认证
+          alert('请先完成企业认证')
+          navigate('/advertiser-certification')
+        } else if (certificationStatus === 'pending') {
+          // 认证审核中
+          alert('您的企业认证正在审核中，请耐心等待')
+        } else if (certificationStatus === 'approved') {
+          // 认证通过
+          navigate('/client-workspace')
+        } else if (certificationStatus === 'rejected') {
+          // 认证被拒绝
+          alert('您的企业认证未通过，请重新提交')
+          navigate('/advertiser-certification')
+        }
+      } else {
+        // 创作者跳转到任务大厅
+        navigate('/orders')
+      }
+    } catch (error) {
+      alert(error instanceof Error ? error.message : '操作失败，请重试')
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -61,8 +98,8 @@ export default function Login() {
           <div className="w-16 h-16 bg-[#1dbf73] rounded-xl flex items-center justify-center mx-auto mb-4">
             <span className="text-white font-bold text-2xl">热</span>
           </div>
-          <h1 className="text-2xl font-bold text-[#404145]">欢迎回来</h1>
-          <p className="text-[#74767e] mt-1">登录你的热力豆账号</p>
+          <h1 className="text-2xl font-bold text-[#404145]">欢迎来到热力豆</h1>
+          <p className="text-[#74767e] mt-1">手机号快捷登录/注册</p>
         </div>
 
         {/* Form */}
@@ -138,25 +175,27 @@ export default function Login() {
               </div>
             </div>
 
+            <div className="text-xs text-[#74767e] bg-[#f7f7f7] p-3 rounded-lg">
+              <p>💡 登录即表示同意</p>
+              <p className="mt-1">未注册手机号验证通过后将自动创建账号</p>
+            </div>
+
             <Button
               type="submit"
+              disabled={isLoading}
               className="w-full bg-[#1dbf73] hover:bg-[#19a463] text-white py-3"
             >
-              登录
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  处理中...
+                </>
+              ) : (
+                '登录 / 注册'
+              )}
             </Button>
           </form>
         </div>
-
-        {/* Register Link */}
-        <p className="text-center mt-6 text-[#74767e]">
-          还没有账号？{' '}
-          <button
-            onClick={() => navigate('/register')}
-            className="text-[#1dbf73] font-medium hover:underline"
-          >
-            立即注册
-          </button>
-        </p>
       </div>
     </div>
   )

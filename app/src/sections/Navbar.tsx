@@ -63,7 +63,7 @@ export default function Navbar({ scrolled }: NavbarProps) {
           </div>
 
           {/* Search Bar - Desktop */}
-          {(!isActive('/login') && !isActive('/register') && !isActive('/client-workspace') && (!isHomePage || scrolled)) && (
+          {(!isActive('/login') && !isActive('/client-workspace') && (!isHomePage || scrolled)) && (
             <div className="hidden md:flex flex-1 max-w-xl mx-8">
               <div className="relative w-full">
                 <input
@@ -129,20 +129,12 @@ export default function Navbar({ scrolled }: NavbarProps) {
                 </Button>
               </>
             ) : (
-              <>
-                <button
-                  onClick={() => navigate('/login')}
-                  className="text-[#74767e] hover:text-[#1dbf73] transition-colors text-sm font-medium"
-                >
-                  登录
-                </button>
-                <Button
-                  onClick={() => navigate('/register')}
-                  className="bg-[#1dbf73] hover:bg-[#19a463] text-white rounded-md px-5"
-                >
-                  注册
-                </Button>
-              </>
+              <Button
+                onClick={() => navigate('/login')}
+                className="bg-[#1dbf73] hover:bg-[#19a463] text-white rounded-md px-5"
+              >
+                登录 / 注册
+              </Button>
             )}
           </div>
 
@@ -163,7 +155,7 @@ export default function Navbar({ scrolled }: NavbarProps) {
         {mobileMenuOpen && (
           <div className="md:hidden mt-4 pb-4 border-t border-[#e4e5e7] pt-4">
             <div className="flex flex-col gap-4">
-              {(!isActive('/login') && !isActive('/register') && !isActive('/client-workspace') && (!isHomePage || scrolled)) && (
+              {(!isActive('/login') && !isActive('/client-workspace') && (!isHomePage || scrolled)) && (
                 <div className="relative">
                   <input
                     type="text"
@@ -220,20 +212,12 @@ export default function Navbar({ scrolled }: NavbarProps) {
                   </Button>
                 </>
               ) : (
-                <>
-                  <button
-                    onClick={() => { navigate('/login'); setMobileMenuOpen(false) }}
-                    className="text-left py-2 text-[#74767e] text-sm font-medium"
-                  >
-                    登录
-                  </button>
-                  <Button
-                    onClick={() => { navigate('/register'); setMobileMenuOpen(false) }}
-                    className="bg-[#1dbf73] hover:bg-[#19a463] text-white rounded-md w-full"
-                  >
-                    注册
-                  </Button>
-                </>
+                <Button
+                  onClick={() => { navigate('/login'); setMobileMenuOpen(false) }}
+                  className="bg-[#1dbf73] hover:bg-[#19a463] text-white rounded-md w-full"
+                >
+                  登录 / 注册
+                </Button>
               )}
             </div>
           </div>

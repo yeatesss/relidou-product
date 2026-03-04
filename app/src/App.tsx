@@ -11,9 +11,10 @@ import BrowseOrders from './pages/BrowseOrders'
 import OrderDetail from './pages/OrderDetail'
 import Creators from './pages/Creators'
 import CreatorProfile from './pages/CreatorProfile'
+import CreatorProfileSetup from './pages/CreatorProfileSetup'
+import AdvertiserCertification from './pages/AdvertiserCertification'
 import PostOrder from './pages/PostOrder'
 import Login from './pages/Login'
-import Register from './pages/Register'
 import UserDashboard from './pages/UserDashboard'
 import Messages from './pages/Messages'
 import HowItWorks from './pages/HowItWorks'
@@ -80,12 +81,13 @@ function App() {
                   <Route path="/creators" element={<Creators />} />
                   <Route path="/creators/:id" element={<CreatorProfile />} />
                   <Route path="/login" element={<Login />} />
-                  <Route path="/register" element={<Register />} />
                   <Route path="/dashboard" element={<UserDashboard />} />
                   <Route path="/messages" element={<Messages />} />
                   <Route path="/how-it-works" element={<HowItWorks />} />
                   <Route path="/client-workspace" element={<ClientWorkspace />} />
                   <Route path="/creator-workspace" element={<CreatorWorkspace />} />
+                  <Route path="/creator-profile-setup" element={<CreatorProfileSetup />} />
+                  <Route path="/advertiser-certification" element={<AdvertiserCertification />} />
                 </Routes>
               </main>
               <Footer />

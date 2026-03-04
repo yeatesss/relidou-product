@@ -45,11 +45,15 @@ const SERVICE = {
     secondReviewPrice: 24,
     desc: '100字左右的简单用户生成内容视频，可以在家里或办公室拍摄',
     items: '4 条 15s 竖版信息流视频',
-    duration: '72小时',
     acceptAI: '不接受',
     scene: '不限',
     style: '不限',
     dubbing: '普通话',
+    platform: '抖音',
+    resolution: '9:16',
+    taskTime: '72小时',
+    startTime: '2026-02-23T10:00',
+    endTime: '2026-02-26T18:00',
   },
 
   description: `**任务说明**
@@ -310,11 +314,13 @@ export default function OrderDetail() {
                 <div className="px-5 pt-4 pb-2 space-y-0">
                   {[
                     { icon: <Film className="w-4 h-4 text-[#1dbf73]" />, label: '素材条数', value: SERVICE.task.items },
-                    { icon: <Clock className="w-4 h-4 text-[#1dbf73]" />, label: '出片时间', value: SERVICE.task.duration },
                     { icon: <Bot className="w-4 h-4 text-[#1dbf73]" />, label: 'AI 创作', value: SERVICE.task.acceptAI },
                     { icon: <Monitor className="w-4 h-4 text-[#1dbf73]" />, label: '场景要求', value: SERVICE.task.scene },
                     { icon: <AlertCircle className="w-4 h-4 text-[#1dbf73]" />, label: '视频风格', value: SERVICE.task.style },
                     { icon: <Mic className="w-4 h-4 text-[#1dbf73]" />, label: '配音要求', value: SERVICE.task.dubbing },
+                    { icon: <Monitor className="w-4 h-4 text-[#1dbf73]" />, label: '投放平台', value: SERVICE.task.platform },
+                    { icon: <Maximize2 className="w-4 h-4 text-[#1dbf73]" />, label: '分辨率', value: SERVICE.task.resolution },
+                    { icon: <Clock className="w-4 h-4 text-[#1dbf73]" />, label: '任务时效', value: SERVICE.taskTime },
                   ].map((row) => (
                     <div
                       key={row.label}
@@ -327,6 +333,16 @@ export default function OrderDetail() {
                       <span className="text-sm font-medium text-[#1a1a1a]">{row.value}</span>
                     </div>
                   ))}
+                </div>
+
+                {/* 任务时间 */}
+                <div className="px-5 py-4 bg-[#f0faf5] border-t border-[#d4f0e3]">
+                  <div className="text-xs text-[#74767e] mb-2">任务时间</div>
+                  <div className="text-sm text-[#1a1a1a]">
+                    {new Date(SERVICE.task.startTime).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                    {' ~ '}
+                    {new Date(SERVICE.task.endTime).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                  </div>
                 </div>
 
                 {/* 立即下单按钮 */}

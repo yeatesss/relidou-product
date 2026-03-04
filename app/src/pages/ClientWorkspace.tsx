@@ -28,12 +28,169 @@ const stats = [
 ]
 
 const myOrders = [
-  { id: 'ORD-2026-001', title: '美妆品牌抖音短视频', budget: '¥1,200', status: '进行中', bids: 5, acceptedCount: 2, submissionsReceived: 2, creator: '小明影视', deadline: '2026-02-26', createdAt: '2026-02-23' },
-  { id: 'ORD-2026-002', title: '产品展示视频拍摄', budget: '¥2,500', status: '审核中', bids: 3, acceptedCount: 0, submissionsReceived: 0, creator: null, deadline: '2026-02-27', createdAt: '2026-02-22' },
-  { id: 'ORD-2026-003', title: '企业宣传片剪辑', budget: '¥5,000', status: '审核通过', bids: 8, acceptedCount: 8, submissionsReceived: 8, creator: '动画工坊', deadline: '2026-02-25', createdAt: '2026-02-20' },
-  { id: 'ORD-2026-004', title: 'APP演示动画', budget: '¥8,000', status: '审核驳回', bids: 6, acceptedCount: 3, submissionsReceived: 3, creator: '三维视界', deadline: '2026-03-01', createdAt: '2026-02-19' },
-  { id: 'ORD-2026-005', title: '美食探店视频', budget: '¥3,800', status: '已下架', bids: 4, acceptedCount: 4, submissionsReceived: 4, creator: '味蕾视频', deadline: '2026-02-18', createdAt: '2026-02-15' },
-  { id: 'ORD-2026-006', title: '健身教程合集', budget: '¥2,200', status: '已结束', bids: 7, acceptedCount: 7, submissionsReceived: 7, creator: '运动达人', deadline: '2026-02-10', createdAt: '2026-02-08' },
+  {
+    id: 'ORD-2026-001',
+    title: '美妆品牌抖音短视频',
+    type: '爆款复刻',
+    budget: '¥1,200',
+    status: '进行中',
+    bids: 5,
+    acceptedCount: 2,
+    submissionsReceived: 2,
+    likedCount: 1,
+    creator: '小明影视',
+    deadline: '2026-02-26',
+    createdAt: '2026-02-23',
+    // 任务详细信息
+    description: '面向短视频创作者的信息流广告视频制作任务',
+    items: 4,
+    price: 36,
+    platform: '抖音',
+    resolution: '9:16',
+    taskTime: '48小时',
+    acceptAI: '不接受',
+    scene: '实景',
+    style: '正式',
+    dubbing: '普通话',
+    startTime: '2026-02-23T10:00',
+    endTime: '2026-02-26T18:00',
+    coverImages: ['美妆样片1.jpg', '美妆样片2.jpg'],
+  },
+  {
+    id: 'ORD-2026-002',
+    title: '产品展示视频拍摄',
+    type: '原创内容',
+    budget: '¥2,500',
+    status: '审核中',
+    bids: 3,
+    acceptedCount: 0,
+    submissionsReceived: 0,
+    likedCount: 0,
+    creator: null,
+    deadline: '2026-02-27',
+    createdAt: '2026-02-22',
+    description: '产品信息流广告视频拍摄制作',
+    items: 5,
+    price: 48,
+    platform: '小红书',
+    resolution: '9:16',
+    taskTime: '48小时',
+    acceptAI: '不接受',
+    scene: '不限',
+    style: '幽默',
+    dubbing: '普通话',
+    startTime: '2026-02-22T09:00',
+    endTime: '2026-02-27T18:00',
+    coverImages: ['产品样片1.jpg'],
+  },
+  {
+    id: 'ORD-2026-003',
+    title: '企业宣传片剪辑',
+    type: '爆款复刻',
+    budget: '¥5,000',
+    status: '审核通过',
+    bids: 8,
+    acceptedCount: 8,
+    submissionsReceived: 8,
+    likedCount: 5,
+    creator: '动画工坊',
+    deadline: '2026-02-25',
+    createdAt: '2026-02-20',
+    description: '企业宣传短视频剪辑与后期制作',
+    items: 3,
+    price: 60,
+    platform: '全平台',
+    resolution: '4:3',
+    taskTime: '24小时',
+    acceptAI: '接受',
+    scene: '外景',
+    style: '正式',
+    dubbing: '不限',
+    startTime: '2026-02-20T08:00',
+    endTime: '2026-02-25T20:00',
+    coverImages: ['企业样片1.jpg', '企业样片2.jpg', '企业样片3.jpg'],
+  },
+  {
+    id: 'ORD-2026-004',
+    title: 'APP演示动画',
+    type: '原创内容',
+    budget: '¥8,000',
+    status: '审核驳回',
+    bids: 6,
+    acceptedCount: 3,
+    submissionsReceived: 3,
+    likedCount: 2,
+    creator: '三维视界',
+    deadline: '2026-03-01',
+    createdAt: '2026-02-19',
+    description: '移动应用功能演示动画视频',
+    items: 6,
+    price: 72,
+    platform: '抖音',
+    resolution: '1:1',
+    taskTime: '48小时',
+    acceptAI: '不接受',
+    scene: '特殊',
+    style: '正式',
+    dubbing: '方言',
+    startTime: '2026-02-19T10:00',
+    endTime: '2026-03-01T18:00',
+    coverImages: ['APP样片1.jpg', 'APP样片2.jpg'],
+  },
+  {
+    id: 'ORD-2026-005',
+    title: '美食探店视频',
+    type: '爆款复刻',
+    budget: '¥3,800',
+    status: '已下架',
+    bids: 4,
+    acceptedCount: 4,
+    submissionsReceived: 4,
+    likedCount: 3,
+    creator: '味蕾视频',
+    deadline: '2026-02-18',
+    createdAt: '2026-02-15',
+    description: '餐饮探店信息流短视频制作',
+    items: 4,
+    price: 42,
+    platform: '视频号',
+    resolution: '9:16',
+    taskTime: '48小时',
+    acceptAI: '不接受',
+    scene: '实景',
+    style: '正式',
+    dubbing: '普通话',
+    startTime: '2026-02-15T10:00',
+    endTime: '2026-02-18T20:00',
+    coverImages: ['美食样片1.jpg', '美食样片2.jpg'],
+  },
+  {
+    id: 'ORD-2026-006',
+    title: '健身教程合集',
+    type: '原创内容',
+    budget: '¥2,200',
+    status: '已结束',
+    bids: 7,
+    acceptedCount: 7,
+    submissionsReceived: 7,
+    likedCount: 6,
+    creator: '运动达人',
+    deadline: '2026-02-10',
+    createdAt: '2026-02-08',
+    description: '健身运动类短视频教程制作',
+    items: 10,
+    price: 22,
+    platform: '抖音',
+    resolution: '9:16',
+    taskTime: '72小时',
+    acceptAI: '不接受',
+    scene: '不限',
+    style: '幽默',
+    dubbing: '普通话',
+    startTime: '2026-02-08T10:00',
+    endTime: '2026-02-10T18:00',
+    coverImages: ['健身样片1.jpg', '健身样片2.jpg'],
+  },
 ]
 
 const myBids = [
@@ -116,7 +273,7 @@ const getStatusColor = (status: string) => {
 
 export default function ClientWorkspace() {
   const navigate = useNavigate()
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, isAdvertiserCertified, getAdvertiserCertificationStatus } = useAuth()
   const [activeTab, setActiveTab] = useState('orders')
   const [isVisible, setIsVisible] = useState(false)
   const [bidSearchKeyword, setBidSearchKeyword] = useState('')
@@ -135,6 +292,17 @@ export default function ClientWorkspace() {
   const [currentModifyInput, setCurrentModifyInput] = useState('')
   const [showOrderDetailModal, setShowOrderDetailModal] = useState(false)
   const [selectedOrder, setSelectedOrder] = useState<typeof myOrders[0] | null>(null)
+  const [orderStatusFilter, setOrderStatusFilter] = useState('全部')
+  const [showReviewModal, setShowReviewModal] = useState(false)
+  const [currentReviewOrder, setCurrentReviewOrder] = useState<typeof myOrders[0] | null>(null)
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0)
+  const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null)
+  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | 'up' | 'down' | null>(null)
+  const [dragOffset, setDragOffset] = useState(0)
+  const [isVerticalSwipe, setIsVerticalSwipe] = useState(false)
+  const [showDislikeConfirm, setShowDislikeConfirm] = useState(false)
+  const [showLikeConfirm, setShowLikeConfirm] = useState(false)
+  const [bidStatusFilter, setBidStatusFilter] = useState('全部')
 
   useEffect(() => {
     // 检查登录状态
@@ -142,8 +310,201 @@ export default function ClientWorkspace() {
       navigate('/login')
       return
     }
+
+    // 检查广告主认证状态
+    if (!isAdvertiserCertified()) {
+      const certificationStatus = getAdvertiserCertificationStatus()
+      if (certificationStatus === 'not_submitted' || certificationStatus === 'rejected') {
+        navigate('/advertiser-certification')
+        return
+      } else if (certificationStatus === 'pending') {
+        // 显示审核中提示，阻止进入工作台
+        alert('您的企业认证正在审核中，请耐心等待')
+        navigate('/login')
+        return
+      }
+    }
+
     setIsVisible(true)
-  }, [isAuthenticated, navigate])
+  }, [isAuthenticated, isAdvertiserCertified, getAdvertiserCertificationStatus, navigate])
+
+  // 防止在审片弹窗中滑动时触发页面滚动
+  useEffect(() => {
+    if (showReviewModal) {
+      document.body.style.overflow = 'hidden'
+      return () => {
+        document.body.style.overflow = 'unset'
+      }
+    }
+  }, [showReviewModal])
+
+  const handleReviewClick = (orderId: string) => {
+    const order = myOrders.find(o => o.id === orderId)
+    if (order) {
+      setCurrentReviewOrder(order)
+      setCurrentVideoIndex(0)
+      setShowReviewModal(true)
+    }
+  }
+
+  const handleSwipeLeft = () => {
+    // 不喜欢 - 显示确认弹窗
+    setShowDislikeConfirm(true)
+  }
+
+  const confirmDislike = () => {
+    // 确认不喜欢 - 滑到下一个视频
+    setShowDislikeConfirm(false)
+    if (currentVideoIndex < 4) {
+      setSwipeDirection('left')
+      setDragOffset(0)
+      setTimeout(() => {
+        setCurrentVideoIndex(prev => prev + 1)
+        setSwipeDirection(null)
+      }, 300)
+    }
+  }
+
+  const handleSwipeRight = () => {
+    // 喜欢 - 显示确认弹窗
+    setShowLikeConfirm(true)
+  }
+
+  const confirmLike = () => {
+    // 确认喜欢 - 滑到下一个视频
+    setShowLikeConfirm(false)
+    if (currentVideoIndex < 4) {
+      setSwipeDirection('right')
+      setDragOffset(0)
+      setTimeout(() => {
+        setCurrentVideoIndex(prev => prev + 1)
+        setSwipeDirection(null)
+      }, 300)
+    }
+  }
+
+  const handleSwipeUp = () => {
+    // 向上滑动 - 直接切换到下一个视频（无需确认）
+    if (currentVideoIndex < 4) {
+      setSwipeDirection('up')
+      setDragOffset(0)
+      setTimeout(() => {
+        setCurrentVideoIndex(prev => prev + 1)
+        setSwipeDirection(null)
+      }, 300)
+    }
+  }
+
+  const handleSwipeDown = () => {
+    // 向下滑动 - 直接切换到下一个视频（无需确认）
+    if (currentVideoIndex < 4) {
+      setSwipeDirection('down')
+      setDragOffset(0)
+      setTimeout(() => {
+        setCurrentVideoIndex(prev => prev + 1)
+        setSwipeDirection(null)
+      }, 300)
+    }
+  }
+
+  // 处理滑动开始
+  const handleTouchStart = (e: React.TouchEvent | React.MouseEvent) => {
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
+    setTouchStart({ x: clientX, y: clientY })
+  }
+
+  // 处理滑动移动
+  const handleTouchMove = (e: React.TouchEvent | React.MouseEvent) => {
+    if (!touchStart) return
+
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
+    const deltaX = clientX - touchStart.x
+    const deltaY = clientY - touchStart.y
+
+    const absDeltaX = Math.abs(deltaX)
+    const absDeltaY = Math.abs(deltaY)
+
+    // 判断主要滑动方向（在移动超过10px后确定方向）
+    if (absDeltaX > 10 || absDeltaY > 10) {
+      if (absDeltaX > absDeltaY) {
+        // 水平滑动
+        setIsVerticalSwipe(false)
+        const maxOffset = 150
+        const clampedDelta = Math.max(-maxOffset, Math.min(maxOffset, deltaX))
+        setDragOffset(clampedDelta)
+
+        // 根据拖动方向设置提示
+        if (clampedDelta < -20) {
+          setSwipeDirection('left')
+        } else if (clampedDelta > 20) {
+          setSwipeDirection('right')
+        } else {
+          setSwipeDirection(null)
+        }
+      } else {
+        // 垂直滑动
+        setIsVerticalSwipe(true)
+        const maxOffset = 150
+        const clampedDelta = Math.max(-maxOffset, Math.min(maxOffset, deltaY))
+        setDragOffset(-clampedDelta)
+
+        // 根据拖动方向设置提示
+        if (clampedDelta < -20) {
+          setSwipeDirection('up')
+        } else if (clampedDelta > 20) {
+          setSwipeDirection('down')
+        } else {
+          setSwipeDirection(null)
+        }
+      }
+    }
+  }
+
+  // 处理滑动结束
+  const handleTouchEnd = (e: React.TouchEvent | React.MouseEvent) => {
+    if (!touchStart) return
+
+    const clientX = 'changedTouches' in e ? e.changedTouches[0].clientX : e.clientX
+    const clientY = 'changedTouches' in e ? e.changedTouches[0].clientY : e.clientY
+
+    const deltaX = clientX - touchStart.x
+    const deltaY = clientY - touchStart.y
+    const absDeltaX = Math.abs(deltaX)
+    const absDeltaY = Math.abs(deltaY)
+
+    const threshold = 50
+
+    if (absDeltaX > threshold || absDeltaY > threshold) {
+      if (absDeltaX > absDeltaY) {
+        // 水平滑动占主导
+        if (deltaX > 0) {
+          // 向右滑动 - 喜欢
+          handleSwipeRight()
+        } else {
+          // 向左滑动 - 不喜欢
+          handleSwipeLeft()
+        }
+      } else {
+        // 垂直滑动占主导 - 只切换视频
+        if (deltaY < 0) {
+          // 向上滑动
+          handleSwipeUp()
+        } else {
+          // 向下滑动
+          handleSwipeDown()
+        }
+      }
+    } else {
+      // 没有达到阈值，复位
+      setDragOffset(0)
+      setSwipeDirection(null)
+    }
+
+    setTouchStart(null)
+    setIsVerticalSwipe(false)
+  }
 
   const handleVideoClick = (videoTitle: string, videoType: string) => {
     setCurrentVideo({ title: videoTitle, type: videoType })
@@ -288,89 +649,112 @@ export default function ClientWorkspace() {
             {/* Orders */}
             <TabsContent value="orders">
               <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-                {/* 新投稿提示横幅 */}
-                {hasNewSubmission && (
-                  <div className="mx-5 mt-5 mb-0 bg-gradient-to-r from-[#1dbf73] to-[#19a463] rounded-xl p-4 shadow-lg animate-pulse">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                          <CheckCircle className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                          <p className="text-white font-bold text-base">收到3条新的投稿视频</p>
-                          <p className="text-white/90 text-sm">创作者已提交视频，请及时审核</p>
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => {
-                          setHasNewSubmission(false)
-                          navigate('/video-review')
-                        }}
-                        className="px-4 py-2 bg-white text-[#1dbf73] rounded-lg hover:bg-white/90 transition-colors text-sm font-bold"
-                      >
-                        立即审核
-                      </button>
-                    </div>
-                  </div>
-                )}
+                {/* 搜索和状态筛选区域 */}
                 <div className="p-5 border-b border-slate-100">
-                  <div className="flex items-center gap-4">
+                  <div className="mb-4">
                     <input
                       type="text"
                       placeholder="搜索任务..."
-                      className="flex-1 max-w-md px-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#1dbf73]"
+                      className="w-full max-w-md px-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#1dbf73]"
                     />
-                    <select className="px-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#1dbf73]">
-                      <option>全部状态</option>
-                      <option>审核中</option>
-                      <option>审核通过</option>
-                      <option>审核驳回</option>
-                      <option>进行中</option>
-                      <option>已下架</option>
-                      <option>已结束</option>
-                    </select>
+                  </div>
+                  {/* 状态筛选 Tab */}
+                  <div className="flex gap-2 flex-wrap">
+                    {['全部', '审核中', '审核通过', '审核驳回', '进行中', '已下架', '已结束'].map((status) => (
+                      <button
+                        key={status}
+                        onClick={() => setOrderStatusFilter(status)}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                          orderStatusFilter === status
+                            ? 'bg-[#1dbf73] text-white'
+                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        }`}
+                      >
+                        {status}
+                      </button>
+                    ))}
                   </div>
                 </div>
                 <table className="w-full">
                   <thead className="bg-slate-50">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">任务信息</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">预算</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">已验收/采购数量</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">采购数量</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">已收到</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">已喜欢</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">已验收</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">状态</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">截止日</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">操作</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {myOrders.map((order) => (
-                      <tr key={order.id} className="hover:bg-slate-50">
-                        <td className="px-6 py-4">
-                          <p className="font-medium text-[#404145]">{order.title}</p>
-                        </td>
-                        <td className="px-6 py-4">
-                          <p className="text-[#1dbf73] font-medium">{order.budget}</p>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-slate-600">
-                          {order.acceptedCount}/{order.bids}
-                        </td>
-                        <td className="px-6 py-4">
-                          <Badge className={getStatusColor(order.status)}>{order.status}</Badge>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-slate-500">{order.deadline}</td>
-                        <td className="px-6 py-4">
-                          <button
-                            onClick={() => {
-                              setSelectedOrder(order)
-                              setShowOrderDetailModal(true)
-                            }}
-                            className="px-3 py-1.5 text-sm text-[#74767e] hover:bg-slate-100 rounded-lg transition-colors"
-                          >
-                            查看详情
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                    {myOrders
+                      .filter((order) => orderStatusFilter === '全部' || order.status === orderStatusFilter)
+                      .map((order) => (
+                        <tr key={order.id} className="hover:bg-slate-50">
+                          <td className="px-6 py-4">
+                            <p className="font-medium text-[#404145]">{order.title}</p>
+                          </td>
+                          <td className="px-6 py-4">
+                            <button
+                              onClick={() => setActiveTab('bids')}
+                              className="text-sm font-medium text-[#1dbf73] hover:underline"
+                            >
+                              {order.bids}
+                            </button>
+                          </td>
+                          <td className="px-6 py-4">
+                            <button
+                              onClick={() => setActiveTab('bids')}
+                              className={`text-sm font-medium ${order.submissionsReceived > 0 ? 'text-[#1dbf73] hover:underline' : 'text-slate-400'}`}
+                            >
+                              {order.submissionsReceived}
+                            </button>
+                          </td>
+                          <td className="px-6 py-4">
+                            <button
+                              onClick={() => setActiveTab('bids')}
+                              className={`text-sm font-medium ${order.likedCount > 0 ? 'text-[#1dbf73] hover:underline' : 'text-slate-400'}`}
+                            >
+                              {order.likedCount}
+                            </button>
+                          </td>
+                          <td className="px-6 py-4">
+                            <button
+                              onClick={() => setActiveTab('bids')}
+                              className={`text-sm font-medium ${order.acceptedCount > 0 ? 'text-[#1dbf73] hover:underline' : 'text-slate-400'}`}
+                            >
+                              {order.acceptedCount}
+                            </button>
+                          </td>
+                          <td className="px-6 py-4">
+                            <Badge className={getStatusColor(order.status)}>{order.status}</Badge>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-slate-500">{order.deadline}</td>
+                          <td className="px-6 py-4">
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => {
+                                  setSelectedOrder(order)
+                                  setShowOrderDetailModal(true)
+                                }}
+                                className="px-3 py-1.5 text-sm text-[#74767e] hover:bg-slate-100 rounded-lg transition-colors"
+                              >
+                                查看详情
+                              </button>
+                              {order.status === '进行中' && (
+                                <button
+                                  onClick={() => handleReviewClick(order.id)}
+                                  className="px-3 py-1.5 text-sm bg-[#1dbf73] text-white hover:bg-[#19a463] rounded-lg transition-colors"
+                                >
+                                  审片
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
                   </tbody>
                 </table>
               </div>
@@ -380,17 +764,40 @@ export default function ClientWorkspace() {
             <TabsContent value="bids">
               <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
                 <div className="p-5 border-b border-slate-100">
-                  <input
-                    type="text"
-                    placeholder="搜索投标任务..."
-                    value={bidSearchKeyword}
-                    onChange={(e) => setBidSearchKeyword(e.target.value)}
-                    className="w-full max-w-md px-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#1dbf73]"
-                  />
+                  <div className="mb-4">
+                    <input
+                      type="text"
+                      placeholder="搜索投标任务..."
+                      value={bidSearchKeyword}
+                      onChange={(e) => setBidSearchKeyword(e.target.value)}
+                      className="w-full max-w-md px-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#1dbf73]"
+                    />
+                  </div>
+                  {/* 状态筛选 Tab */}
+                  <div className="flex gap-2 flex-wrap">
+                    {['全部', '预审已通过', '已完成', '订单冻结'].map((status) => (
+                      <button
+                        key={status}
+                        onClick={() => setBidStatusFilter(status)}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                          bidStatusFilter === status
+                            ? 'bg-[#1dbf73] text-white'
+                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        }`}
+                      >
+                        {status}
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 <div className="divide-y divide-slate-100">
                   {myBids
-                    .filter((bid) => bid.order.toLowerCase().includes(bidSearchKeyword.toLowerCase()))
+                    .filter((bid) => {
+                      const matchesSearch = bid.order.toLowerCase().includes(bidSearchKeyword.toLowerCase())
+                      const bidStatus = frozenBids.has(bid.id) ? '订单冻结' : approvedBids.has(bid.id) ? '已完成' : bid.status
+                      const matchesStatus = bidStatusFilter === '全部' || bidStatus === bidStatusFilter
+                      return matchesSearch && matchesStatus
+                    })
                     .map((bid) => (
                       <div key={bid.id} className="p-5 hover:bg-slate-50">
                         <div className="flex items-start gap-4 mb-4">
@@ -413,17 +820,17 @@ export default function ClientWorkspace() {
                         </div>
 
                         {/* 视频展示区域 */}
-                        <div className="flex gap-3 mb-3">
+                        <div className="flex gap-2 mb-3">
                           {/* 高光视频 */}
                           <div
-                            className="bg-slate-50 rounded-lg p-2 cursor-pointer hover:bg-slate-100 transition-colors"
-                            style={{ width: '200px' }}
+                            className="bg-slate-50 rounded-lg p-1.5 cursor-pointer hover:bg-slate-100 transition-colors flex-shrink-0"
+                            style={{ width: '140px' }}
                             onClick={() => handleVideoClick(bid.highlightVideo, '高光视频')}
                           >
                             <p className="text-xs text-[#74767e] mb-1">高光</p>
                             <div className="aspect-video bg-gradient-to-br from-[#003912] to-[#1dbf73] rounded flex items-center justify-center text-white/60">
                               <div className="text-center">
-                                <div className="text-sm mb-0.5">▶️</div>
+                                <div className="text-xs mb-0.5">▶️</div>
                                 <div className="text-xs">{bid.highlightVideo}</div>
                               </div>
                             </div>
@@ -431,21 +838,21 @@ export default function ClientWorkspace() {
 
                           {/* 打水印视频 */}
                           <div
-                            className="bg-slate-50 rounded-lg p-2 cursor-pointer hover:bg-slate-100 transition-colors"
-                            style={{ width: '200px' }}
+                            className="bg-slate-50 rounded-lg p-1.5 cursor-pointer hover:bg-slate-100 transition-colors flex-shrink-0"
+                            style={{ width: '140px' }}
                             onClick={() => handleVideoClick(bid.watermarkVideo, '水印完整版')}
                           >
                             <p className="text-xs text-[#74767e] mb-1">水印完整版</p>
                             <div className="aspect-video bg-gradient-to-br from-[#1a1a2e] to-[#16213e] rounded flex items-center justify-center text-white/60">
                               <div className="text-center">
-                                <div className="text-sm mb-0.5">▶️</div>
+                                <div className="text-xs mb-0.5">▶️</div>
                                 <div className="text-xs">{bid.watermarkVideo}</div>
                               </div>
                             </div>
                           </div>
 
                           {/* 操作按钮 */}
-                          <div className="flex gap-2 ml-auto">
+                          <div className="flex gap-2 ml-auto items-start">
                             {frozenBids.has(bid.id) ? (
                               <Badge className={getStatusColor('订单冻结')}>订单冻结</Badge>
                             ) : approvedBids.has(bid.id) || bid.status === '已完成' ? (
@@ -1031,80 +1438,100 @@ export default function ClientWorkspace() {
 
             {/* 弹窗内容 */}
             <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
-              {/* 任务标题 */}
+              {/* 任务标题和类型 */}
               <div className="mb-6">
                 <h3 className="text-2xl font-bold text-[#1a1a1a] mb-2">{selectedOrder.title}</h3>
-                <div className="flex items-center gap-4 text-sm text-[#74767e]">
-                  <span>任务编号：{selectedOrder.id}</span>
-                  <span>创建时间：{selectedOrder.createdAt}</span>
+                <div className="flex items-center gap-2">
+                  <span className="px-3 py-1 bg-[#1dbf73] text-white text-sm rounded">{selectedOrder.type}</span>
                 </div>
               </div>
 
-              {/* 任务信息卡片 */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <div className="bg-[#f7f7f7] rounded-lg p-4">
-                  <div className="text-sm text-[#74767e] mb-1">预算金额</div>
-                  <div className="text-xl font-bold text-[#1dbf73]">{selectedOrder.budget}</div>
-                </div>
-                <div className="bg-[#f7f7f7] rounded-lg p-4">
-                  <div className="text-sm text-[#74767e] mb-1">投标数</div>
-                  <div className="text-xl font-bold text-[#1a1a1a]">{selectedOrder.bids}</div>
-                </div>
-                <div className="bg-[#f7f7f7] rounded-lg p-4">
-                  <div className="text-sm text-[#74767e] mb-1">已接受</div>
-                  <div className="text-xl font-bold text-[#1a1a1a]">{selectedOrder.acceptedCount}</div>
-                </div>
-                <div className="bg-[#f7f7f7] rounded-lg p-4">
-                  <div className="text-sm text-[#74767e] mb-1">截止日期</div>
-                  <div className="text-lg font-bold text-[#1a1a1a]">{selectedOrder.deadline}</div>
-                </div>
-              </div>
-
-              {/* 任务状态 */}
+              {/* 佣金价格 */}
               <div className="mb-6">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-[#404145]">任务状态</span>
-                  <Badge className={getStatusColor(selectedOrder.status)}>{selectedOrder.status}</Badge>
+                <div className="flex items-center justify-between p-4 bg-[#f0faf5] border border-[#d4f0e3] rounded-lg">
+                  <div className="text-sm text-[#74767e]">佣金价格</div>
+                  <div className="text-3xl font-bold text-[#1dbf73]">¥{selectedOrder.price}</div>
                 </div>
               </div>
 
-              {/* 创作者信息 */}
-              {selectedOrder.creator && (
+              {/* 任务参数网格 */}
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+                {/* 素材条数 */}
+                <div className="bg-[#f7f7f7] rounded-lg p-4">
+                  <div className="text-xs text-[#74767e] mb-1">素材条数</div>
+                  <div className="text-lg font-bold text-[#1a1a1a]">{selectedOrder.items} 条</div>
+                </div>
+
+                {/* AI创作 */}
+                <div className="bg-[#f7f7f7] rounded-lg p-4">
+                  <div className="text-xs text-[#74767e] mb-1">AI创作</div>
+                  <div className="text-sm font-medium text-[#1a1a1a]">{selectedOrder.acceptAI}</div>
+                </div>
+
+                {/* 投放平台 */}
+                <div className="bg-[#f7f7f7] rounded-lg p-4">
+                  <div className="text-xs text-[#74767e] mb-1">投放平台</div>
+                  <div className="text-sm font-medium text-[#1a1a1a]">{selectedOrder.platform}</div>
+                </div>
+
+                {/* 场景要求 */}
+                <div className="bg-[#f7f7f7] rounded-lg p-4">
+                  <div className="text-xs text-[#74767e] mb-1">场景要求</div>
+                  <div className="text-sm font-medium text-[#1a1a1a]">{selectedOrder.scene}</div>
+                </div>
+
+                {/* 视频风格 */}
+                <div className="bg-[#f7f7f7] rounded-lg p-4">
+                  <div className="text-xs text-[#74767e] mb-1">视频风格</div>
+                  <div className="text-sm font-medium text-[#1a1a1a]">{selectedOrder.style}</div>
+                </div>
+
+                {/* 配音要求 */}
+                <div className="bg-[#f7f7f7] rounded-lg p-4">
+                  <div className="text-xs text-[#74767e] mb-1">配音要求</div>
+                  <div className="text-sm font-medium text-[#1a1a1a]">{selectedOrder.dubbing}</div>
+                </div>
+
+                {/* 任务时效 */}
+                <div className="bg-[#f7f7f7] rounded-lg p-4">
+                  <div className="text-xs text-[#74767e] mb-1">任务时效</div>
+                  <div className="text-sm font-medium text-[#1a1a1a]">{selectedOrder.taskTime}</div>
+                </div>
+              </div>
+
+              {/* 任务时间 */}
+              <div className="mb-6">
+                <div className="text-sm font-medium text-[#404145] mb-3">任务时间</div>
+                <div className="flex items-center gap-2 text-sm text-[#74767e]">
+                  <Clock className="w-4 h-4 text-[#1dbf73]" />
+                  <span>{new Date(selectedOrder.startTime).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
+                  <span>~</span>
+                  <span>{new Date(selectedOrder.endTime).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
+                </div>
+              </div>
+
+              {/* 参考视频/图片 */}
+              {selectedOrder.coverImages && selectedOrder.coverImages.length > 0 && (
                 <div className="mb-6">
-                  <div className="text-sm font-medium text-[#404145] mb-2">创作者</div>
-                  <div className="flex items-center gap-3 bg-[#f7f7f7] rounded-lg p-4">
-                    <div className="w-10 h-10 bg-[#1dbf73] rounded-full flex items-center justify-center text-white font-bold">
-                      {selectedOrder.creator[0]}
-                    </div>
-                    <span className="font-medium text-[#1a1a1a]">{selectedOrder.creator}</span>
+                  <div className="text-sm font-medium text-[#404145] mb-3">参考视频/图片</div>
+                  <div className="grid grid-cols-4 gap-3">
+                    {selectedOrder.coverImages.map((img, i) => (
+                      <div key={i} className="aspect-video bg-gradient-to-br from-[#003912] to-[#1dbf73] rounded-lg flex items-center justify-center text-white/60">
+                        <div className="text-center">
+                          <div className="text-xs mb-1">{img}</div>
+                          <div className="text-xs">参考{i + 1}</div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
 
               {/* 任务描述 */}
-              <div className="mb-6">
-                <div className="text-sm font-medium text-[#404145] mb-2">任务描述</div>
+              <div>
+                <div className="text-sm font-medium text-[#404145] mb-3">任务描述</div>
                 <div className="bg-[#f7f7f7] rounded-lg p-4 text-sm text-[#74767e]">
-                  <p>任务描述内容...</p>
-                </div>
-              </div>
-
-              {/* 交付要求 */}
-              <div className="mb-6">
-                <div className="text-sm font-medium text-[#404145] mb-2">交付要求</div>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm text-[#74767e]">
-                    <CheckCircle className="w-4 h-4 text-[#1dbf73]" />
-                    <span>视频规格：1080×1920（9:16 竖版）</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-[#74767e]">
-                    <CheckCircle className="w-4 h-4 text-[#1dbf73]" />
-                    <span>时长：13-17 秒</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-[#74767e]">
-                    <CheckCircle className="w-4 h-4 text-[#1dbf73]" />
-                    <span>格式：MP4，不低于 1080P</span>
-                  </div>
+                  <p className="leading-relaxed">{selectedOrder.description}</p>
                 </div>
               </div>
             </div>
@@ -1116,6 +1543,236 @@ export default function ClientWorkspace() {
                 className="px-6 py-2 bg-[#1dbf73] hover:bg-[#19a463] text-white rounded-lg transition-colors font-medium"
               >
                 关闭
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 审片弹窗 */}
+      {showReviewModal && currentReviewOrder && (
+        <div className="fixed inset-0 bg-[#1a1a1a] flex items-center justify-center z-50">
+          <div className="relative w-full max-w-lg h-[85vh] flex flex-col">
+            {/* 关闭按钮 */}
+            <button
+              onClick={() => setShowReviewModal(false)}
+              className="absolute top-4 right-4 z-10 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-colors"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            {/* 任务信息 */}
+            <div className="absolute top-4 left-4 z-10">
+              <p className="text-white text-lg font-semibold">{currentReviewOrder.title}</p>
+              <p className="text-white/70 text-sm mt-1">投稿 {currentVideoIndex + 1}/5</p>
+            </div>
+
+            {/* 当前视频卡片 */}
+            <div className="flex-1 flex items-center justify-center px-4">
+              {(() => {
+                const videos = [
+                  { id: 1, video: '美妆高光.mp4', submitTime: '2小时前', gradient: 'from-[#003912] to-[#1dbf73]' },
+                  { id: 2, video: '产品展示.mp4', submitTime: '3小时前', gradient: 'from-[#1a1a2e] to-[#16213e]' },
+                  { id: 3, video: '创意视频.mp4', submitTime: '5小时前', gradient: 'from-[#2d1b69] to-[#11998e]' },
+                  { id: 4, video: '动画演示.mp4', submitTime: '1天前', gradient: 'from-[#c94b4b] to-[#4b134f]' },
+                  { id: 5, video: '3D展示.mp4', submitTime: '1天前', gradient: 'from-[#f97316] to-[#ea580c]' },
+                ]
+                const currentVideo = videos[currentVideoIndex]
+
+                return (
+                  <div className="w-full h-full flex flex-col items-center justify-center">
+                    {/* 视频卡片 */}
+                    <div
+                      className={`relative w-full aspect-[9/16] max-h-[65vh] bg-gradient-to-br from-[#1a1a2e] to-[#16213e] rounded-3xl overflow-hidden shadow-2xl transition-transform duration-75`}
+                      style={{
+                        transform: isVerticalSwipe
+                          ? `translateY(${dragOffset}px)`
+                          : `translateX(${dragOffset}px) rotate(${dragOffset * 0.05}deg)`,
+                        opacity: 1 - Math.abs(dragOffset) / 300,
+                        cursor: touchStart ? 'grabbing' : 'grab'
+                      }}
+                      onMouseDown={handleTouchStart}
+                      onMouseUp={handleTouchEnd}
+                      onMouseMove={handleTouchMove}
+                      onMouseLeave={() => {
+                        if (touchStart) {
+                          setDragOffset(0)
+                          setSwipeDirection(null)
+                          setTouchStart(null)
+                          setIsVerticalSwipe(false)
+                        }
+                      }}
+                      onTouchStart={handleTouchStart}
+                      onTouchEnd={handleTouchEnd}
+                      onTouchMove={handleTouchMove}
+                    >
+                      {/* 视频内容 */}
+                      <div
+                        className={`absolute inset-0 bg-gradient-to-br ${currentVideo.gradient} flex items-center justify-center cursor-pointer select-none`}
+                        onClick={() => handleVideoClick(currentVideo.video, '投稿视频')}
+                      >
+                        <div className="text-center text-white pointer-events-none">
+                          <div className="text-6xl mb-3 opacity-80">▶️</div>
+                          <div className="text-lg font-medium opacity-90">{currentVideo.video}</div>
+                        </div>
+                      </div>
+
+                      {/* 滑动指示器 - 不喜欢（仅水平滑动） */}
+                      {!isVerticalSwipe && dragOffset < -20 && (
+                        <div
+                          className="absolute top-1/2 left-6 -translate-y-1/2 border-4 border-red-500 text-red-500 px-6 py-3 rounded-xl transition-opacity"
+                          style={{ opacity: Math.min(1, Math.abs(dragOffset) / 80) }}
+                        >
+                          <span className="text-4xl font-bold">不喜欢</span>
+                        </div>
+                      )}
+
+                      {/* 滑动指示器 - 喜欢（仅水平滑动） */}
+                      {!isVerticalSwipe && dragOffset > 20 && (
+                        <div
+                          className="absolute top-1/2 right-6 -translate-y-1/2 border-4 border-[#1dbf73] text-[#1dbf73] px-6 py-3 rounded-xl transition-opacity"
+                          style={{ opacity: Math.min(1, Math.abs(dragOffset) / 80) }}
+                        >
+                          <span className="text-4xl font-bold">喜欢</span>
+                        </div>
+                      )}
+
+                      {/* 滑动指示器 - 下一个（垂直滑动） */}
+                      {isVerticalSwipe && Math.abs(dragOffset) > 20 && (
+                        <div
+                          className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm transition-opacity"
+                          style={{ opacity: Math.min(0.8, Math.abs(dragOffset) / 100) }}
+                        >
+                          <div className="text-white text-2xl font-bold">下一个视频</div>
+                        </div>
+                      )}
+
+                      {/* 提交时间 */}
+                      <div className="absolute bottom-6 left-6 right-6">
+                        <div className="bg-black/40 backdrop-blur-sm rounded-lg px-4 py-2">
+                          <p className="text-white text-sm">投稿时间：{currentVideo.submitTime}</p>
+                        </div>
+                      </div>
+
+                      {/* 进度指示 */}
+                      <div className="absolute top-6 left-6 flex gap-1.5">
+                        {videos.map((_, i) => (
+                          <div
+                            key={i}
+                            className={`h-1 rounded-full transition-all ${
+                              i === currentVideoIndex
+                                ? 'w-8 bg-white'
+                                : i < currentVideoIndex
+                                ? 'w-6 bg-white/50'
+                                : 'w-2 bg-white/30'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 左右操作按钮 */}
+                    {currentVideoIndex < videos.length - 1 ? (
+                      <div className="flex items-center justify-center gap-6 mt-8 w-full">
+                        <button
+                          onClick={handleSwipeLeft}
+                          className="w-16 h-16 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-lg flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+                        >
+                          <X className="w-8 h-8" />
+                        </button>
+                        <button
+                          onClick={handleSwipeRight}
+                          className="w-16 h-16 rounded-full bg-[#1dbf73] hover:bg-[#19a463] text-white shadow-lg flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+                        >
+                          <Star className="w-8 h-8 fill-current" />
+                        </button>
+                      </div>
+                    ) : (
+                      /* 全部审完的完成按钮 */
+                      <div className="flex items-center justify-center mt-8 w-full">
+                        <button
+                          onClick={() => setShowReviewModal(false)}
+                          className="px-12 py-4 bg-[#1dbf73] hover:bg-[#19a463] text-white rounded-full text-lg font-semibold shadow-lg transition-all hover:scale-105 active:scale-95"
+                        >
+                          审核完成
+                        </button>
+                      </div>
+                    )}
+
+                    {/* 提示文字 */}
+                    {currentVideoIndex < videos.length - 1 && (
+                      <div className="flex flex-col items-center gap-3 mt-4 w-full text-white/50 text-xs">
+                        <div className="flex items-center justify-center gap-2">
+                          <span>↑↓ 上下切换</span>
+                          <span>|</span>
+                          <span>←→ 不喜欢/喜欢</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )
+              })()}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 不喜欢确认弹窗 */}
+      {showDislikeConfirm && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60] p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <X className="w-6 h-6 text-red-500" />
+              </div>
+              <h3 className="text-xl font-bold text-[#1a1a1a]">确认不喜欢</h3>
+            </div>
+            <p className="text-[#74767e] text-base leading-relaxed mb-6">
+              点击不喜欢后，该视频将无法找回。
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowDislikeConfirm(false)}
+                className="flex-1 py-3 border border-[#e4e5e7] text-[#404145] rounded-xl hover:bg-[#f5f5f5] transition-colors font-medium text-base"
+              >
+                取消
+              </button>
+              <button
+                onClick={confirmDislike}
+                className="flex-1 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors font-medium text-base"
+              >
+                确认不喜欢
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 喜欢确认弹窗 */}
+      {showLikeConfirm && currentReviewOrder && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60] p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-[#1dbf73]/10 rounded-full flex items-center justify-center flex-shrink-0">
+                <Star className="w-6 h-6 text-[#1dbf73] fill-current" />
+              </div>
+              <h3 className="text-xl font-bold text-[#1a1a1a]">确认喜欢</h3>
+            </div>
+            <p className="text-[#74767e] text-base leading-relaxed mb-6">
+              确认喜欢后，系统将自动扣除{currentReviewOrder.price}元预付佣金，请确认。
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowLikeConfirm(false)}
+                className="flex-1 py-3 border border-[#e4e5e7] text-[#404145] rounded-xl hover:bg-[#f5f5f5] transition-colors font-medium text-base"
+              >
+                取消
+              </button>
+              <button
+                onClick={confirmLike}
+                className="flex-1 py-3 bg-[#1dbf73] text-white rounded-xl hover:bg-[#19a463] transition-colors font-medium text-base"
+              >
+                确认喜欢
               </button>
             </div>
           </div>

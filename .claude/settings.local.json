@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(claude skill:*)",
+      "Bash(find ~/.claude -name *.md -type f)",
+      "Bash(find:*)",
+      "Bash(ls:*)"
+    ]
+  }
+}
