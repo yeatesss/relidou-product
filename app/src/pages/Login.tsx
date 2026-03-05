@@ -6,7 +6,7 @@ import { useAuth } from '../contexts/AuthContext'
 
 export default function Login() {
   const navigate = useNavigate()
-  const { authenticate, getAdvertiserCertificationStatus } = useAuth()
+  const { authenticate, getAdvertiserCertificationStatus, isCreatorProfileComplete } = useAuth()
   const [isVisible, setIsVisible] = useState(false)
   const [countdown, setCountdown] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
@@ -66,22 +66,26 @@ export default function Login() {
         const certificationStatus = getAdvertiserCertificationStatus()
         if (certificationStatus === 'not_submitted') {
           // 首次登录，未提交认证
-          alert('请先完成企业认证')
           navigate('/advertiser-certification')
         } else if (certificationStatus === 'rejected') {
           // 认证被拒绝
-          alert('您的企业认证未通过，请重新提交')
           navigate('/advertiser-certification')
-        } else {
-          // 认证审核中或已通过，都可以进入工作台
-          if (certificationStatus === 'pending') {
-            alert('您的企业认证正在审核中，可以浏览平台功能')
-          }
+        } else if (certificationStatus === 'pending') {
+          // 审核中，跳转到等待审核页面
+          navigate('/advertiser-pending')
+        } else if (certificationStatus === 'approved') {
+          // 认证通过，进入工作台
           navigate('/client-workspace')
         }
-      } else {
-        // 创作者跳转到任务大厅
-        navigate('/orders')
+      } else if (formData.role === 'creator') {
+        // 检查创作者个人信息完整性
+        if (!isCreatorProfileComplete()) {
+          // 资料不完整，进入资料补充页
+          navigate('/creator-profile-setup')
+        } else {
+          // 资料完整，进入任务大厅
+          navigate('/orders')
+        }
       }
     } catch (error) {
       alert(error instanceof Error ? error.message : '操作失败，请重试')

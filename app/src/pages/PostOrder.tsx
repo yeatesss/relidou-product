@@ -26,33 +26,16 @@ const sceneOptions = ['不限', '实景', '外景', '特殊']
 
 const styleOptions = ['不限', '正式', '幽默', '特殊']
 
-type AiFeedback = {
-  status: 'success' | 'warning' | 'info'
-  title: string
-  content?: string
-  issues?: string[]
-  suggestions?: string[]
-  tips?: string[]
-}
-
 export default function PostOrder() {
   const navigate = useNavigate()
   const { isAuthenticated } = useAuth()
   const [isVisible, setIsVisible] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [showConfirmModal, setShowConfirmModal] = useState(false)
-  const [aiFeedback, setAiFeedback] = useState<AiFeedback | null>(null)
-  const [isLoadingAi, setIsLoadingAi] = useState(false)
-  const [hasAiReviewed, setHasAiReviewed] = useState(false) // 是否已AI预审
 
-  // 表单数据更新时重置AI预审状态
+  // 表单数据更新
   const updateFormData = (updates: Partial<typeof formData>) => {
     setFormData({ ...formData, ...updates })
-    // 如果已经AI预审过，但用户修改了内容，则重置预审状态
-    if (hasAiReviewed) {
-      setHasAiReviewed(false)
-      setAiFeedback(null)
-    }
   }
 
   const [formData, setFormData] = useState({
@@ -93,34 +76,6 @@ export default function PostOrder() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // AI预审
-  const handleAiReview = async () => {
-    if (!formData.title || !formData.type || !formData.budget || !formData.mandatoryRequirements) {
-      alert('请填写必填项（任务标题、视频类型、佣金价格、硬性要求）')
-      return
-    }
-    if (!formData.startTime || !formData.endTime) {
-      alert('请选择开始时间和结束时间')
-      return
-    }
-    if (new Date(formData.endTime) <= new Date(formData.startTime)) {
-      alert('结束时间必须晚于开始时间')
-      return
-    }
-
-    // 调用AI预审
-    setIsLoadingAi(true)
-    setAiFeedback(null)
-
-    // 模拟AI分析
-    setTimeout(() => {
-      const feedback = generateMockAiFeedback(formData)
-      setAiFeedback(feedback)
-      setIsLoadingAi(false)
-      setHasAiReviewed(true)
-    }, 1500)
-  }
-
   // 确认发布（提交给运营审核）
   const confirmPublish = () => {
     alert('任务已提交运营审核！')
@@ -150,85 +105,6 @@ export default function PostOrder() {
   }
 
   const price = calculatePrice()
-
-  // 生成模拟AI反馈
-  const generateMockAiFeedback = (data: typeof formData): AiFeedback => {
-    const issues = []
-    const suggestions = []
-
-    // 检查标题
-    if (!data.title || data.title.length < 5) {
-      issues.push('任务标题过短，建议至少10个字符以更清晰地描述任务需求')
-    }
-
-    // 检查预算
-    const budget = parseInt(data.budget) || 0
-    if (budget === 0) {
-      issues.push('未设置预算金额，请设置合理的预算以吸引优质创作者')
-    } else if (budget < 100) {
-      issues.push('预算金额偏低，可能难以吸引有经验的创作者')
-    }
-
-    // 检查描述内容
-    const totalDescLength = (data.basicRequirements?.length || 0) +
-                            (data.mandatoryRequirements?.length || 0) +
-                            (data.optionalRequirements?.length || 0) +
-                            (data.supplementaryInfo?.length || 0)
-
-    if (totalDescLength < 20) {
-      issues.push('任务描述过于简单，建议详细说明基础要求、硬性要求等内容')
-    }
-
-    if (!data.basicRequirements) {
-      suggestions.push('建议填写基础要求，说明视频的基本信息和目标')
-    }
-
-    if (!data.mandatoryRequirements) {
-      suggestions.push('建议填写硬性要求，明确必须满足的条件')
-    }
-
-    // 检查必要信息
-    if (!data.type) {
-      issues.push('未选择视频类型，请明确是爆款复刻还是原创内容')
-    }
-
-    if (!data.platform) {
-      suggestions.push('建议指定投放平台，以便创作者制作符合平台风格的内容')
-    }
-
-    if (data.taskTime === '72小时') {
-      suggestions.push('当前任务时效为72小时，如需加急可选择48小时或24小时')
-    }
-
-    // 根据视频类型给出建议
-    if (data.type === '爆款复刻') {
-      suggestions.push('爆款复刻类任务建议提供参考视频链接或详细描述参考内容')
-    } else if (data.type === '原创内容') {
-      suggestions.push('原创内容建议说明品牌调性、目标受众和核心卖点')
-    }
-
-    // 如果没有任何问题
-    if (issues.length === 0 && suggestions.length === 0) {
-      return {
-        status: 'success',
-        title: '任务描述很棒！',
-        content: '您的任务描述清晰完整，包含了所有必要信息。这样的描述能够帮助创作者快速理解需求，提高任务匹配效率。',
-        tips: ['保持这样的详细程度', '可以考虑添加参考图片或视频', '明确交付标准和验收要求']
-      }
-    }
-
-    return {
-      status: issues.length > 0 ? 'warning' : 'info',
-      title: issues.length > 0 ? '发现一些需要改进的地方' : '优化建议',
-      issues,
-      suggestions,
-      tips: [
-        '详细的需求描述能吸引更优质的创作者',
-        '明确的预算范围有助于快速匹配',
-        '提供参考案例可以减少沟通成本'
-      ]
-    }
-  }
 
   return (
     <div className="min-h-screen bg-[#f5f5f5]">
@@ -605,139 +481,6 @@ export default function PostOrder() {
         </div>
       </div>
 
-      {/* AI预审结果弹窗 */}
-      {aiFeedback && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-2xl w-full shadow-2xl max-h-[90vh] overflow-hidden flex flex-col">
-            {/* 弹窗标题 */}
-            <div className="px-6 py-4 border-b border-[#e4e5e7] flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
-                  <Bot className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-[#1a1a1a]">AI预审结果</h3>
-                  <p className="text-xs text-[#74767e]">智能分析任务信息，提供优化建议</p>
-                </div>
-              </div>
-              <button
-                onClick={() => {
-                  setAiFeedback(null)
-                  setHasAiReviewed(false)
-                }}
-                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#f5f5f5] transition-colors"
-              >
-                <X className="w-5 h-5 text-[#74767e]" />
-              </button>
-            </div>
-
-            {/* 弹窗内容 */}
-            <div className="flex-1 overflow-y-auto px-6 py-4">
-              {aiFeedback.status === 'success' && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                  <div className="flex items-start gap-3">
-                    <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <h4 className="font-semibold text-green-800 mb-1">{aiFeedback.title}</h4>
-                      <p className="text-sm text-green-700 mb-3">{aiFeedback.content}</p>
-                      <div className="text-xs text-green-600">
-                        <span className="font-medium">小贴士：</span>
-                        {aiFeedback.tips?.join('、')}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {(aiFeedback.status === 'warning' || aiFeedback.status === 'info') && (
-                <div className={`rounded-lg p-4 ${aiFeedback.status === 'warning' ? 'bg-amber-50 border border-amber-200' : 'bg-blue-50 border border-blue-200'}`}>
-                  <div className="flex items-start gap-3 mb-3">
-                    {aiFeedback.status === 'warning' ? (
-                      <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                    ) : (
-                      <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                    )}
-                    <div>
-                      <h4 className={`font-semibold mb-1 ${aiFeedback.status === 'warning' ? 'text-amber-800' : 'text-blue-800'}`}>
-                        {aiFeedback.title}
-                      </h4>
-                    </div>
-                  </div>
-
-                  {/* 问题列表 */}
-                  {aiFeedback.issues && aiFeedback.issues.length > 0 && (
-                    <div className="mb-3">
-                      <p className="text-xs font-medium text-amber-700 mb-2">需要改进：</p>
-                      <ul className="space-y-1">
-                        {aiFeedback.issues.map((issue, index) => (
-                          <li key={index} className="flex items-start gap-2 text-sm text-amber-800">
-                            <span className="text-amber-600 mt-0.5">•</span>
-                            <span>{issue}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {/* 建议列表 */}
-                  {aiFeedback.suggestions && aiFeedback.suggestions.length > 0 && (
-                    <div className="mb-3">
-                      <p className="text-xs font-medium text-blue-700 mb-2">优化建议：</p>
-                      <ul className="space-y-1">
-                        {aiFeedback.suggestions.map((suggestion, index) => (
-                          <li key={index} className="flex items-start gap-2 text-sm text-blue-800">
-                            <span className="text-blue-600 mt-0.5">•</span>
-                            <span>{suggestion}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {/* 小贴士 */}
-                  {aiFeedback.tips && (
-                    <div className={`text-xs p-3 rounded-md ${aiFeedback.status === 'warning' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'}`}>
-                      <span className="font-medium">💡 小贴士：</span>
-                      {aiFeedback.tips.join('、')}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* 提示信息 */}
-              <div className="mt-4 p-3 bg-[#f0faf5] border border-[#1dbf73]/30 rounded-lg">
-                <p className="text-xs text-[#74767e]">
-                  您可以根据AI建议继续优化任务信息，或直接点击下方按钮提交运营审核
-                </p>
-              </div>
-            </div>
-
-            {/* 弹窗底部按钮 */}
-            <div className="px-6 py-4 border-t border-[#e4e5e7] bg-gray-50 flex gap-3">
-              <button
-                onClick={() => {
-                  setAiFeedback(null)
-                  setHasAiReviewed(false)
-                }}
-                className="flex-1 py-3 border border-[#e4e5e7] text-[#404145] rounded-lg hover:bg-[#f5f5f5] transition-colors font-medium"
-              >
-                继续修改
-              </button>
-              <button
-                onClick={() => {
-                  setAiFeedback(null)
-                  setShowConfirmModal(true)
-                }}
-                className="flex-1 py-3 bg-[#1dbf73] text-white rounded-lg hover:bg-[#19a463] transition-colors font-medium flex items-center justify-center gap-2"
-              >
-                <CheckCircle className="w-4 h-4" />
-                确认发布
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* 确认发布弹窗 */}
       {showConfirmModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -781,21 +524,10 @@ export default function PostOrder() {
               取消
             </Button>
             <Button
-              onClick={handleAiReview}
-              disabled={isLoadingAi}
-              className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white px-8"
+              onClick={() => setShowConfirmModal(true)}
+              className="bg-[#1dbf73] hover:bg-[#19a463] text-white px-8"
             >
-              {isLoadingAi ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
-                  AI预审中...
-                </>
-              ) : (
-                <>
-                  <Bot className="w-4 h-4 mr-2" />
-                  AI预审
-                </>
-              )}
+              确认发布
             </Button>
           </div>
         </div>

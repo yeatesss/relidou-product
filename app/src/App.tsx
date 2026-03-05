@@ -13,6 +13,7 @@ import Creators from './pages/Creators'
 import CreatorProfile from './pages/CreatorProfile'
 import CreatorProfileSetup from './pages/CreatorProfileSetup'
 import AdvertiserCertification from './pages/AdvertiserCertification'
+import AdvertiserPending from './pages/AdvertiserPending'
 import PostOrder from './pages/PostOrder'
 import Login from './pages/Login'
 import UserDashboard from './pages/UserDashboard'
@@ -88,6 +89,7 @@ function App() {
                   <Route path="/creator-workspace" element={<CreatorWorkspace />} />
                   <Route path="/creator-profile-setup" element={<CreatorProfileSetup />} />
                   <Route path="/advertiser-certification" element={<AdvertiserCertification />} />
+                  <Route path="/advertiser-pending" element={<AdvertiserPending />} />
                 </Routes>
               </main>
               <Footer />

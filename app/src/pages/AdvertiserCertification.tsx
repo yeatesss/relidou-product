@@ -135,80 +135,86 @@ export default function AdvertiserCertification() {
   if (isSuccess) {
     return (
       <div className="min-h-screen bg-[#f7f7f7] pt-20">
-        <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="max-w-5xl mx-auto px-4 py-6">
           <div className={`transition-all duration-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-            {/* 成功图标 */}
-            <div className="text-center mb-8">
-              <div className="w-24 h-24 bg-[#1dbf73] rounded-full flex items-center justify-center mx-auto mb-6">
-                <CheckCircle className="w-12 h-12 text-white" />
+            {/* 成功图标和标题 */}
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-[#1dbf73] rounded-full flex items-center justify-center mx-auto mb-3">
+                <CheckCircle className="w-8 h-8 text-white" />
               </div>
-              <h1 className="text-3xl font-bold text-[#1a1a1a] mb-3">提交成功！</h1>
-              <p className="text-[#74767e]">您的企业认证信息已成功提交</p>
+              <h1 className="text-2xl font-bold text-[#1a1a1a] mb-1">提交成功！</h1>
+              <p className="text-sm text-[#74767e]">您的企业认证信息已成功提交</p>
             </div>
 
-            {/* 成功提示卡片 */}
-            <div className="bg-white rounded-xl shadow-sm p-8 mb-6">
+            {/* 主内容区域 - 两栏布局 */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+              {/* 左侧：成功提示 + 温馨提示 */}
               <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <CheckCircle className="w-5 h-5 text-[#1dbf73] flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium text-[#404145]">认证信息已提交</p>
-                    <p className="text-xs text-[#74767e] mt-1">我们将在1-3个工作日内完成审核</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium text-[#404145]">请添加客服微信</p>
-                    <p className="text-xs text-[#74767e] mt-1">添加客服后，审核结果将通过微信第一时间通知您</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <FileText className="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium text-[#404145]">请保持手机畅通</p>
-                    <p className="text-xs text-[#74767e] mt-1">审核期间如需补充材料，我们会通过电话联系您</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* 客服二维码 */}
-            <div className="bg-white rounded-xl shadow-sm p-8 mb-6">
-              <h3 className="text-lg font-bold text-[#404145] mb-4 text-center">扫码添加客服微信</h3>
-              <div className="flex flex-col items-center">
-                {/* 二维码占位图 */}
-                <div className="w-48 h-48 bg-[#f5f5f5] rounded-lg flex items-center justify-center mb-4 border-2 border-dashed border-[#e4e5e7]">
-                  <div className="text-center">
-                    <div className="w-16 h-16 bg-white rounded-lg flex items-center justify-center mx-auto mb-2 shadow-sm">
-                      <User className="w-8 h-8 text-[#1dbf73]" />
+                {/* 成功提示卡片 */}
+                <div className="bg-white rounded-xl shadow-sm p-5">
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-[#1dbf73] flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium text-[#404145]">认证信息已提交</p>
+                        <p className="text-xs text-[#74767e] mt-0.5">我们将在1-3个工作日内完成审核</p>
+                      </div>
                     </div>
-                    <p className="text-xs text-[#74767e]">客服二维码</p>
+
+                    <div className="flex items-start gap-2">
+                      <AlertCircle className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium text-[#404145]">请添加客服微信</p>
+                        <p className="text-xs text-[#74767e] mt-0.5">审核结果将通过微信第一时间通知您</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-2">
+                      <FileText className="w-4 h-4 text-orange-600 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium text-[#404145]">请保持手机畅通</p>
+                        <p className="text-xs text-[#74767e] mt-0.5">审核期间如需补充材料，我们会电话联系您</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                {/* 客服信息 */}
-                <div className="text-center space-y-2">
-                  <p className="text-sm font-medium text-[#404145]">热力豆企业客服</p>
-                  <p className="text-xs text-[#74767e]">微信号：relidou_service</p>
-                  <p className="text-xs text-[#74767e]">工作时间：9:00-18:00</p>
+                {/* 温馨提示 */}
+                <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+                  <div className="flex items-start gap-2">
+                    <AlertCircle className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <div className="text-sm text-blue-900">
+                      <p className="font-medium mb-1">温馨提示</p>
+                      <ul className="space-y-0.5 text-blue-700 text-xs">
+                        <li>• 审核通过后，您将收到微信和短信通知</li>
+                        <li>• 如有疑问，可随时联系客服咨询</li>
+                        <li>• 审核期间请耐心等待，无需重复提交</li>
+                      </ul>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* 温馨提示 */}
-            <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg mb-6">
-              <div className="flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                <div className="text-sm text-blue-900">
-                  <p className="font-medium mb-1">温馨提示</p>
-                  <ul className="space-y-1 text-blue-700">
-                    <li>• 审核通过后，您将收到微信通知和短信通知</li>
-                    <li>• 如有疑问，可随时联系客服咨询</li>
-                    <li>• 审核期间请耐心等待，无需重复提交</li>
-                  </ul>
+              {/* 右侧：客服二维码 */}
+              <div className="bg-white rounded-xl shadow-sm p-5">
+                <h3 className="text-base font-bold text-[#404145] mb-4 text-center">扫码添加客服微信</h3>
+                <div className="flex flex-col items-center">
+                  {/* 二维码占位图 */}
+                  <div className="w-40 h-40 bg-[#f5f5f5] rounded-lg flex items-center justify-center mb-3 border-2 border-dashed border-[#e4e5e7]">
+                    <div className="text-center">
+                      <div className="w-14 h-14 bg-white rounded-lg flex items-center justify-center mx-auto mb-1.5 shadow-sm">
+                        <User className="w-7 h-7 text-[#1dbf73]" />
+                      </div>
+                      <p className="text-xs text-[#74767e]">客服二维码</p>
+                    </div>
+                  </div>
+
+                  {/* 客服信息 */}
+                  <div className="text-center space-y-1">
+                    <p className="text-sm font-medium text-[#404145]">热力豆企业客服</p>
+                    <p className="text-xs text-[#74767e]">微信号：relidou_service</p>
+                    <p className="text-xs text-[#74767e]">工作时间：9:00-18:00</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -217,7 +223,7 @@ export default function AdvertiserCertification() {
             <div className="text-center">
               <button
                 onClick={() => navigate('/login')}
-                className="px-8 py-3 bg-[#1dbf73] text-white rounded-lg hover:bg-[#19a463] transition-colors font-medium"
+                className="px-8 py-2.5 bg-[#1dbf73] text-white rounded-lg hover:bg-[#19a463] transition-colors font-medium"
               >
                 返回登录页
               </button>

@@ -117,7 +117,18 @@ export default function Navbar({ scrolled }: NavbarProps) {
             )}
             {isAuthenticated ? (
               <>
-                <span className="text-sm text-[#404145]">{formatPhone(user?.phone || '')}</span>
+                <button
+                  onClick={() => {
+                    if (user?.role === 'creator') {
+                      navigate('/creator-profile-setup')
+                    } else if (user?.role === 'advertiser') {
+                      navigate('/advertiser-certification')
+                    }
+                  }}
+                  className="text-sm text-[#404145] hover:text-[#1dbf73] transition-colors cursor-pointer"
+                >
+                  {formatPhone(user?.phone || '')}
+                </button>
                 <Button
                   onClick={handleLogout}
                   variant="outline"
@@ -199,9 +210,19 @@ export default function Navbar({ scrolled }: NavbarProps) {
               )}
               {isAuthenticated ? (
                 <>
-                  <div className="py-2 text-sm text-[#404145] border-t border-[#e4e5e7] pt-3">
+                  <button
+                    onClick={() => {
+                      if (user?.role === 'creator') {
+                        navigate('/creator-profile-setup')
+                      } else if (user?.role === 'advertiser') {
+                        navigate('/advertiser-certification')
+                      }
+                      setMobileMenuOpen(false)
+                    }}
+                    className="py-2 text-sm text-[#404145] border-t border-[#e4e5e7] pt-3 text-left hover:text-[#1dbf73] transition-colors"
+                  >
                     {formatPhone(user?.phone || '')}
-                  </div>
+                  </button>
                   <Button
                     onClick={() => { handleLogout(); setMobileMenuOpen(false) }}
                     variant="outline"

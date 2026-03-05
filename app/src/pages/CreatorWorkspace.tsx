@@ -255,22 +255,6 @@ export default function CreatorWorkspace() {
               <Search className="w-4 h-4 mr-2" />
               找任务
             </Button>
-            {/* 用户信息卡片 */}
-            <div
-              className="flex items-center gap-3 bg-white rounded-xl px-4 py-2 shadow-sm border border-slate-100 cursor-pointer hover:shadow-md transition-shadow"
-              onClick={() => navigate('/creator-profile-setup')}
-            >
-              <div className="text-right">
-                <p className="text-sm font-medium text-[#404145]">{creatorProfile?.realName || '创作者'}</p>
-                <p className="text-xs text-[#1dbf73] hover:underline cursor-pointer">{user?.phone || ''}</p>
-              </div>
-              <Avatar className="w-10 h-10 bg-gradient-to-br from-[#1dbf73] to-[#003912]">
-                <AvatarFallback className="text-white font-medium">
-                  {creatorProfile?.realName?.[0] || user?.phone[0] || '创'}
-                </AvatarFallback>
-              </Avatar>
-              <Settings className="w-4 h-4 text-[#74767e]" />
-            </div>
           </div>
         </div>
 
