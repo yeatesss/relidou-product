@@ -76,7 +76,9 @@ export default function OrderDetail() {
   const [isVisible, setIsVisible] = useState(false)
   const [activeImage, setActiveImage] = useState(0)
   const [ordered, setOrdered] = useState(false)
-  const [showConfirmModal, setShowConfirmModal] = useState(false)
+  const [showCodeModal, setShowCodeModal] = useState(false)
+  const [orderCode, setOrderCode] = useState('')
+  const [codeError, setCodeError] = useState('')
 
   useEffect(() => {
     setIsVisible(true)
@@ -89,16 +91,33 @@ export default function OrderDetail() {
       navigate('/login')
       return
     }
-    setShowConfirmModal(true)
+    setShowCodeModal(true)
+    setOrderCode('')
+    setCodeError('')
   }
 
-  const handleConfirmOrder = () => {
-    setShowConfirmModal(false)
-    setOrdered(true)
-    // 跳转到创作者工作台
-    setTimeout(() => {
-      navigate('/creator-workspace')
-    }, 500)
+  // 验证抢单码
+  const validateCode = (code: string): boolean => {
+    const validCodes = ['TEST001', 'TEST002', 'TEST003', 'SN20240301']
+    return validCodes.includes(code.toUpperCase().trim())
+  }
+
+  const handleCodeSubmit = () => {
+    if (!orderCode.trim()) {
+      setCodeError('请输入抢单码')
+      return
+    }
+
+    if (validateCode(orderCode)) {
+      setShowCodeModal(false)
+      setOrdered(true)
+      // 跳转到创作者工作台
+      setTimeout(() => {
+        navigate('/creator-workspace')
+      }, 500)
+    } else {
+      setCodeError('抢单码无效，请联系客服重新获取')
+    }
   }
 
   return (
@@ -365,29 +384,77 @@ export default function OrderDetail() {
         </div>
       </div>
 
-      {/* 接单确认弹窗 */}
-      {showConfirmModal && (
+      {/* 抢单码验证弹窗 */}
+      {showCodeModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-2xl">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 bg-[#fff7ed] rounded-full flex items-center justify-center flex-shrink-0">
-                <AlertCircle className="w-6 h-6 text-[#f97316]" />
+            {/* 标题 */}
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-12 h-12 bg-[#f0faf5] rounded-full flex items-center justify-center flex-shrink-0">
+                <svg className="w-6 h-6 text-[#1dbf73]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                </svg>
               </div>
-              <h3 className="text-lg font-bold text-[#1a1a1a]">确认接单</h3>
+              <h3 className="text-lg font-bold text-[#1a1a1a]">获取抢单码</h3>
             </div>
-            <p className="text-[#74767e] text-sm leading-relaxed mb-6">
-              每位创作者只能同时进行接单3个任务，确认接单吗？
-            </p>
+
+            {/* 二维码区域 */}
+            <div className="bg-[#f5f5f5] rounded-lg p-5 mb-5">
+              <div className="w-[200px] h-[200px] mx-auto bg-white rounded-lg flex items-center justify-center overflow-hidden">
+                <img
+                  src="customer-service-qrcode.png"
+                  alt="客服二维码"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <p className="text-center text-sm text-[#1a1a1a] font-medium mt-3">扫码添加客服微信获取抢单码</p>
+            </div>
+
+            {/* 输入框 */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-[#1a1a1a] mb-2">
+                请输入抢单码
+              </label>
+              <input
+                type="text"
+                value={orderCode}
+                onChange={(e) => {
+                  setOrderCode(e.target.value)
+                  setCodeError('')
+                }}
+                placeholder="例如：TEST001"
+                className={`w-full px-4 py-3 rounded-lg border ${codeError ? 'border-red-500' : 'border-[#e4e5e7]'} focus:outline-none focus:ring-2 focus:ring-[#1dbf73] focus:border-transparent transition-all`}
+                autoFocus
+              />
+              {codeError && (
+                <p className="text-red-500 text-xs mt-2 flex items-center gap-1">
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  {codeError}
+                </p>
+              )}
+            </div>
+
+            {/* 提示信息 */}
+            <div className="bg-[#fff7ed] rounded-lg p-3 mb-5 space-y-2">
+              <p className="text-xs text-[#74767e] leading-relaxed">
+                💡 添加客服后，发送"我要抢单"，客服会提供专属抢单码
+              </p>
+              <p className="text-xs text-[#f97316] leading-relaxed">
+                ⚠️ 每位创作者最多只能同时进行接单3个任务
+              </p>
+            </div>
+
+            {/* 按钮 */}
             <div className="flex gap-3">
               <button
-                onClick={() => setShowConfirmModal(false)}
-                className="flex-1 py-2.5 border border-[#e4e5e7] text-[#404145] rounded-lg hover:bg-[#f5f5f5] transition-colors font-medium"
+                onClick={() => setShowCodeModal(false)}
+                className="flex-1 py-3 border border-[#e4e5e7] text-[#404145] rounded-lg hover:bg-[#f5f5f5] transition-colors font-medium"
               >
                 取消
               </button>
               <button
-                onClick={handleConfirmOrder}
-                className="flex-1 py-2.5 bg-[#1dbf73] text-white rounded-lg hover:bg-[#19a463] transition-colors font-medium"
+                onClick={handleCodeSubmit}
+                className="flex-1 py-3 bg-[#1dbf73] text-white rounded-lg hover:bg-[#19a463] transition-colors font-medium"
               >
                 确认接单
               </button>

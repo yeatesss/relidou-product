@@ -199,21 +199,19 @@ export default function AdvertiserCertification() {
               <div className="bg-white rounded-xl shadow-sm p-5">
                 <h3 className="text-base font-bold text-[#404145] mb-4 text-center">扫码添加客服微信</h3>
                 <div className="flex flex-col items-center">
-                  {/* 二维码占位图 */}
-                  <div className="w-40 h-40 bg-[#f5f5f5] rounded-lg flex items-center justify-center mb-3 border-2 border-dashed border-[#e4e5e7]">
-                    <div className="text-center">
-                      <div className="w-14 h-14 bg-white rounded-lg flex items-center justify-center mx-auto mb-1.5 shadow-sm">
-                        <User className="w-7 h-7 text-[#1dbf73]" />
-                      </div>
-                      <p className="text-xs text-[#74767e]">客服二维码</p>
-                    </div>
+                  {/* 二维码 */}
+                  <div className="w-40 h-40 bg-[#f5f5f5] rounded-lg flex items-center justify-center mb-3 overflow-hidden">
+                    <img
+                      src="customer-service-qrcode.png"
+                      alt="客服二维码"
+                      className="w-full h-full object-cover"
+                    />
                   </div>
 
                   {/* 客服信息 */}
                   <div className="text-center space-y-1">
                     <p className="text-sm font-medium text-[#404145]">热力豆企业客服</p>
                     <p className="text-xs text-[#74767e]">微信号：relidou_service</p>
-                    <p className="text-xs text-[#74767e]">工作时间：9:00-18:00</p>
                   </div>
                 </div>
               </div>

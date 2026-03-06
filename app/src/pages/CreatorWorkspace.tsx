@@ -19,7 +19,6 @@ import {
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 const stats = [
@@ -51,11 +50,99 @@ const myWorks = [
 ]
 
 const messages = [
-  { id: 1, from: '花漾美妆', content: '视频效果很好，就是结尾可以再优化一下', time: '30分钟前', unread: true },
-  { id: 2, from: '互联科技', content: '已确认收货，合作愉快！', time: '2小时前', unread: false },
-  { id: 3, from: '花漾美妆', content: '【修改意见】美妆品牌抖音短视频：镜头切换不够流畅，建议在0:05-0:08处增加过渡效果。背景音乐需要更换为更活泼的风格。字幕位置需要调整，目前遮挡了产品展示。', time: '10分钟前', unread: true, type: 'modify' },
-  { id: 4, from: '优品家居', content: '【修改意见】产品展示视频：产品特写镜头时间太短，希望延长至3秒以上。整体色调偏暗，建议增加亮度。', time: '1小时前', unread: true, type: 'modify' },
+  {
+    id: 1,
+    type: 'system',
+    category: 'signup',
+    title: '报名通知',
+    content: '您已成功报名任务"美妆品牌抖音短视频"，请及时上传视频',
+    time: '10分钟前',
+    unread: true
+  },
+  {
+    id: 2,
+    type: 'system',
+    category: 'review',
+    title: '审核通知',
+    content: '任务"直播切片制作"视频已提交，等待广告主审核',
+    time: '30分钟前',
+    unread: true
+  },
+  {
+    id: 3,
+    type: 'system',
+    category: 'review',
+    title: '审核通知',
+    content: '任务"企业宣传片剪辑"审核已通过，等待您确认交付',
+    time: '1小时前',
+    unread: true
+  },
+  {
+    id: 4,
+    type: 'system',
+    category: 'review',
+    title: '审核通知',
+    content: '任务"口播视频制作"审核未通过，请查看修改意见并重新上传',
+    time: '2小时前',
+    unread: false
+  },
+  {
+    id: 5,
+    type: 'system',
+    category: 'review',
+    title: '审核通知',
+    content: '任务"产品展示视频"需要修改，请查看广告主的修改意见',
+    time: '3小时前',
+    unread: false
+  },
+  {
+    id: 6,
+    type: 'system',
+    category: 'review',
+    title: '审核通知',
+    content: '任务"美食探店视频"已完成，佣金¥3,800已到账',
+    time: '5小时前',
+    unread: false
+  },
 ]
+
+// 分类对应的样式配置
+const getCategoryConfig = (category: string) => {
+  switch (category) {
+    case 'signup':
+      return {
+        bgColor: 'bg-green-50',
+        iconColor: 'text-green-600',
+        iconBg: 'bg-green-100',
+        icon: '✓',
+        badgeColor: 'bg-green-100 text-green-700'
+      }
+    case 'review':
+      return {
+        bgColor: 'bg-blue-50',
+        iconColor: 'text-blue-600',
+        iconBg: 'bg-blue-100',
+        icon: '◉',
+        badgeColor: 'bg-blue-100 text-blue-700'
+      }
+    default:
+      return {
+        bgColor: 'bg-gray-50',
+        iconColor: 'text-gray-600',
+        iconBg: 'bg-gray-100',
+        icon: '•',
+        badgeColor: 'bg-gray-100 text-gray-700'
+      }
+  }
+}
+
+const getCategoryLabel = (category: string) => {
+  const labels: Record<string, string> = {
+    signup: '报名通知',
+    review: '审核通知'
+  }
+  return labels[category] || '系统通知'
+}
 
 const incomeDetails = [
   { id: 1, type: 'commission', task: '企业宣传片剪辑', advertiser: '互联科技', amount: 5000, date: '2026-02-20 14:30' },
@@ -108,6 +195,37 @@ export default function CreatorWorkspace() {
   const [creatorProfile, setCreatorProfile] = useState<any>(null)
   const [orderStatusFilter, setOrderStatusFilter] = useState<'全部' | '待上传视频' | '待审核' | '待交付' | '已完成' | '审核未通过' | '订单冻结'>('全部')
 
+  // 提现功能相关状态
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false)
+  const [withdrawAccountType, setWithdrawAccountType] = useState<'alipay' | 'bank'>('alipay')
+  const [withdrawAmount, setWithdrawAmount] = useState('')
+  const [savedAccounts, setSavedAccounts] = useState<any[]>([])
+  const [selectedAccountId, setSelectedAccountId] = useState<string>('')
+  const [showAddAccountForm, setShowAddAccountForm] = useState(false)
+  const [newAccount, setNewAccount] = useState({
+    type: 'alipay' as 'alipay' | 'bank',
+    alipay: { account: '', name: '', phone: '', idCard: '' },
+    bank: { account: '', name: '', phone: '', idCard: '' }
+  })
+  const [verificationCode, setVerificationCode] = useState('')
+  const [countdown, setCountdown] = useState(0)
+
+  // 根据选择的账户类型过滤账户
+  const getFilteredAccounts = () => {
+    return savedAccounts.filter(acc => acc.type === withdrawAccountType)
+  }
+
+  // 切换账户类型时，自动选中该类型的第一个账户
+  const handleAccountTypeChange = (type: 'alipay' | 'bank') => {
+    setWithdrawAccountType(type)
+    const filteredAccounts = savedAccounts.filter(acc => acc.type === type)
+    if (filteredAccounts.length > 0) {
+      setSelectedAccountId(filteredAccounts[0].id)
+    } else {
+      setSelectedAccountId('')
+    }
+  }
+
   useEffect(() => {
     // 检查登录状态
     if (!isAuthenticated) {
@@ -128,6 +246,24 @@ export default function CreatorWorkspace() {
         setCreatorProfile(JSON.parse(savedProfile))
       } catch (error) {
         console.error('加载个人信息失败:', error)
+      }
+    }
+
+    // 加载保存的提现账户
+    const accounts = localStorage.getItem('withdrawAccounts')
+    if (accounts) {
+      try {
+        const parsedAccounts = JSON.parse(accounts)
+        setSavedAccounts(parsedAccounts)
+        // 默认选择第一个支付宝账户，如果没有则选择第一个账户
+        const alipayAccounts = parsedAccounts.filter((acc: any) => acc.type === 'alipay')
+        if (alipayAccounts.length > 0) {
+          setSelectedAccountId(alipayAccounts[0].id)
+        } else if (parsedAccounts.length > 0) {
+          setSelectedAccountId(parsedAccounts[0].id)
+        }
+      } catch (error) {
+        console.error('加载提现账户失败:', error)
       }
     }
 
@@ -237,6 +373,173 @@ export default function CreatorWorkspace() {
 
     return true
   })
+
+  // 提现处理函数
+  const handleWithdraw = () => {
+    const amount = parseFloat(withdrawAmount)
+
+    // 验证提现金额
+    if (!amount || amount <= 0) {
+      alert('请输入有效的提现金额')
+      return
+    }
+
+    if (amount < 10) {
+      alert('单笔提现金额不得低于10元')
+      return
+    }
+
+    if (amount > 9200) {
+      alert('提现金额不能超过账户余额')
+      return
+    }
+
+    // 验证是否选择了账户
+    if (!selectedAccountId) {
+      alert('请选择或添加提现账户')
+      return
+    }
+
+    const selectedAccount = savedAccounts.find(acc => acc.id === selectedAccountId)
+    if (!selectedAccount) {
+      alert('请选择或添加提现账户')
+      return
+    }
+
+    // 模拟提现成功
+    const accountInfo = selectedAccount.type === 'alipay'
+      ? `支付宝 ${selectedAccount.alipay.account}`
+      : `银行卡 ${selectedAccount.bank.account}`
+
+    alert(`提现申请已提交！\n提现金额：¥${amount.toFixed(2)}\n到账账户：${accountInfo}\n预计1-3个工作日到账`)
+    setShowWithdrawModal(false)
+    setShowAddAccountForm(false)
+    setWithdrawAmount('')
+  }
+
+  // 添加新账户
+  const handleAddAccount = () => {
+    const accountType = newAccount.type
+
+    if (accountType === 'alipay') {
+      if (!newAccount.alipay.account || !newAccount.alipay.name || !newAccount.alipay.phone || !newAccount.alipay.idCard) {
+        alert('请完善所有必填信息')
+        return
+      }
+      if (!verificationCode) {
+        alert('请输入验证码')
+        return
+      }
+      if (!/^1[3-9]\d{9}$/.test(newAccount.alipay.phone)) {
+        alert('请输入正确的手机号码')
+        return
+      }
+      if (!/^\d{15}$|^\d{18}$/.test(newAccount.alipay.idCard)) {
+        alert('请输入正确的身份证号码（15位或18位）')
+        return
+      }
+    } else {
+      if (!newAccount.bank.account || !newAccount.bank.name || !newAccount.bank.phone || !newAccount.bank.idCard) {
+        alert('请完善所有必填信息')
+        return
+      }
+      if (!verificationCode) {
+        alert('请输入验证码')
+        return
+      }
+      if (!/^1[3-9]\d{9}$/.test(newAccount.bank.phone)) {
+        alert('请输入正确的手机号码')
+        return
+      }
+      if (!/^\d{15}$|^\d{18}$/.test(newAccount.bank.idCard)) {
+        alert('请输入正确的身份证号码（15位或18位）')
+        return
+      }
+    }
+
+    // 创建新账户
+    const account = {
+      id: Date.now().toString(),
+      type: accountType,
+      alipay: accountType === 'alipay' ? newAccount.alipay : { account: '', name: '', phone: '', idCard: '' },
+      bank: accountType === 'bank' ? newAccount.bank : { account: '', name: '', phone: '', idCard: '' },
+      isDefault: savedAccounts.length === 0
+    }
+
+    // 保存到列表
+    const updatedAccounts = [...savedAccounts, account]
+    setSavedAccounts(updatedAccounts)
+    localStorage.setItem('withdrawAccounts', JSON.stringify(updatedAccounts))
+
+    // 选中新添加的账户，并切换到对应的账户类型
+    setSelectedAccountId(account.id)
+    setWithdrawAccountType(accountType)
+
+    // 重置表单
+    setNewAccount({
+      type: accountType,
+      alipay: { account: '', name: '', phone: '', idCard: '' },
+      bank: { account: '', name: '', phone: '', idCard: '' }
+    })
+    setVerificationCode('')
+    setShowAddAccountForm(false)
+  }
+
+  // 删除账户
+  const handleDeleteAccount = (accountId: string) => {
+    if (savedAccounts.length === 1) {
+      alert('至少需要保留一个提现账户')
+      return
+    }
+
+    if (!confirm('确定要删除这个账户吗？')) {
+      return
+    }
+
+    const updatedAccounts = savedAccounts.filter(acc => acc.id !== accountId)
+    setSavedAccounts(updatedAccounts)
+    localStorage.setItem('withdrawAccounts', JSON.stringify(updatedAccounts))
+
+    // 如果删除的是当前选中的账户，选中第一个
+    if (selectedAccountId === accountId) {
+      setSelectedAccountId(updatedAccounts[0].id)
+    }
+  }
+
+  // 设置默认账户
+  const handleSetDefaultAccount = (accountId: string) => {
+    const updatedAccounts = savedAccounts.map(acc => ({
+      ...acc,
+      isDefault: acc.id === accountId
+    }))
+    setSavedAccounts(updatedAccounts)
+    localStorage.setItem('withdrawAccounts', JSON.stringify(updatedAccounts))
+  }
+
+  // 发送验证码
+  const handleSendCode = () => {
+    const phone = newAccount.type === 'alipay' ? newAccount.alipay.phone : newAccount.bank.phone
+
+    if (!phone || !/^1[3-9]\d{9}$/.test(phone)) {
+      alert('请输入正确的手机号码')
+      return
+    }
+
+    // 模拟发送验证码
+    alert(`验证码已发送至 ${phone}`)
+    setCountdown(60)
+
+    // 倒计时
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer)
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+  }
 
   return (
     <div className="min-h-screen bg-[#f7f7f7] pt-20">
@@ -448,7 +751,18 @@ export default function CreatorWorkspace() {
                         <span className="font-medium text-[#1dbf73]">¥12,400</span>
                       </div>
                     </div>
-                    <Button className="w-full mt-4 bg-[#1dbf73] hover:bg-[#19a463]">
+                    <Button
+                      className="w-full mt-4 bg-[#1dbf73] hover:bg-[#19a463]"
+                      onClick={() => {
+                        setShowWithdrawModal(true)
+                        // 重置为支付宝，并选中第一个支付宝账户
+                        setWithdrawAccountType('alipay')
+                        const alipayAccounts = savedAccounts.filter(acc => acc.type === 'alipay')
+                        if (alipayAccounts.length > 0) {
+                          setSelectedAccountId(alipayAccounts[0].id)
+                        }
+                      }}
+                    >
                       申请提现
                     </Button>
                   </div>
@@ -543,30 +857,34 @@ export default function CreatorWorkspace() {
             <TabsContent value="messages">
               <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
                 <div className="divide-y divide-slate-100">
-                  {messages.map((msg) => (
-                    <div key={msg.id} className={`p-4 hover:bg-slate-50 cursor-pointer ${msg.unread ? 'bg-blue-50/30' : ''} ${(msg as any).type === 'modify' ? 'bg-orange-50/40' : ''}`}>
-                      <div className="flex items-start gap-4">
-                        <Avatar className={`w-12 h-12 ${(msg as any).type === 'modify' ? 'bg-orange-500' : 'bg-[#1dbf73]'}`}>
-                          <AvatarFallback className="text-white">{msg.from[0]}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <p className="font-medium text-[#404145]">{msg.from}</p>
-                              {(msg as any).type === 'modify' && (
-                                <span className="px-2 py-0.5 bg-orange-500 text-white text-xs font-medium rounded-full">
-                                  修改意见
-                                </span>
-                              )}
-                            </div>
-                            <span className="text-sm text-[#74767e]">{msg.time}</span>
+                  {messages.map((msg) => {
+                    const config = getCategoryConfig((msg as any).category)
+                    return (
+                      <div
+                        key={msg.id}
+                        className={`p-4 hover:bg-slate-50 cursor-pointer transition-colors ${msg.unread ? config.bgColor : ''}`}
+                      >
+                        <div className="flex items-start gap-4">
+                          {/* 图标 */}
+                          <div className={`w-10 h-10 ${config.iconBg} rounded-lg flex items-center justify-center flex-shrink-0`}>
+                            <span className={`text-lg ${config.iconColor}`}>{config.icon}</span>
                           </div>
-                          <p className={`text-sm mt-1 ${(msg as any).type === 'modify' ? 'text-orange-800 font-medium' : 'text-[#74767e]'}`}>{msg.content}</p>
+
+                          {/* 内容 */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-2 mb-1">
+                              <p className="font-medium text-[#404145]">{(msg as any).title}</p>
+                              <span className="text-sm text-[#74767e] flex-shrink-0 whitespace-nowrap">{msg.time}</span>
+                            </div>
+                            <p className="text-sm text-[#74767e] line-clamp-2">{(msg as any).content}</p>
+                          </div>
+
+                          {/* 未读标识 */}
+                          {msg.unread && <span className="w-2 h-2 bg-red-500 rounded-full flex-shrink-0 mt-2" />}
                         </div>
-                        {msg.unread && <span className="w-2 h-2 bg-red-500 rounded-full flex-shrink-0" />}
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               </div>
             </TabsContent>
@@ -1066,6 +1384,390 @@ export default function CreatorWorkspace() {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* 申请提现弹窗 */}
+      {showWithdrawModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-lg w-full shadow-2xl">
+            {/* 弹窗头部 */}
+            <div className="flex items-center justify-between p-6 border-b border-slate-100">
+              <div>
+                <h3 className="text-xl font-bold text-[#404145]">申请提现</h3>
+                <p className="text-sm text-[#74767e] mt-1">可提现余额：¥9,200</p>
+              </div>
+              <button
+                onClick={() => {
+                  setShowWithdrawModal(false)
+                  setShowAddAccountForm(false)
+                }}
+                className="text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* 弹窗内容 */}
+            <div className="p-6 space-y-5 max-h-[60vh] overflow-y-auto">
+              {!showAddAccountForm ? (
+                <>
+                  {/* 账户类型选择 */}
+                  <div>
+                    <label className="block text-sm font-medium text-[#404145] mb-2">提现方式</label>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => handleAccountTypeChange('alipay')}
+                        className={`flex-1 py-3 px-4 rounded-lg border-2 transition-all ${
+                          withdrawAccountType === 'alipay'
+                            ? 'border-[#1dbf73] bg-[#f0faf5] text-[#1dbf73]'
+                            : 'border-slate-200 text-slate-600 hover:border-slate-300'
+                        }`}
+                      >
+                        <div className="flex items-center justify-center gap-2">
+                          <span className="text-lg">💰</span>
+                          <span className="font-medium">支付宝</span>
+                        </div>
+                      </button>
+                      <button
+                        onClick={() => handleAccountTypeChange('bank')}
+                        className={`flex-1 py-3 px-4 rounded-lg border-2 transition-all ${
+                          withdrawAccountType === 'bank'
+                            ? 'border-[#1dbf73] bg-[#f0faf5] text-[#1dbf73]'
+                            : 'border-slate-200 text-slate-600 hover:border-slate-300'
+                        }`}
+                      >
+                        <div className="flex items-center justify-center gap-2">
+                          <span className="text-lg">💳</span>
+                          <span className="font-medium">银行卡</span>
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* 具体账户选择 */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="block text-sm font-medium text-[#404145]">
+                        选择{withdrawAccountType === 'alipay' ? '支付宝' : '银行卡'}账户
+                      </label>
+                      <button
+                        onClick={() => setShowAddAccountForm(true)}
+                        className="text-sm text-[#1dbf73] hover:underline flex items-center gap-1"
+                      >
+                        <span>+</span> 添加新账户
+                      </button>
+                    </div>
+
+                    {getFilteredAccounts().length === 0 ? (
+                      <div className="text-center py-6 bg-slate-50 rounded-lg">
+                        <p className="text-[#74767e] mb-3 text-sm">
+                          暂无{withdrawAccountType === 'alipay' ? '支付宝' : '银行卡'}账户
+                        </p>
+                        <Button
+                          onClick={() => setShowAddAccountForm(true)}
+                          size="sm"
+                          className="bg-[#1dbf73] hover:bg-[#19a463]"
+                        >
+                          添加{withdrawAccountType === 'alipay' ? '支付宝' : '银行卡'}账户
+                        </Button>
+                      </div>
+                    ) : (
+                      <select
+                        value={selectedAccountId}
+                        onChange={(e) => setSelectedAccountId(e.target.value)}
+                        className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:border-[#1dbf73] transition-colors"
+                      >
+                        {getFilteredAccounts().map((account) => (
+                          <option key={account.id} value={account.id}>
+                            {withdrawAccountType === 'alipay'
+                              ? account.alipay.account
+                              : account.bank.account}
+                            {account.isDefault ? ' (默认)' : ''}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* 添加新账户表单 */}
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <label className="block text-sm font-medium text-[#404145]">添加提现账户</label>
+                      <button
+                        onClick={() => setShowAddAccountForm(false)}
+                        className="text-sm text-[#74767e] hover:underline"
+                      >
+                        返回
+                      </button>
+                    </div>
+
+                    {/* 账户类型选择 */}
+                    <div className="flex gap-3 mb-4">
+                      <button
+                        onClick={() => setNewAccount({ ...newAccount, type: 'alipay' })}
+                        className={`flex-1 py-3 px-4 rounded-lg border-2 transition-all ${
+                          newAccount.type === 'alipay'
+                            ? 'border-[#1dbf73] bg-[#f0faf5] text-[#1dbf73]'
+                            : 'border-slate-200 text-slate-600 hover:border-slate-300'
+                        }`}
+                      >
+                        <div className="flex items-center justify-center gap-2">
+                          <span className="text-lg">💰</span>
+                          <span className="font-medium">支付宝</span>
+                        </div>
+                      </button>
+                      <button
+                        onClick={() => setNewAccount({ ...newAccount, type: 'bank' })}
+                        className={`flex-1 py-3 px-4 rounded-lg border-2 transition-all ${
+                          newAccount.type === 'bank'
+                            ? 'border-[#1dbf73] bg-[#f0faf5] text-[#1dbf73]'
+                            : 'border-slate-200 text-slate-600 hover:border-slate-300'
+                        }`}
+                      >
+                        <div className="flex items-center justify-center gap-2">
+                          <span className="text-lg">💳</span>
+                          <span className="font-medium">银行卡</span>
+                        </div>
+                      </button>
+                    </div>
+
+                    {/* 支付宝表单 */}
+                    {newAccount.type === 'alipay' && (
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-[#404145] mb-2">支付宝账号</label>
+                          <input
+                            type="text"
+                            placeholder="请输入支付宝账号"
+                            value={newAccount.alipay.account}
+                            onChange={(e) => setNewAccount({
+                              ...newAccount,
+                              alipay: { ...newAccount.alipay, account: e.target.value }
+                            })}
+                            className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:border-[#1dbf73] transition-colors"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-[#404145] mb-2">真实姓名</label>
+                          <input
+                            type="text"
+                            placeholder="请输入真实姓名"
+                            value={newAccount.alipay.name}
+                            onChange={(e) => setNewAccount({
+                              ...newAccount,
+                              alipay: { ...newAccount.alipay, name: e.target.value }
+                            })}
+                            className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:border-[#1dbf73] transition-colors"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-[#404145] mb-2">身份证号</label>
+                          <input
+                            type="text"
+                            placeholder="请输入身份证号"
+                            maxLength={18}
+                            value={newAccount.alipay.idCard}
+                            onChange={(e) => setNewAccount({
+                              ...newAccount,
+                              alipay: { ...newAccount.alipay, idCard: e.target.value }
+                            })}
+                            className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:border-[#1dbf73] transition-colors"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-[#404145] mb-2">手机号</label>
+                          <input
+                            type="tel"
+                            placeholder="请输入手机号"
+                            maxLength={11}
+                            value={newAccount.alipay.phone}
+                            onChange={(e) => setNewAccount({
+                              ...newAccount,
+                              alipay: { ...newAccount.alipay, phone: e.target.value }
+                            })}
+                            className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:border-[#1dbf73] transition-colors"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-[#404145] mb-2">验证码</label>
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              placeholder="请输入验证码"
+                              maxLength={6}
+                              value={verificationCode}
+                              onChange={(e) => setVerificationCode(e.target.value)}
+                              className="flex-1 px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:border-[#1dbf73] transition-colors"
+                            />
+                            <button
+                              onClick={handleSendCode}
+                              disabled={countdown > 0}
+                              className="px-4 py-2.5 bg-[#1dbf73] text-white rounded-lg hover:bg-[#19a463] disabled:bg-slate-300 disabled:cursor-not-allowed whitespace-nowrap text-sm"
+                            >
+                              {countdown > 0 ? `${countdown}秒` : '发送验证码'}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 银行卡表单 */}
+                    {newAccount.type === 'bank' && (
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-[#404145] mb-2">真实姓名</label>
+                          <input
+                            type="text"
+                            placeholder="请输入开户姓名"
+                            value={newAccount.bank.name}
+                            onChange={(e) => setNewAccount({
+                              ...newAccount,
+                              bank: { ...newAccount.bank, name: e.target.value }
+                            })}
+                            className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:border-[#1dbf73] transition-colors"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-[#404145] mb-2">身份证号</label>
+                          <input
+                            type="text"
+                            placeholder="请输入身份证号"
+                            maxLength={18}
+                            value={newAccount.bank.idCard}
+                            onChange={(e) => setNewAccount({
+                              ...newAccount,
+                              bank: { ...newAccount.bank, idCard: e.target.value }
+                            })}
+                            className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:border-[#1dbf73] transition-colors"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-[#404145] mb-2">银行卡号</label>
+                          <input
+                            type="text"
+                            placeholder="请输入银行卡号"
+                            value={newAccount.bank.account}
+                            onChange={(e) => setNewAccount({
+                              ...newAccount,
+                              bank: { ...newAccount.bank, account: e.target.value }
+                            })}
+                            className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:border-[#1dbf73] transition-colors"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-[#404145] mb-2">手机号</label>
+                          <input
+                            type="tel"
+                            placeholder="请输入手机号"
+                            maxLength={11}
+                            value={newAccount.bank.phone}
+                            onChange={(e) => setNewAccount({
+                              ...newAccount,
+                              bank: { ...newAccount.bank, phone: e.target.value }
+                            })}
+                            className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:border-[#1dbf73] transition-colors"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-[#404145] mb-2">验证码</label>
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              placeholder="请输入验证码"
+                              maxLength={6}
+                              value={verificationCode}
+                              onChange={(e) => setVerificationCode(e.target.value)}
+                              className="flex-1 px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:border-[#1dbf73] transition-colors"
+                            />
+                            <button
+                              onClick={handleSendCode}
+                              disabled={countdown > 0}
+                              className="px-4 py-2.5 bg-[#1dbf73] text-white rounded-lg hover:bg-[#19a463] disabled:bg-slate-300 disabled:cursor-not-allowed whitespace-nowrap text-sm"
+                            >
+                              {countdown > 0 ? `${countdown}秒` : '发送验证码'}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    <Button
+                      onClick={handleAddAccount}
+                      className="w-full mt-4 bg-[#1dbf73] hover:bg-[#19a463]"
+                    >
+                      保存账户
+                    </Button>
+                  </div>
+                </>
+              )}
+
+              {/* 提现金额（只在非添加账户模式下且已选择账户时显示） */}
+              {!showAddAccountForm && selectedAccountId && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-[#404145] mb-2">提现金额</label>
+                    <div className="relative">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#74767e] font-medium">¥</span>
+                      <input
+                        type="number"
+                        placeholder="请输入提现金额"
+                        value={withdrawAmount}
+                        onChange={(e) => setWithdrawAmount(e.target.value)}
+                        className="w-full pl-8 pr-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:border-[#1dbf73] transition-colors"
+                      />
+                    </div>
+                    <div className="flex items-center justify-between mt-2 text-xs">
+                      <span className="text-[#74767e]">可提现余额：¥9,200</span>
+                      <button
+                        onClick={() => setWithdrawAmount('9200')}
+                        className="text-[#1dbf73] hover:underline"
+                      >
+                        全部提现
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* 提示信息 */}
+                  <div className="bg-blue-50 rounded-lg p-4 flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <div className="text-sm text-blue-900">
+                      <p className="font-medium mb-1">温馨提示</p>
+                      <ul className="space-y-1 text-blue-700">
+                        <li>• 单笔提现金额不得低于10元</li>
+                        <li>• 提现手续费全免</li>
+                        <li>• 预计1-2小时内到账</li>
+                        <li>• 请确保账户信息准确无误</li>
+                      </ul>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* 弹窗底部 */}
+            {!showAddAccountForm && selectedAccountId && (
+              <div className="flex items-center justify-end gap-3 p-6 border-t border-slate-100">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowWithdrawModal(false)
+                    setShowAddAccountForm(false)
+                  }}
+                >
+                  取消
+                </Button>
+                <Button
+                  onClick={handleWithdraw}
+                  className="bg-[#1dbf73] hover:bg-[#19a463]"
+                >
+                  确认提现
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       )}

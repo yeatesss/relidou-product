@@ -304,24 +304,13 @@ export default function Register() {
               <h3 className="text-xl font-bold text-[#404145] mb-2">提交成功</h3>
               <p className="text-[#74767e] mb-6">请等待客服为您开通</p>
 
-              {/* QR Code Placeholder */}
-              <div className="w-48 h-48 mx-auto mb-6 bg-[#f7f7f7] rounded-lg flex items-center justify-center">
-                <div className="text-center">
-                  <svg
-                    className="w-24 h-24 mx-auto mb-2 text-[#74767e]"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.5}
-                      d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
-                    />
-                  </svg>
-                  <p className="text-xs text-[#74767e]">扫码联系客服</p>
-                </div>
+              {/* 客服二维码 */}
+              <div className="w-48 h-48 mx-auto mb-6 bg-[#f7f7f7] rounded-lg flex items-center justify-center overflow-hidden">
+                <img
+                  src="customer-service-qrcode.png"
+                  alt="客服二维码"
+                  className="w-full h-full object-cover"
+                />
               </div>
 
               <Button
