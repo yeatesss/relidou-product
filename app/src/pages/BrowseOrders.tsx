@@ -1,16 +1,15 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, ChevronDown, Star, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Search, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
 
 // ─── 平台 Tabs ────────────────────────────────────────────────
-const platformTabs = ['全部', '抖音', '快手', '小红书', '视频号', 'B站']
+const platformTabs = ['全部', '抖音', '快手', '小红书', '视频号']
 
 const platformColors: Record<string, string> = {
   抖音: 'bg-black text-white',
   快手: 'bg-[#FF4906] text-white',
   小红书: 'bg-[#FE2C55] text-white',
   视频号: 'bg-[#07C160] text-white',
-  'B站': 'bg-[#00AEEC] text-white',
 }
 
 const platformDot: Record<string, string> = {
@@ -18,7 +17,6 @@ const platformDot: Record<string, string> = {
   快手: 'bg-[#FF4906]',
   小红书: 'bg-[#FE2C55]',
   视频号: 'bg-[#07C160]',
-  'B站': 'bg-[#00AEEC]',
 }
 
 // ─── Mock 数据 ────────────────────────────────────────────────
@@ -83,15 +81,6 @@ const ALL_TASKS = [
     platforms: ['小红书'],
     creator: { name: '小红书达人', avatar: '红', rating: 4.9, reviews: 302 },
     price: 250,
-    duration: '普通72小时',
-    isUrgent: false,
-  },
-  {
-    id: 8,
-    title: 'B站知识分享类口播视频',
-    platforms: ['B站'],
-    creator: { name: '知识博主', avatar: '知', rating: 4.7, reviews: 143 },
-    price: 350,
     duration: '普通72小时',
     isUrgent: false,
   },
@@ -197,19 +186,6 @@ export default function BrowseOrders() {
 
   return (
     <div className="min-h-screen bg-[#f5f5f5] pt-20">
-      {/* ── 顶部标题区 ── */}
-      <div className="bg-white border-b border-[#e4e5e7]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div
-            className={`transition-all duration-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-              }`}
-          >
-            <h1 className="text-3xl font-bold text-[#1a1a1a] mb-1">任务大厅</h1>
-            <p className="text-[#74767e] text-sm">发现海量素材任务，找到适合您的创作机会</p>
-          </div>
-        </div>
-      </div>
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* ── 平台 Tabs ── */}
         <div
@@ -390,20 +366,6 @@ function TaskCard({
               {p}
             </span>
           ))}
-        </div>
-
-        {/* 广告主信息 */}
-        <div className="flex items-center gap-2 mb-3">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#1dbf73] to-[#0a4226] flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-            {task.creator.avatar}
-          </div>
-          <div>
-            <div className="text-xs font-medium text-[#404145]">{task.creator.name}</div>
-            <div className="flex items-center gap-0.5">
-              <Star className="w-3 h-3 fill-[#ffb33e] text-[#ffb33e]" />
-              <span className="text-xs text-[#74767e]">{task.creator.rating}</span>
-            </div>
-          </div>
         </div>
 
         {/* 价格 + 时效 */}

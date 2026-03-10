@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { ArrowLeft, Upload, FileText, MapPin, User, Calendar, Camera, CheckCircle, AlertCircle } from 'lucide-react'
+import { ArrowLeft, Upload, FileText, CheckCircle, AlertCircle } from 'lucide-react'
 
 interface CertificationData {
   businessLicense: string | null
@@ -9,7 +9,6 @@ interface CertificationData {
   validUntil: string
   legalPerson: string
   registeredAddress: string
-  faceVerified: boolean
 }
 
 export default function AdvertiserCertification() {
@@ -23,11 +22,8 @@ export default function AdvertiserCertification() {
     validUntil: '',
     legalPerson: '',
     registeredAddress: '',
-    faceVerified: false,
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [showFaceVerification, setShowFaceVerification] = useState(false)
-  const [isVerifyingFace, setIsVerifyingFace] = useState(false)
 
   useEffect(() => {
     setIsVisible(true)
@@ -78,18 +74,6 @@ export default function AdvertiserCertification() {
     }
   }
 
-  const handleFaceVerification = () => {
-    setIsVerifyingFace(true)
-
-    // 模拟人脸识别过程
-    setTimeout(() => {
-      setIsVerifyingFace(false)
-      setFormData({ ...formData, faceVerified: true })
-      setShowFaceVerification(false)
-      alert('人脸识别验证成功！')
-    }, 2000)
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
@@ -98,13 +82,6 @@ export default function AdvertiserCertification() {
     if (!formData.businessLicense || !formData.creditCode || !formData.validUntil ||
         !formData.legalPerson || !formData.registeredAddress) {
       alert('请填写所有必填字段')
-      setIsSubmitting(false)
-      return
-    }
-
-    // 验证人脸识别
-    if (!formData.faceVerified) {
-      alert('请先完成法定代表人人脸识别验证')
       setIsSubmitting(false)
       return
     }
@@ -263,7 +240,6 @@ export default function AdvertiserCertification() {
                 <ul className="space-y-1 text-blue-700">
                   <li>• 请上传清晰的营业执照照片</li>
                   <li>• 统一社会信用代码必须与营业执照一致</li>
-                  <li>• 法定代表人需完成人脸识别验证</li>
                   <li>• 提交后由运营端审核，审核通过后方可使用平台功能</li>
                 </ul>
               </div>
@@ -376,56 +352,6 @@ export default function AdvertiserCertification() {
               />
             </div>
 
-            {/* 人脸识别验证 */}
-            <div>
-              <label className="block text-sm font-medium text-[#404145] mb-2">
-                法定代表人人脸识别验证 <span className="text-red-500">*</span>
-              </label>
-              <div className={`border-2 rounded-lg p-6 transition-colors ${
-                formData.faceVerified
-                  ? 'border-green-500 bg-green-50'
-                  : 'border-[#e4e5e7] bg-white'
-              }`}>
-                {formData.faceVerified ? (
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
-                      <CheckCircle className="w-6 h-6 text-white" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-green-800">验证通过</p>
-                      <p className="text-xs text-green-600">法定代表人身份已验证</p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setFormData({ ...formData, faceVerified: false })}
-                      className="text-sm text-green-600 hover:text-green-700"
-                    >
-                      重新验证
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-[#f5f5f5] rounded-full flex items-center justify-center">
-                        <Camera className="w-6 h-6 text-[#74767e]" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-[#404145]">需要验证</p>
-                        <p className="text-xs text-[#74767e]">请法定代表人完成人脸识别</p>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setShowFaceVerification(true)}
-                      className="px-6 py-2.5 bg-[#1dbf73] text-white rounded-lg hover:bg-[#19a463] transition-colors font-medium text-sm"
-                    >
-                      开始验证
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-
             {/* 提交按钮 */}
             <div className="flex gap-3 pt-4 border-t border-[#e4e5e7]">
               <button
@@ -450,61 +376,6 @@ export default function AdvertiserCertification() {
           </div>
         </form>
       </div>
-
-      {/* 人脸识别弹窗 */}
-      {showFaceVerification && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-md w-full shadow-2xl overflow-hidden">
-            {/* 弹窗头部 */}
-            <div className="flex items-center justify-between p-4 border-b border-slate-100">
-              <h3 className="text-lg font-bold text-[#404145]">人脸识别验证</h3>
-              <button
-                onClick={() => setShowFaceVerification(false)}
-                className="text-slate-400 hover:text-slate-600 transition-colors"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* 弹窗内容 */}
-            <div className="p-6">
-              {isVerifyingFace ? (
-                <div className="flex flex-col items-center py-8">
-                  <div className="w-20 h-20 border-4 border-[#1dbf73] border-t-transparent rounded-full animate-spin mb-4"></div>
-                  <p className="text-sm text-[#74767e]">正在验证中...</p>
-                </div>
-              ) : (
-                <>
-                  <div className="aspect-square bg-gradient-to-br from-[#003912] to-[#0a4226] rounded-lg mb-4 flex items-center justify-center relative overflow-hidden">
-                    <Camera className="w-16 h-16 text-white/50" />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-48 h-48 border-2 border-white/30 rounded-full"></div>
-                    </div>
-                  </div>
-                  <div className="space-y-3 text-sm text-[#74767e]">
-                    <p>• 请确保光线充足</p>
-                    <p>• 正面面对摄像头</p>
-                    <p>• 保持表情自然</p>
-                    <p>• 摘除眼镜和帽子</p>
-                  </div>
-                </>
-              )}
-            </div>
-
-            {/* 弹窗底部 */}
-            {!isVerifyingFace && (
-              <div className="p-4 border-t border-slate-100">
-                <button
-                  onClick={handleFaceVerification}
-                  className="w-full py-3 bg-[#1dbf73] text-white rounded-lg hover:bg-[#19a463] transition-colors font-medium"
-                >
-                  开始识别
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   )
 }

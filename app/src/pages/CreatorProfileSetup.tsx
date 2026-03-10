@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { ArrowLeft, User, Phone, MapPin, Briefcase, Camera, Calendar, Globe, Shield, CheckCircle, Loader2 } from 'lucide-react'
+import { ArrowLeft, User, Phone, MapPin, Briefcase, Calendar, Globe, Shield, CheckCircle, Loader2, Camera, Upload } from 'lucide-react'
 
 interface BankVerification {
   bankName: string
@@ -18,6 +18,8 @@ export default function CreatorProfileSetup() {
 
   // 表单数据
   const [formData, setFormData] = useState({
+    nickname: '',
+    avatar: '',
     realName: '',
     idCard: '',
     phone: '',
@@ -34,8 +36,6 @@ export default function CreatorProfileSetup() {
     bankAccount: '',
     isVerified: false,
   })
-
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
 
   // 擅长类型选项
   const availableSkills = [
@@ -67,9 +67,6 @@ export default function CreatorProfileSetup() {
       try {
         const profile = JSON.parse(savedProfile)
         setFormData(profile)
-        if (profile.avatar) {
-          setAvatarPreview(profile.avatar)
-        }
       } catch (error) {
         console.error('加载个人信息失败:', error)
       }
@@ -123,7 +120,6 @@ export default function CreatorProfileSetup() {
     // 保存到localStorage
     const profileToSave = {
       ...formData,
-      avatar: avatarPreview,
       completedAt: new Date().toISOString(),
     }
     localStorage.setItem('creatorProfile', JSON.stringify(profileToSave))
@@ -136,17 +132,6 @@ export default function CreatorProfileSetup() {
 
     setIsSubmitting(false)
     navigate('/orders')
-  }
-
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setAvatarPreview(reader.result as string)
-      }
-      reader.readAsDataURL(file)
-    }
   }
 
   const toggleSkill = (skill: string) => {
@@ -165,6 +150,37 @@ export default function CreatorProfileSetup() {
         ? prev.languages.filter(l => l !== language)
         : [...prev.languages, language].slice(0, 3), // 最多选3个语言
     }))
+  }
+
+  // 处理头像上传
+  const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // 验证文件类型
+    if (!file.type.startsWith('image/')) {
+      alert('请上传图片文件')
+      return
+    }
+
+    // 验证文件大小（限制2MB）
+    if (file.size > 2 * 1024 * 1024) {
+      alert('图片大小不能超过2MB')
+      return
+    }
+
+    // 读取文件并预览
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      const result = event.target?.result as string
+      setFormData(prev => ({ ...prev, avatar: result }))
+    }
+    reader.readAsDataURL(file)
+  }
+
+  // 移除头像
+  const handleRemoveAvatar = () => {
+    setFormData(prev => ({ ...prev, avatar: '' }))
   }
 
   // 验证银行卡
@@ -201,22 +217,13 @@ export default function CreatorProfileSetup() {
       <div className="max-w-6xl mx-auto px-4 py-2">
         {/* 头部 - 紧凑 */}
         <div className={`mb-2 transition-all duration-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => navigate(-1)}
-                className="p-1.5 text-[#74767e] hover:text-[#1a1a1a] transition-colors"
-              >
-                <ArrowLeft className="w-4 h-4" />
-              </button>
-              <div>
-                <h1 className="text-lg font-bold text-[#1a1a1a]">完善个人信息</h1>
-                <p className="text-xs text-[#74767e]">请补充以下信息以便接单和结算</p>
-              </div>
-            </div>
-            <div className="w-8 h-8 bg-gradient-to-br from-[#1dbf73] to-[#003912] rounded-full flex items-center justify-center text-white text-sm font-bold">
-              {user?.phone[0]}
-            </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate(-1)}
+              className="p-1.5 text-[#74767e] hover:text-[#1a1a1a] transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </button>
           </div>
         </div>
 
@@ -234,32 +241,73 @@ export default function CreatorProfileSetup() {
                 </h2>
 
                 <div className="space-y-2.5">
-                  {/* 头像 */}
+                  {/* 头像上传 */}
                   <div>
-                    <label className="block text-sm font-medium text-[#404145] mb-1.5">
+                    <label className="block text-sm font-medium text-[#404145] mb-2">
                       头像
                     </label>
-                    <div className="flex items-center gap-2">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#1dbf73] to-[#003912] flex items-center justify-center text-white text-sm font-bold overflow-hidden">
-                        {avatarPreview ? (
-                          <img src={avatarPreview} alt="头像" className="w-full h-full object-cover" />
+                    <div className="flex items-start gap-4">
+                      {/* 头像预览 */}
+                      <div className="relative group">
+                        {formData.avatar ? (
+                          <div className="relative">
+                            <img
+                              src={formData.avatar}
+                              alt="头像预览"
+                              className="w-20 h-20 rounded-full object-cover border-2 border-[#e4e5e7] group-hover:border-[#1dbf73] transition-colors"
+                            />
+                            <button
+                              type="button"
+                              onClick={handleRemoveAvatar}
+                              className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                              title="移除头像"
+                            >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </div>
                         ) : (
-                          <span>{user?.phone[0] || '创'}</span>
+                          <div className="w-20 h-20 rounded-full bg-[#f5f5f5] border-2 border-dashed border-[#e4e5e7] flex items-center justify-center">
+                            <User className="w-8 h-8 text-[#74767e]" />
+                          </div>
                         )}
                       </div>
-                      <label className="cursor-pointer">
+
+                      {/* 上传按钮 */}
+                      <div className="flex-1">
                         <input
                           type="file"
+                          id="avatar-upload"
                           accept="image/*"
-                          onChange={handleAvatarChange}
+                          onChange={handleAvatarUpload}
                           className="hidden"
                         />
-                        <div className="flex items-center gap-1.5 px-2.5 py-1.5 border border-[#e4e5e7] rounded-lg hover:border-[#1dbf73] hover:text-[#1dbf73] transition-colors text-xs text-[#74767e]">
-                          <Camera className="w-3.5 h-3.5" />
-                          <span>上传头像</span>
-                        </div>
-                      </label>
+                        <label
+                          htmlFor="avatar-upload"
+                          className="flex items-center gap-2 px-4 py-2 border border-[#e4e5e7] rounded-lg hover:border-[#1dbf73] hover:bg-[#f0fdf4] transition-all cursor-pointer text-sm"
+                        >
+                          <Camera className="w-4 h-4 text-[#74767e]" />
+                          <span className="text-[#404145]">点击上传头像</span>
+                        </label>
+                        <p className="text-xs text-[#74767e] mt-1">
+                          支持 JPG、PNG 格式，文件大小不超过 2MB
+                        </p>
+                      </div>
                     </div>
+                  </div>
+
+                  {/* 昵称 */}
+                  <div>
+                    <label className="block text-sm font-medium text-[#404145] mb-1">
+                      昵称 <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.nickname}
+                      onChange={(e) => setFormData({ ...formData, nickname: e.target.value })}
+                      placeholder="请输入昵称，将在作品中显示"
+                      maxLength={20}
+                      className="w-full px-2.5 py-1.5 border border-[#e4e5e7] rounded-lg text-sm focus:outline-none focus:border-[#1dbf73] transition-colors"
+                    />
                   </div>
 
                   {/* 真实姓名 */}
@@ -395,7 +443,7 @@ export default function CreatorProfileSetup() {
               {/* 擅长类型 */}
               <div className="bg-white rounded-xl p-4 shadow-sm">
                 <h2 className="text-sm font-bold text-[#1a1a1a] mb-2.5 flex items-center gap-2">
-                  <Camera className="w-3.5 h-3.5 text-[#1dbf73]" />
+                  <Briefcase className="w-3.5 h-3.5 text-[#1dbf73]" />
                   擅长类型 <span className="text-xs font-normal text-[#74767e]">（最多8个）</span>
                 </h2>
                 <div className="flex flex-wrap gap-1.5">
@@ -444,42 +492,36 @@ export default function CreatorProfileSetup() {
                     </button>
                   </div>
                 ) : (
-                  <div className="space-y-2.5">
-                    <div>
-                      <label className="block text-sm font-medium text-[#404145] mb-1">
-                        银行卡号
-                      </label>
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
                       <input
                         type="text"
                         value={bankInfo.bankAccount}
                         onChange={(e) => setBankInfo({ ...bankInfo, bankAccount: e.target.value.replace(/\D/g, '') })}
-                        placeholder="请输入16-19位银行卡号"
+                        placeholder="请输入银行卡号"
                         maxLength={19}
-                        className="w-full px-2.5 py-1.5 border border-[#e4e5e7] rounded-lg text-sm focus:outline-none focus:border-[#1dbf73] transition-colors"
+                        className="flex-1 px-2 py-1.5 border border-[#e4e5e7] rounded-lg text-sm focus:outline-none focus:border-[#1dbf73] transition-colors"
                       />
+                      <button
+                        type="button"
+                        onClick={handleVerifyBank}
+                        disabled={isVerifyingBank}
+                        className={`px-3 py-1.5 rounded-lg font-medium transition-all text-xs whitespace-nowrap ${
+                          isVerifyingBank
+                            ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                            : 'bg-[#1dbf73] hover:bg-[#19a463] text-white'
+                        }`}
+                      >
+                        {isVerifyingBank ? (
+                          <>
+                            <Loader2 className="w-3 h-3 mr-1 animate-spin inline" />
+                            验证中
+                          </>
+                        ) : (
+                          '验证'
+                        )}
+                      </button>
                     </div>
-                    <button
-                      type="button"
-                      onClick={handleVerifyBank}
-                      disabled={isVerifyingBank}
-                      className={`w-full py-2 rounded-lg font-medium transition-all text-sm ${
-                        isVerifyingBank
-                          ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
-                          : 'bg-[#1dbf73] hover:bg-[#19a463] text-white'
-                      }`}
-                    >
-                      {isVerifyingBank ? (
-                        <>
-                          <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
-                          验证中...
-                        </>
-                      ) : (
-                        <>
-                          <Shield className="w-3.5 h-3.5 mr-1.5" />
-                          验证打款信息
-                        </>
-                      )}
-                    </button>
                   </div>
                 )}
               </div>

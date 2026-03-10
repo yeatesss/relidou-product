@@ -3,10 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import {
   ShoppingCart,
-  MessageSquare,
   Wallet,
   Video,
-  Search,
   CheckCircle,
   Clock,
   DollarSign,
@@ -20,22 +18,32 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import VideoReviewModal from '../components/video-review/VideoReviewModal'
 
 const stats = [
   { title: '我的任务', value: '28', icon: ShoppingCart, color: 'bg-blue-500' },
   { title: '进行中', value: '5', icon: Clock, color: 'bg-yellow-500' },
   { title: '已完成', value: '23', icon: CheckCircle, color: 'bg-green-500' },
-  { title: '总收入', value: '¥98,400', icon: DollarSign, color: 'bg-[#1dbf73]' },
+  { title: '总收入', value: '¥98,400', icon: DollarSign, color: 'bg-[#1dbf73]', showDetails: true },
+  { title: '账户余额', value: '¥9,200', icon: Wallet, color: 'bg-purple-500', highlight: true },
+  {
+    title: '创作者信息',
+    isCreatorInfo: true,
+    phone: '178****2141',
+    level: '初级',
+    orders: '23单',
+    nextLevel: '距中级7单'
+  },
 ]
 
 const myOrders = [
   { id: 'ORD-2026-001', title: '美妆品牌抖音短视频', client: '花漾美妆', price: '¥1,200', status: '待上传视频', deadline: '2026-02-26', progress: 0 },
   { id: 'ORD-2026-005', title: '直播切片制作', client: '电竞俱乐部', price: '¥800', status: '待审核', deadline: '2026-02-21', progress: 100 },
-  { id: 'ORD-2026-003', title: '企业宣传片剪辑', client: '互联科技', price: '¥5,000', status: '待交付', deadline: '2026-02-25', progress: 100 },
+  { id: 'ORD-2026-003', title: '企业宣传片剪辑', client: '互联科技', price: '¥5,000', status: '预审已通过', deadline: '2026-02-25', progress: 100 },
   { id: 'ORD-2026-008', title: '口播视频制作', client: '学而教育', price: '¥1,200', status: '已完成', deadline: '2026-02-18', progress: 100 },
-  { id: 'ORD-2026-010', title: '产品展示视频', client: '优品家居', price: '¥2,500', status: '审核未通过', deadline: '2026-02-20', progress: 100 },
-  { id: 'ORD-2026-012', title: '美食探店视频', client: '味道餐厅', price: '¥3,800', status: '订单冻结', deadline: '2026-02-22', progress: 50 },
-  { id: 'ORD-2026-015', title: '电商产品展示视频', client: '时尚服饰', price: '¥1,800', status: '待交付', deadline: '2026-02-28', progress: 100 },
+  { id: 'ORD-2026-010', title: '产品展示视频', client: '优品家居', price: '¥2,500', status: '待修改', deadline: '2026-02-20', progress: 100 },
+  { id: 'ORD-2026-012', title: '美食探店视频', client: '味道餐厅', price: '¥3,800', status: '待修改', deadline: '2026-02-22', progress: 50 },
+  { id: 'ORD-2026-015', title: '电商产品展示视频', client: '时尚服饰', price: '¥1,800', status: '预审已通过', deadline: '2026-02-28', progress: 100 },
 ]
 
 const myWorks = [
@@ -48,101 +56,6 @@ const myWorks = [
   { id: 7, title: '游戏精彩集锦', description: '电竞俱乐部游戏精彩操作集锦剪辑', rating: 4.8, createdAt: '2026-01-15', isPinned: false },
   { id: 8, title: '教育课程片头', description: '学而教育在线课程片头动画制作', rating: 4.6, createdAt: '2026-01-08', isPinned: false },
 ]
-
-const messages = [
-  {
-    id: 1,
-    type: 'system',
-    category: 'signup',
-    title: '报名通知',
-    content: '您已成功报名任务"美妆品牌抖音短视频"，请及时上传视频',
-    time: '10分钟前',
-    unread: true
-  },
-  {
-    id: 2,
-    type: 'system',
-    category: 'review',
-    title: '审核通知',
-    content: '任务"直播切片制作"视频已提交，等待广告主审核',
-    time: '30分钟前',
-    unread: true
-  },
-  {
-    id: 3,
-    type: 'system',
-    category: 'review',
-    title: '审核通知',
-    content: '任务"企业宣传片剪辑"审核已通过，等待您确认交付',
-    time: '1小时前',
-    unread: true
-  },
-  {
-    id: 4,
-    type: 'system',
-    category: 'review',
-    title: '审核通知',
-    content: '任务"口播视频制作"审核未通过，请查看修改意见并重新上传',
-    time: '2小时前',
-    unread: false
-  },
-  {
-    id: 5,
-    type: 'system',
-    category: 'review',
-    title: '审核通知',
-    content: '任务"产品展示视频"需要修改，请查看广告主的修改意见',
-    time: '3小时前',
-    unread: false
-  },
-  {
-    id: 6,
-    type: 'system',
-    category: 'review',
-    title: '审核通知',
-    content: '任务"美食探店视频"已完成，佣金¥3,800已到账',
-    time: '5小时前',
-    unread: false
-  },
-]
-
-// 分类对应的样式配置
-const getCategoryConfig = (category: string) => {
-  switch (category) {
-    case 'signup':
-      return {
-        bgColor: 'bg-green-50',
-        iconColor: 'text-green-600',
-        iconBg: 'bg-green-100',
-        icon: '✓',
-        badgeColor: 'bg-green-100 text-green-700'
-      }
-    case 'review':
-      return {
-        bgColor: 'bg-blue-50',
-        iconColor: 'text-blue-600',
-        iconBg: 'bg-blue-100',
-        icon: '◉',
-        badgeColor: 'bg-blue-100 text-blue-700'
-      }
-    default:
-      return {
-        bgColor: 'bg-gray-50',
-        iconColor: 'text-gray-600',
-        iconBg: 'bg-gray-100',
-        icon: '•',
-        badgeColor: 'bg-gray-100 text-gray-700'
-      }
-  }
-}
-
-const getCategoryLabel = (category: string) => {
-  const labels: Record<string, string> = {
-    signup: '报名通知',
-    review: '审核通知'
-  }
-  return labels[category] || '系统通知'
-}
 
 const incomeDetails = [
   { id: 1, type: 'commission', task: '企业宣传片剪辑', advertiser: '互联科技', amount: 5000, date: '2026-02-20 14:30' },
@@ -160,14 +73,12 @@ const getStatusColor = (status: string) => {
       return 'bg-slate-100 text-slate-700'
     case '待审核':
       return 'bg-blue-100 text-blue-700'
-    case '待交付':
+    case '预审已通过':
       return 'bg-yellow-100 text-yellow-700'
     case '已完成':
       return 'bg-green-100 text-green-700'
-    case '审核未通过':
-      return 'bg-red-100 text-red-700'
-    case '订单冻结':
-      return 'bg-gray-200 text-gray-700'
+    case '待修改':
+      return 'bg-orange-100 text-orange-700'
     default:
       return 'bg-slate-100 text-slate-700'
   }
@@ -193,7 +104,11 @@ export default function CreatorWorkspace() {
   const [incomeStartDate, setIncomeStartDate] = useState('')
   const [incomeEndDate, setIncomeEndDate] = useState('')
   const [creatorProfile, setCreatorProfile] = useState<any>(null)
-  const [orderStatusFilter, setOrderStatusFilter] = useState<'全部' | '待上传视频' | '待审核' | '待交付' | '已完成' | '审核未通过' | '订单冻结'>('全部')
+  const [orderStatusFilter, setOrderStatusFilter] = useState<'全部' | '待上传视频' | '待审核' | '预审已通过' | '已完成' | '待修改'>('全部')
+
+  // 视频审片相关状态
+  const [showVideoReviewModal, setShowVideoReviewModal] = useState(false)
+  const [currentReviewOrder, setCurrentReviewOrder] = useState<typeof myOrders[0] | null>(null)
 
   // 提现功能相关状态
   const [showWithdrawModal, setShowWithdrawModal] = useState(false)
@@ -209,6 +124,12 @@ export default function CreatorWorkspace() {
   })
   const [verificationCode, setVerificationCode] = useState('')
   const [countdown, setCountdown] = useState(0)
+
+  // 收入明细弹窗状态
+  const [showIncomeDetailsModal, setShowIncomeDetailsModal] = useState(false)
+
+  // 作品集弹窗状态
+  const [showPortfolioModal, setShowPortfolioModal] = useState(false)
 
   // 根据选择的账户类型过滤账户
   const getFilteredAccounts = () => {
@@ -281,12 +202,24 @@ export default function CreatorWorkspace() {
     }
   }
 
+  // 视频审片处理函数
+  const handleOpenVideoReview = (order: typeof myOrders[0]) => {
+    setCurrentReviewOrder(order)
+    setShowVideoReviewModal(true)
+  }
+
+  const handleReviewSubmit = (annotations: any[]) => {
+    console.log('创作者查看了标注:', annotations)
+    setShowVideoReviewModal(false)
+    // 创作者只是查看标注，不需要提交
+  }
+
   const handleUploadSubmit = () => {
-    const isPendingDelivery = selectedOrder?.status === '待交付'
+    const isPendingDelivery = selectedOrder?.status === '预审已通过'
 
     // 根据订单状态验证需要上传的视频
     if (isPendingDelivery) {
-      // 待交付状态只需要上传水印低质量版和高清完整版
+      // 预审已通过状态只需要上传水印低质量版和高清完整版
       if (!uploadedVideos.watermarked || !uploadedVideos.fullQuality) {
         alert('请上传水印低质量版和高清完整版视频')
         return
@@ -304,7 +237,7 @@ export default function CreatorWorkspace() {
       const orderIndex = myOrders.findIndex(o => o.id === selectedOrder.id)
       if (orderIndex !== -1) {
         if (isPendingDelivery) {
-          // 待交付状态重新上传后，状态保持不变
+          // 预审已通过状态重新上传后，状态保持不变
           setSelectedOrder(myOrders[orderIndex])
         } else {
           // 其他状态上传后变为"待审核"
@@ -544,437 +477,244 @@ export default function CreatorWorkspace() {
   return (
     <div className="min-h-screen bg-[#f7f7f7] pt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className={`flex items-center justify-between mb-8 transition-all duration-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-          <div>
-            <h1 className="text-2xl font-bold text-[#404145]">创作者工作台</h1>
-            <p className="text-[#74767e] mt-1">管理您的任务、作品和收入</p>
-          </div>
-          <div className="flex gap-3">
-            <Button
-              onClick={() => navigate('/orders')}
-              className="bg-[#1dbf73] hover:bg-[#19a463] text-white"
-            >
-              <Search className="w-4 h-4 mr-2" />
-              找任务
-            </Button>
-          </div>
-        </div>
+        {/* Stats Dashboard - 左右布局 */}
+        <div className={`grid grid-cols-1 lg:grid-cols-4 gap-4 mb-8 transition-all duration-500 delay-100 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+          {/* 左侧：个人信息卡片 */}
+          <div className="lg:col-span-1 bg-white rounded-xl shadow-sm border border-slate-100 p-4">
+            {/* 头部：标题和作品集入口 */}
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs font-medium text-[#74767e]">个人信息</span>
+              <button
+                onClick={() => setShowPortfolioModal(true)}
+                className="text-xs text-[#1dbf73] hover:underline"
+              >
+                作品集 →
+              </button>
+            </div>
 
-        {/* Stats */}
-        <div className={`grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 transition-all duration-500 delay-100 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-          {stats.map((stat) => {
-            const Icon = stat.icon
-            return (
-              <div key={stat.title} className="bg-white rounded-xl p-5 shadow-sm border border-slate-100">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-[#74767e] text-sm">{stat.title}</p>
-                    <p className="text-2xl font-bold text-[#404145] mt-1">{stat.value}</p>
+            {/* 头像和基本信息 */}
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden border-2 border-[#1dbf73]/20">
+                {creatorProfile?.avatar ? (
+                  <img src={creatorProfile.avatar} alt="头像" className="w-full h-full object-cover" />
+                ) : creatorProfile?.nickname ? (
+                  <div className="w-full h-full bg-gradient-to-br from-[#1dbf73] to-[#19a463] flex items-center justify-center">
+                    <span className="text-white font-bold text-base">{creatorProfile.nickname.charAt(0)}</span>
                   </div>
-                  <div className={`w-12 h-12 ${stat.color} rounded-xl flex items-center justify-center`}>
-                    <Icon className="w-6 h-6 text-white" />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-[#1dbf73] to-[#19a463] flex items-center justify-center">
+                    <User className="w-6 h-6 text-white" />
                   </div>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-[#404145] text-sm truncate">
+                  {creatorProfile?.nickname || '创作者昵称'}
+                </p>
+                <p className="text-xs text-[#74767e] mt-0.5">
+                  {creatorProfile?.phone || '178****2141'}
+                </p>
+              </div>
+            </div>
+
+            {/* 等级和订单 */}
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded text-xs">初级</span>
+                <span className="text-xs text-[#74767e]">完成 23 单</span>
+              </div>
+              <div>
+                <div className="flex items-center justify-between text-xs mb-1">
+                  <span className="text-[#74767e]">距中级还需 7 单</span>
+                  <span className="text-amber-600">76%</span>
+                </div>
+                <div className="w-full bg-slate-100 rounded-full h-1">
+                  <div className="bg-gradient-to-r from-amber-400 to-amber-500 h-1 rounded-full transition-all" style={{ width: '76%' }}></div>
                 </div>
               </div>
-            )
-          })}
+            </div>
+          </div>
+
+          {/* 右侧：统计数据 */}
+          <div className="lg:col-span-3 bg-white rounded-xl shadow-sm border border-slate-100 p-3">
+            <div className="flex items-center gap-2 mb-2">
+              <Award className="w-4 h-4 text-[#1dbf73]" />
+              <h2 className="text-sm font-bold text-[#404145]">数据概览</h2>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2.5">
+              {stats.filter(stat => !stat.isCreatorInfo).map((stat) => {
+                const Icon = stat.icon
+                return (
+                  <div key={stat.title} className="relative group">
+                    <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-100 group-hover:border-[#1dbf73]/30 transition-all">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <div className={`w-6 h-6 ${stat.color} rounded-lg flex items-center justify-center`}>
+                          <Icon className="w-3 h-3 text-white" />
+                        </div>
+                        {stat.highlight && (
+                          <Button
+                            size="sm"
+                            className="h-5 px-1.5 text-[10px] bg-[#1dbf73] hover:bg-[#19a463] text-white"
+                            onClick={() => {
+                              setShowWithdrawModal(true)
+                              setWithdrawAccountType('alipay')
+                              const alipayAccounts = savedAccounts.filter(acc => acc.type === 'alipay')
+                              if (alipayAccounts.length > 0) {
+                                setSelectedAccountId(alipayAccounts[0].id)
+                              }
+                            }}
+                          >
+                            提现
+                          </Button>
+                        )}
+                        {stat.showDetails && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-5 px-1.5 text-[10px] border-slate-200 text-slate-600 hover:bg-slate-50"
+                            onClick={() => setShowIncomeDetailsModal(true)}
+                          >
+                            明细
+                          </Button>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-[#74767e] mb-0.5">{stat.title}</p>
+                      <p className={`font-bold ${stat.title === '账户余额' || stat.title === '总收入' ? 'text-sm text-[#1dbf73]' : 'text-xs text-[#404145]'}`}>
+                        {stat.value}
+                      </p>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
         </div>
 
         {/* Main Content */}
         <div className={`transition-all duration-500 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="bg-white mb-6 p-1 rounded-xl flex-wrap">
-              <TabsTrigger value="orders" className="rounded-lg data-[state=active]:bg-[#1dbf73] data-[state=active]:text-white">
-                <ShoppingCart className="w-4 h-4 mr-2" />
-                我的任务
-              </TabsTrigger>
-              <TabsTrigger value="works" className="rounded-lg data-[state=active]:bg-[#1dbf73] data-[state=active]:text-white">
-                <Video className="w-4 h-4 mr-2" />
-                作品集
-              </TabsTrigger>
-              <TabsTrigger value="messages" className="rounded-lg data-[state=active]:bg-[#1dbf73] data-[state=active]:text-white">
-                <MessageSquare className="w-4 h-4 mr-2" />
-                消息
-                {messages.filter(m => m.unread).length > 0 && (
-                  <span className="ml-2 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
-                    {messages.filter(m => m.unread).length}
-                  </span>
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="income" className="rounded-lg data-[state=active]:bg-[#1dbf73] data-[state=active]:text-white">
-                <Wallet className="w-4 h-4 mr-2" />
-                收入
-              </TabsTrigger>
-            </TabsList>
-
-            {/* Orders */}
-            <TabsContent value="orders">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2">
-                  <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-                    {/* 任务状态Tab切换 */}
-                    <div className="p-3 border-b border-slate-100">
-                      <div className="flex gap-2 overflow-x-auto pb-1">
-                        <button
-                          onClick={() => setOrderStatusFilter('全部')}
-                          className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
-                            orderStatusFilter === '全部'
-                              ? 'bg-[#1dbf73] text-white'
-                              : 'text-[#74767e] hover:bg-[#f5f5f5]'
-                          }`}
-                        >
-                          全部
-                        </button>
-                        <button
-                          onClick={() => setOrderStatusFilter('待上传视频')}
-                          className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
-                            orderStatusFilter === '待上传视频'
-                              ? 'bg-[#1dbf73] text-white'
-                              : 'text-[#74767e] hover:bg-[#f5f5f5]'
-                          }`}
-                        >
-                          待上传
-                        </button>
-                        <button
-                          onClick={() => setOrderStatusFilter('待审核')}
-                          className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
-                            orderStatusFilter === '待审核'
-                              ? 'bg-[#1dbf73] text-white'
-                              : 'text-[#74767e] hover:bg-[#f5f5f5]'
-                          }`}
-                        >
-                          待审核
-                        </button>
-                        <button
-                          onClick={() => setOrderStatusFilter('待交付')}
-                          className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
-                            orderStatusFilter === '待交付'
-                              ? 'bg-[#1dbf73] text-white'
-                              : 'text-[#74767e] hover:bg-[#f5f5f5]'
-                          }`}
-                        >
-                          待交付
-                        </button>
-                        <button
-                          onClick={() => setOrderStatusFilter('已完成')}
-                          className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
-                            orderStatusFilter === '已完成'
-                              ? 'bg-[#1dbf73] text-white'
-                              : 'text-[#74767e] hover:bg-[#f5f5f5]'
-                          }`}
-                        >
-                          已完成
-                        </button>
-                        <button
-                          onClick={() => setOrderStatusFilter('审核未通过')}
-                          className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
-                            orderStatusFilter === '审核未通过'
-                              ? 'bg-[#1dbf73] text-white'
-                              : 'text-[#74767e] hover:bg-[#f5f5f5]'
-                          }`}
-                        >
-                          未通过
-                        </button>
-                        <button
-                          onClick={() => setOrderStatusFilter('订单冻结')}
-                          className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
-                            orderStatusFilter === '订单冻结'
-                              ? 'bg-[#1dbf73] text-white'
-                              : 'text-[#74767e] hover:bg-[#f5f5f5]'
-                          }`}
-                        >
-                          已冻结
-                        </button>
-                      </div>
-                    </div>
-                    <div className="divide-y divide-slate-100">
-                      {myOrders.filter((order) => orderStatusFilter === '全部' || order.status === orderStatusFilter).map((order) => (
-                        <div key={order.id} className="p-5 hover:bg-slate-50 cursor-pointer" onClick={() => { setSelectedOrder(order); setShowOrderDetailModal(true) }}>
-                          <div className="flex items-center justify-between">
-                            <div className="flex-1">
-                              <p className="font-medium text-[#404145]">{order.title}</p>
-                              <p className="text-sm text-[#74767e] mt-1">截止投稿：{order.deadline}</p>
-                            </div>
-                            <div className="text-right flex flex-col items-end gap-2">
-                              <Badge className={getStatusColor(order.status)}>{order.status}</Badge>
-                              <p className="text-[#1dbf73] font-medium text-lg">{order.price}</p>
-                            </div>
-                          </div>
-                          {order.status === '待上传视频' && (
-                            <div className="mt-4 flex gap-2" onClick={(e) => e.stopPropagation()}>
-                              <Button
-                                size="sm"
-                                onClick={() => {
-                                  setSelectedOrder(order)
-                                  setShowUploadModal(true)
-                                }}
-                                className="bg-[#1dbf73] hover:bg-[#19a463]"
-                              >
-                                上传视频
-                              </Button>
-                            </div>
-                          )}
-                          {order.status === '待交付' && (
-                            <div className="mt-4 flex gap-2" onClick={(e) => e.stopPropagation()}>
-                              <Button
-                                size="sm"
-                                onClick={() => {
-                                  setSelectedOrder(order)
-                                  setShowUploadModal(true)
-                                }}
-                                className="bg-[#1dbf73] hover:bg-[#19a463]"
-                              >
-                                重新上传
-                              </Button>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Right Sidebar - 账户余额 + 创作者等级 */}
-                <div className="space-y-4">
-                  {/* 账户余额 */}
-                  <div className="bg-white rounded-xl p-5 shadow-sm border border-slate-100">
-                    <p className="text-[#74767e] text-sm">账户余额</p>
-                    <p className="text-3xl font-bold text-[#1dbf73] mt-2">¥9,200</p>
-                    <div className="space-y-2 mt-4">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-[#74767e]">待结算</span>
-                        <span className="font-medium text-[#404145]">¥3,200</span>
-                      </div>
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-[#74767e]">本月收入</span>
-                        <span className="font-medium text-[#1dbf73]">¥12,400</span>
-                      </div>
-                    </div>
-                    <Button
-                      className="w-full mt-4 bg-[#1dbf73] hover:bg-[#19a463]"
-                      onClick={() => {
-                        setShowWithdrawModal(true)
-                        // 重置为支付宝，并选中第一个支付宝账户
-                        setWithdrawAccountType('alipay')
-                        const alipayAccounts = savedAccounts.filter(acc => acc.type === 'alipay')
-                        if (alipayAccounts.length > 0) {
-                          setSelectedAccountId(alipayAccounts[0].id)
-                        }
-                      }}
-                    >
-                      申请提现
-                    </Button>
-                  </div>
-
-                  {/* 创作者等级 */}
-                  <div className="bg-white rounded-xl p-5 shadow-sm border border-slate-100">
-                    <h4 className="font-semibold text-[#404145] mb-3">创作者等级</h4>
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl flex items-center justify-center">
-                        <Award className="w-6 h-6 text-white" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-[#404145]">金牌创作者</p>
-                        <p className="text-sm text-[#74767e]">已完成 23 单</p>
-                      </div>
-                    </div>
-                    <div className="mt-3">
-                      <div className="flex items-center justify-between text-sm mb-1">
-                        <span className="text-[#74767e]">距离铂金还需</span>
-                        <span className="text-[#1dbf73]">7单</span>
-                      </div>
-                      <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                        <div className="h-full bg-amber-500 rounded-full" style={{ width: '77%' }} />
-                      </div>
-                    </div>
-                  </div>
-                </div>
+          {/* 任务列表 */}
+          <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+            {/* 任务状态Tab切换 */}
+            <div className="p-3 border-b border-slate-100">
+              <div className="flex gap-2 overflow-x-auto pb-1">
+                <button
+                  onClick={() => setOrderStatusFilter('全部')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+                    orderStatusFilter === '全部'
+                      ? 'bg-[#1dbf73] text-white'
+                      : 'text-[#74767e] hover:bg-[#f5f5f5]'
+                  }`}
+                >
+                  全部
+                </button>
+                <button
+                  onClick={() => setOrderStatusFilter('待上传视频')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+                    orderStatusFilter === '待上传视频'
+                      ? 'bg-[#1dbf73] text-white'
+                      : 'text-[#74767e] hover:bg-[#f5f5f5]'
+                  }`}
+                >
+                  待上传
+                </button>
+                <button
+                  onClick={() => setOrderStatusFilter('待审核')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+                    orderStatusFilter === '待审核'
+                      ? 'bg-[#1dbf73] text-white'
+                      : 'text-[#74767e] hover:bg-[#f5f5f5]'
+                  }`}
+                >
+                  待审核
+                </button>
+                <button
+                  onClick={() => setOrderStatusFilter('预审已通过')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+                    orderStatusFilter === '预审已通过'
+                      ? 'bg-[#1dbf73] text-white'
+                      : 'text-[#74767e] hover:bg-[#f5f5f5]'
+                  }`}
+                >
+                  预审已通过
+                </button>
+                <button
+                  onClick={() => setOrderStatusFilter('待修改')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+                    orderStatusFilter === '待修改'
+                      ? 'bg-[#1dbf73] text-white'
+                      : 'text-[#74767e] hover:bg-[#f5f5f5]'
+                  }`}
+                >
+                  待修改
+                </button>
+                <button
+                  onClick={() => setOrderStatusFilter('已完成')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+                    orderStatusFilter === '已完成'
+                      ? 'bg-[#1dbf73] text-white'
+                      : 'text-[#74767e] hover:bg-[#f5f5f5]'
+                  }`}
+                >
+                  已完成
+                </button>
               </div>
-            </TabsContent>
-
-            {/* Works */}
-            <TabsContent value="works">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-semibold text-[#404145]">我的作品 ({myWorks.length})</h3>
-                  <span className="text-sm text-[#74767e]">已置顶 {works.filter(w => w.isPinned).length}/4</span>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {sortedWorks.map((work) => (
-                    <div
-                      key={work.id}
-                      className="bg-white rounded-xl overflow-hidden shadow-sm border border-slate-100 hover:shadow-md transition-shadow relative cursor-pointer"
-                      onClick={() => {
-                        setSelectedWork(work)
-                        setShowWorkVideoModal(true)
-                      }}
-                    >
-                      {work.isPinned && (
-                        <div className="absolute top-2 left-2 z-10 bg-[#1dbf73] text-white text-xs font-bold px-2 py-1 rounded-full shadow-md">
-                          置顶
-                        </div>
-                      )}
-                      <div className="aspect-video bg-gradient-to-br from-[#003912] to-[#0a4226] flex items-center justify-center relative">
-                        <Video className="w-12 h-12 text-white/50" />
-                        <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                          <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center">
-                            <Video className="w-6 h-6 text-[#1dbf73]" />
-                          </div>
-                        </div>
-                      </div>
-                      <div className="p-4">
-                        <h4 className="font-medium text-[#404145] truncate">{work.title}</h4>
-                        <p className="text-sm text-[#74767e] mt-2 line-clamp-2">{work.description}</p>
-                        <div className="flex items-center justify-between mt-3">
-                          <div className="flex items-center gap-1">
-                            <Star className="w-4 h-4 fill-[#ffb33e] text-[#ffb33e]" />
-                            <span className="text-sm font-medium text-[#404145]">{work.rating}</span>
-                          </div>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleTogglePin(work.id)
-                            }}
-                            className="text-xs px-2 py-1 rounded border transition-colors flex items-center gap-1"
-                            style={{
-                              borderColor: work.isPinned ? '#1dbf73' : '#e4e5e7',
-                              color: work.isPinned ? '#1dbf73' : '#74767e',
-                            }}
-                          >
-                            {work.isPinned ? '取消置顶' : '置顶'}
-                          </button>
-                        </div>
-                        <div className="text-xs text-[#74767e] mt-2">{work.createdAt}</div>
-                      </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+              {myOrders.filter((order) => orderStatusFilter === '全部' || order.status === orderStatusFilter).map((order) => (
+                <div key={order.id} className="bg-slate-50 rounded-xl p-5 hover:bg-slate-100 cursor-pointer border border-slate-100" onClick={() => { setSelectedOrder(order); setShowOrderDetailModal(true) }}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <p className="font-medium text-[#404145]">{order.title}</p>
+                      <p className="text-sm text-[#74767e] mt-1">截止投稿：{order.deadline}</p>
                     </div>
-                  ))}
-                </div>
-              </div>
-            </TabsContent>
-
-            {/* Messages */}
-            <TabsContent value="messages">
-              <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-                <div className="divide-y divide-slate-100">
-                  {messages.map((msg) => {
-                    const config = getCategoryConfig((msg as any).category)
-                    return (
-                      <div
-                        key={msg.id}
-                        className={`p-4 hover:bg-slate-50 cursor-pointer transition-colors ${msg.unread ? config.bgColor : ''}`}
+                    <div className="text-right flex flex-col items-end gap-2">
+                      <Badge className={getStatusColor(order.status)}>{order.status}</Badge>
+                      <p className="text-[#1dbf73] font-medium text-lg">{order.price}</p>
+                    </div>
+                  </div>
+                  {order.status === '待上传视频' && (
+                    <div className="mt-4 flex gap-2" onClick={(e) => e.stopPropagation()}>
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          setSelectedOrder(order)
+                          setShowUploadModal(true)
+                        }}
+                        className="bg-[#1dbf73] hover:bg-[#19a463]"
                       >
-                        <div className="flex items-start gap-4">
-                          {/* 图标 */}
-                          <div className={`w-10 h-10 ${config.iconBg} rounded-lg flex items-center justify-center flex-shrink-0`}>
-                            <span className={`text-lg ${config.iconColor}`}>{config.icon}</span>
-                          </div>
-
-                          {/* 内容 */}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between gap-2 mb-1">
-                              <p className="font-medium text-[#404145]">{(msg as any).title}</p>
-                              <span className="text-sm text-[#74767e] flex-shrink-0 whitespace-nowrap">{msg.time}</span>
-                            </div>
-                            <p className="text-sm text-[#74767e] line-clamp-2">{(msg as any).content}</p>
-                          </div>
-
-                          {/* 未读标识 */}
-                          {msg.unread && <span className="w-2 h-2 bg-red-500 rounded-full flex-shrink-0 mt-2" />}
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            </TabsContent>
-
-            {/* Income */}
-            <TabsContent value="income">
-              {/* Recent Income */}
-              <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-                <div className="p-5 border-b border-slate-100">
-                  <h3 className="font-semibold text-[#404145] mb-4">收入明细</h3>
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-[#74767e]">类型：</span>
-                      <select
-                        value={incomeFilterType}
-                        onChange={(e) => setIncomeFilterType(e.target.value as 'all' | 'commission' | 'withdraw')}
-                        className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#1dbf73]"
+                        上传视频
+                      </Button>
+                    </div>
+                  )}
+                  {order.status === '待修改' && (
+                    <div className="mt-4 flex gap-2" onClick={(e) => e.stopPropagation()}>
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          setSelectedOrder(order)
+                          setShowUploadModal(true)
+                        }}
+                        className="bg-[#1dbf73] hover:bg-[#19a463]"
                       >
-                        <option value="all">全部类型</option>
-                        <option value="commission">佣金收入</option>
-                        <option value="withdraw">提现</option>
-                      </select>
+                        重新上传
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleOpenVideoReview(order)
+                        }}
+                      >
+                        查看修改意见
+                      </Button>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-[#74767e]">操作时间：</span>
-                      <input
-                        type="date"
-                        value={incomeStartDate}
-                        onChange={(e) => setIncomeStartDate(e.target.value)}
-                        className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#1dbf73]"
-                      />
-                      <span className="text-sm text-[#74767e]">至</span>
-                      <input
-                        type="date"
-                        value={incomeEndDate}
-                        onChange={(e) => setIncomeEndDate(e.target.value)}
-                        className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#1dbf73]"
-                      />
-                      {(incomeStartDate || incomeEndDate) && (
-                        <button
-                          onClick={() => {
-                            setIncomeStartDate('')
-                            setIncomeEndDate('')
-                          }}
-                          className="text-xs px-2 py-1 text-slate-500 hover:text-slate-700 border border-slate-200 rounded hover:bg-slate-50 transition-colors"
-                        >
-                          清空
-                        </button>
-                      )}
-                    </div>
-                  </div>
+                  )}
                 </div>
-                <table className="w-full">
-                  <thead className="bg-slate-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">任务</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">广告主</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">类型</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">金额</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">日期</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {filteredIncomeDetails.map((item) => (
-                      <tr key={item.id} className="hover:bg-slate-50">
-                        <td className="px-6 py-4 text-sm text-[#404145]">{item.task}</td>
-                        <td className="px-6 py-4 text-sm text-slate-600">{item.advertiser}</td>
-                        <td className="px-6 py-4 text-sm">
-                          <Badge className={item.type === 'commission' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}>
-                            {item.type === 'commission' ? '佣金收入' : '提现'}
-                          </Badge>
-                        </td>
-                        <td className={`px-6 py-4 font-medium ${item.amount > 0 ? 'text-[#1dbf73]' : 'text-orange-600'}`}>
-                          {item.amount > 0 ? `+¥${item.amount.toLocaleString()}` : `¥${item.amount.toLocaleString()}`}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-slate-500">{item.date}</td>
-                      </tr>
-                    ))}
-                    {filteredIncomeDetails.length === 0 && (
-                      <tr>
-                        <td colSpan={5} className="px-6 py-12 text-center text-slate-500">
-                          暂无符合条件的记录
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </TabsContent>
-          </Tabs>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1000,7 +740,7 @@ export default function CreatorWorkspace() {
                       上传视频
                     </Button>
                   )}
-                  {selectedOrder.status === '审核未通过' && (
+                  {selectedOrder.status === '待修改' && (
                     <>
                       <Button
                         onClick={() => {
@@ -1015,7 +755,7 @@ export default function CreatorWorkspace() {
                       </Button>
                     </>
                   )}
-                  {selectedOrder.status === '待交付' && (
+                  {selectedOrder.status === '预审已通过' && (
                     <Button className="bg-[#1dbf73] hover:bg-[#19a463]">
                       确认交付
                     </Button>
@@ -1167,8 +907,8 @@ export default function CreatorWorkspace() {
 
             {/* 弹窗内容 */}
             <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
-              {/* 高光时刻 - 仅在非"待交付"状态显示 */}
-              {selectedOrder?.status !== '待交付' && (
+              {/* 高光时刻 - 仅在非"预审已通过"状态显示 */}
+              {selectedOrder?.status !== '预审已通过' && (
                 <div className="border-2 border-dashed border-slate-200 rounded-lg p-6 hover:border-[#1dbf73] transition-colors">
                   <div className="flex items-start gap-4">
                     <div className="flex-shrink-0 w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -1296,7 +1036,7 @@ export default function CreatorWorkspace() {
                   <p className="font-medium mb-1">上传说明</p>
                   <ul className="space-y-1 text-blue-700">
                     <li>• 支持格式：MP4、MOV、AVI、MKV</li>
-                    {selectedOrder?.status !== '待交付' && <li>• 高光时刻：5-10秒精彩片段</li>}
+                    {selectedOrder?.status !== '预审已通过' && <li>• 高光时刻：5-10秒精彩片段</li>}
                     <li>• 水印版：添加平台水印用于预览审核</li>
                     <li>• 高清版：最终交付的无水印高质量版本</li>
                   </ul>
@@ -1322,7 +1062,7 @@ export default function CreatorWorkspace() {
               <Button
                 onClick={handleUploadSubmit}
                 disabled={
-                  selectedOrder?.status === '待交付'
+                  selectedOrder?.status === '预审已通过'
                     ? !uploadedVideos.watermarked || !uploadedVideos.fullQuality
                     : !uploadedVideos.highlight || !uploadedVideos.watermarked || !uploadedVideos.fullQuality
                 }
@@ -1768,6 +1508,209 @@ export default function CreatorWorkspace() {
                 </Button>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* 视频审片标注弹窗 */}
+      {showVideoReviewModal && currentReviewOrder && (
+        <VideoReviewModal
+          bidId={parseInt(currentReviewOrder.id.split('-')[2])}
+          taskId={currentReviewOrder.id}
+          videoUrl="/sample-video.webm"
+          authorName={currentReviewOrder.client}
+          onClose={() => setShowVideoReviewModal(false)}
+          onSubmit={handleReviewSubmit}
+          mode="creator"
+        />
+      )}
+
+      {/* 收入明细弹窗 */}
+      {showIncomeDetailsModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-5xl w-full max-h-[85vh] overflow-hidden shadow-2xl flex flex-col">
+            {/* 弹窗头部 */}
+            <div className="flex-shrink-0 bg-white border-b border-slate-100 p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold text-[#404145]">收入明细</h3>
+                  <p className="text-sm text-[#74767e] mt-1">查看您的收入和提现记录</p>
+                </div>
+                <button
+                  onClick={() => setShowIncomeDetailsModal(false)}
+                  className="text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+            </div>
+
+            {/* 筛选区域 */}
+            <div className="flex-shrink-0 bg-white border-b border-slate-100 px-6 py-4">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-[#74767e]">类型：</span>
+                  <select
+                    value={incomeFilterType}
+                    onChange={(e) => setIncomeFilterType(e.target.value as 'all' | 'commission' | 'withdraw')}
+                    className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#1dbf73]"
+                  >
+                    <option value="all">全部类型</option>
+                    <option value="commission">佣金收入</option>
+                    <option value="withdraw">提现</option>
+                  </select>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-[#74767e]">操作时间：</span>
+                  <input
+                    type="date"
+                    value={incomeStartDate}
+                    onChange={(e) => setIncomeStartDate(e.target.value)}
+                    className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#1dbf73]"
+                  />
+                  <span className="text-sm text-[#74767e]">至</span>
+                  <input
+                    type="date"
+                    value={incomeEndDate}
+                    onChange={(e) => setIncomeEndDate(e.target.value)}
+                    className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#1dbf73]"
+                  />
+                  {(incomeStartDate || incomeEndDate) && (
+                    <button
+                      onClick={() => {
+                        setIncomeStartDate('')
+                        setIncomeEndDate('')
+                      }}
+                      className="text-xs px-2 py-1 text-slate-500 hover:text-slate-700 border border-slate-200 rounded hover:bg-slate-50 transition-colors"
+                    >
+                      清空
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* 表格内容 */}
+            <div className="flex-1 overflow-y-auto">
+              <table className="w-full">
+                <thead className="bg-slate-50 sticky top-0">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">任务</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">广告主</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">类型</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">金额</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">日期</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {filteredIncomeDetails.map((item) => (
+                    <tr key={item.id} className="hover:bg-slate-50">
+                      <td className="px-6 py-4 text-sm text-[#404145]">{item.task}</td>
+                      <td className="px-6 py-4 text-sm text-slate-600">{item.advertiser}</td>
+                      <td className="px-6 py-4 text-sm">
+                        <Badge className={item.type === 'commission' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}>
+                          {item.type === 'commission' ? '佣金收入' : '提现'}
+                        </Badge>
+                      </td>
+                      <td className={`px-6 py-4 font-medium ${item.amount > 0 ? 'text-[#1dbf73]' : 'text-orange-600'}`}>
+                        {item.amount > 0 ? `+¥${item.amount.toLocaleString()}` : `¥${item.amount.toLocaleString()}`}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-slate-500">{item.date}</td>
+                    </tr>
+                  ))}
+                  {filteredIncomeDetails.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="px-6 py-12 text-center text-slate-500">
+                        暂无符合条件的记录
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* 弹窗底部 */}
+            <div className="flex-shrink-0 bg-white border-t border-slate-100 p-4 flex items-center justify-end">
+              <Button
+                onClick={() => setShowIncomeDetailsModal(false)}
+                className="bg-[#1dbf73] hover:bg-[#19a463]"
+              >
+                关闭
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 作品集弹窗 */}
+      {showPortfolioModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-6xl w-full max-h-[85vh] overflow-hidden shadow-2xl flex flex-col">
+            {/* 弹窗头部 */}
+            <div className="flex-shrink-0 bg-white border-b border-slate-100 p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold text-[#404145]">我的作品集</h3>
+                  <p className="text-sm text-[#74767e] mt-1">展示我的优秀作品 ({sortedWorks.length})</p>
+                </div>
+                <button
+                  onClick={() => setShowPortfolioModal(false)}
+                  className="text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+            </div>
+
+            {/* 作品网格 */}
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {sortedWorks.map((work) => (
+                  <div
+                    key={work.id}
+                    className="bg-white rounded-xl overflow-hidden shadow-sm border border-slate-100 hover:shadow-md transition-shadow"
+                  >
+                    {work.isPinned && (
+                      <div className="absolute top-2 left-2 z-10 bg-[#1dbf73] text-white text-xs font-bold px-2 py-1 rounded-full shadow-md">
+                        置顶
+                      </div>
+                    )}
+                    <div className="aspect-video bg-gradient-to-br from-[#003912] to-[#0a4226] flex items-center justify-center relative">
+                      <Video className="w-12 h-12 text-white/50" />
+                      <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity cursor-pointer">
+                        <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center">
+                          <Video className="w-6 h-6 text-[#1dbf73]" />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-4">
+                      <h4 className="font-medium text-[#404145] truncate">{work.title}</h4>
+                      <p className="text-sm text-[#74767e] mt-2 line-clamp-2">{work.description}</p>
+                      <div className="flex items-center justify-between mt-3">
+                        <div className="flex items-center gap-1">
+                          <Star className="w-4 h-4 fill-[#ffb33e] text-[#ffb33e]" />
+                          <span className="text-sm font-medium text-[#404145]">{work.rating}</span>
+                        </div>
+                        <span className="text-xs text-[#74767e]">{work.createdAt}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 弹窗底部 */}
+            <div className="flex-shrink-0 bg-white border-t border-slate-100 p-4 flex items-center justify-between">
+              <span className="text-xs text-[#74767e]">
+                已置顶 {works.filter(w => w.isPinned).length}/4
+              </span>
+              <Button
+                onClick={() => setShowPortfolioModal(false)}
+                className="bg-[#1dbf73] hover:bg-[#19a463]"
+              >
+                关闭
+              </Button>
+            </div>
           </div>
         </div>
       )}

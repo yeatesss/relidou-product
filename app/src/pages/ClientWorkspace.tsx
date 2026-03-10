@@ -4,27 +4,30 @@ import { useAuth } from '../contexts/AuthContext'
 import {
   ShoppingCart,
   Users,
-  MessageSquare,
   Wallet,
   Star,
   Plus,
+  MessageSquare,
   Search,
   CheckCircle,
   Clock,
   DollarSign,
   TrendingUp,
   X,
+  AlertCircle,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import VideoReviewModal from '../components/video-review/VideoReviewModal'
 
 const stats = [
   { title: '我的任务', value: '12', icon: ShoppingCart, color: 'bg-blue-500' },
   { title: '进行中', value: '3', icon: Clock, color: 'bg-yellow-500' },
   { title: '已完成', value: '8', icon: CheckCircle, color: 'bg-green-500' },
   { title: '总支出', value: '¥45,800', icon: DollarSign, color: 'bg-[#1dbf73]' },
+  { title: '账户余额', value: '¥12,500', icon: Wallet, color: 'bg-[#1dbf73]' },
 ]
 
 const myOrders = [
@@ -200,7 +203,7 @@ const myBids = [
     avatar: '/images/creator-1.jpg',
     order: '美妆品牌抖音短视频',
     price: '¥1,200',
-    highlightVideo: '美妆高光.mp4',
+    highlightVideo: '/sample-video.webm',
     watermarkVideo: '美妆水印.mp4',
     status: '预审已通过',
     creatorId: 1,
@@ -213,14 +216,14 @@ const myBids = [
     price: '¥2,200',
     highlightVideo: '产品高光.mp4',
     watermarkVideo: '产品水印.mp4',
-    status: '预审已通过',
+    status: '待修改',
     creatorId: 2,
   },
   {
     id: 3,
     creator: '创意工作室',
     avatar: '/images/creator-3.jpg',
-    order: '产品展示视频拍摄',
+    order: '企业宣传片剪辑',
     price: '¥2,800',
     highlightVideo: '创意高光.mp4',
     watermarkVideo: '创意水印.mp4',
@@ -233,11 +236,6 @@ const myCreators = [
   { id: 1, name: '小明影视', avatar: '/images/creator-1.jpg', title: '资深视频剪辑师', rating: 4.9, orders: 328, cooperations: 3, lastCooperation: '2026-02-20' },
   { id: 2, name: '动画工坊', avatar: '/images/creator-3.jpg', title: 'MG动画设计师', rating: 5.0, orders: 89, cooperations: 2, lastCooperation: '2026-02-15' },
   { id: 3, name: '三维视界', avatar: '/images/creator-3.jpg', title: '3D设计师', rating: 4.9, orders: 67, cooperations: 1, lastCooperation: '2026-01-28' },
-]
-
-const messages = [
-  { id: 1, from: '小明影视', avatar: '/images/creator-1.jpg', content: '我已重新提交视频，请确认', time: '10:30', unread: true },
-  { id: 2, from: '动画工坊', avatar: '/images/creator-3.jpg', content: '初稿已经发给您了，请查收', time: '昨天', unread: false },
 ]
 
 const transactions = [
@@ -262,10 +260,12 @@ const getStatusColor = (status: string) => {
       return 'bg-slate-100 text-slate-700'
     case '预审已通过':
       return 'bg-green-100 text-green-700'
+    case '待修改':
+      return 'bg-orange-100 text-orange-700'
     case '已完成':
       return 'bg-blue-100 text-blue-700'
     case '订单冻结':
-      return 'bg-orange-100 text-orange-700'
+      return 'bg-gray-200 text-gray-700'
     default:
       return 'bg-slate-100 text-slate-700'
   }
@@ -303,6 +303,9 @@ export default function ClientWorkspace() {
   const [showDislikeConfirm, setShowDislikeConfirm] = useState(false)
   const [showLikeConfirm, setShowLikeConfirm] = useState(false)
   const [bidStatusFilter, setBidStatusFilter] = useState('全部')
+  const [showRechargeModal, setShowRechargeModal] = useState(false)
+  const [showVideoReviewModal, setShowVideoReviewModal] = useState(false)
+  const [currentReviewBid, setCurrentReviewBid] = useState<any>(null)
 
   useEffect(() => {
     // 检查登录状态
@@ -568,32 +571,25 @@ export default function ClientWorkspace() {
     }
   }
 
+  // 打开视频审片标注
+  const handleOpenVideoReview = (bid: any) => {
+    setCurrentReviewBid(bid)
+    setShowVideoReviewModal(true)
+  }
+
+  // 处理审片提交
+  const handleReviewSubmit = (annotations: any[]) => {
+    console.log('审片标注数据:', annotations)
+    setShowVideoReviewModal(false)
+    alert('修改意见已提交！')
+    // TODO: 更新投标状态为"待修改"
+  }
+
   return (
     <div className="min-h-screen bg-[#f7f7f7] pt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className={`flex items-center justify-between mb-8 transition-all duration-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-          <div>
-            <h1 className="text-2xl font-bold text-[#404145]">我的工作台</h1>
-            <p className="text-[#74767e] mt-1">欢迎回来，管理您的任务和创作者</p>
-          </div>
-          <div className="flex gap-3">
-            <Button
-              onClick={() => navigate('/post-order')}
-              className="bg-[#1dbf73] hover:bg-[#19a463] text-white"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              发布任务
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => navigate('/creators')}
-              className="border-[#e4e5e7]"
-            >
-              <Search className="w-4 h-4 mr-2" />
-              找创作者
-            </Button>
-          </div>
+        <div className={`mb-8 transition-all duration-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
         </div>
 
         {/* 认证状态提示横幅 */}
@@ -612,17 +608,25 @@ export default function ClientWorkspace() {
         )}
 
         {/* Stats */}
-        <div className={`grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 transition-all duration-500 delay-100 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+        <div className={`grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-8 transition-all duration-500 delay-100 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
           {stats.map((stat) => {
             const Icon = stat.icon
             return (
               <div key={stat.title} className="bg-white rounded-xl p-5 shadow-sm border border-slate-100">
                 <div className="flex items-center justify-between">
-                  <div>
+                  <div className="flex-1">
                     <p className="text-[#74767e] text-sm">{stat.title}</p>
                     <p className="text-2xl font-bold text-[#404145] mt-1">{stat.value}</p>
+                    {stat.title === '账户余额' && (
+                      <button
+                        onClick={() => setShowRechargeModal(true)}
+                        className="mt-2 text-sm text-[#1dbf73] hover:text-[#19a463] font-medium"
+                      >
+                        立即充值 →
+                      </button>
+                    )}
                   </div>
-                  <div className={`w-12 h-12 ${stat.color} rounded-xl flex items-center justify-center`}>
+                  <div className={`w-12 h-12 ${stat.color} rounded-xl flex items-center justify-center flex-shrink-0`}>
                     <Icon className="w-6 h-6 text-white" />
                   </div>
                 </div>
@@ -634,28 +638,43 @@ export default function ClientWorkspace() {
         {/* Main Content */}
         <div className={`transition-all duration-500 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="bg-white mb-6 p-1 rounded-xl">
-              <TabsTrigger value="orders" className="rounded-lg data-[state=active]:bg-[#1dbf73] data-[state=active]:text-white">
-                <ShoppingCart className="w-4 h-4 mr-2" />
-                我的任务
-              </TabsTrigger>
-              <TabsTrigger value="bids" className="rounded-lg data-[state=active]:bg-[#1dbf73] data-[state=active]:text-white">
-                <TrendingUp className="w-4 h-4 mr-2" />
-                投标管理
-              </TabsTrigger>
-              <TabsTrigger value="creators" className="rounded-lg data-[state=active]:bg-[#1dbf73] data-[state=active]:text-white">
-                <Users className="w-4 h-4 mr-2" />
-                我的创作者
-              </TabsTrigger>
-              <TabsTrigger value="messages" className="rounded-lg data-[state=active]:bg-[#1dbf73] data-[state=active]:text-white">
-                <MessageSquare className="w-4 h-4 mr-2" />
-                消息
-              </TabsTrigger>
-              <TabsTrigger value="finance" className="rounded-lg data-[state=active]:bg-[#1dbf73] data-[state=active]:text-white">
-                <Wallet className="w-4 h-4 mr-2" />
-                财务
-              </TabsTrigger>
-            </TabsList>
+            <div className="flex items-center justify-between mb-6 gap-4">
+              <TabsList className="bg-white p-1 rounded-xl">
+                <TabsTrigger value="orders" className="rounded-lg data-[state=active]:bg-[#1dbf73] data-[state=active]:text-white">
+                  <ShoppingCart className="w-4 h-4 mr-2" />
+                  我的任务
+                </TabsTrigger>
+                <TabsTrigger value="bids" className="rounded-lg data-[state=active]:bg-[#1dbf73] data-[state=active]:text-white">
+                  <TrendingUp className="w-4 h-4 mr-2" />
+                  投标管理
+                </TabsTrigger>
+                <TabsTrigger value="creators" className="rounded-lg data-[state=active]:bg-[#1dbf73] data-[state=active]:text-white">
+                  <Users className="w-4 h-4 mr-2" />
+                  我的创作者
+                </TabsTrigger>
+                <TabsTrigger value="finance" className="rounded-lg data-[state=active]:bg-[#1dbf73] data-[state=active]:text-white">
+                  <Wallet className="w-4 h-4 mr-2" />
+                  财务
+                </TabsTrigger>
+              </TabsList>
+              <div className="flex gap-3">
+                <Button
+                  onClick={() => navigate('/post-order')}
+                  className="bg-[#1dbf73] hover:bg-[#19a463] text-white"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  发布任务
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => navigate('/creators')}
+                  className="border-[#e4e5e7]"
+                >
+                  <Search className="w-4 h-4 mr-2" />
+                  找创作者
+                </Button>
+              </div>
+            </div>
 
             {/* Orders */}
             <TabsContent value="orders">
@@ -786,7 +805,7 @@ export default function ClientWorkspace() {
                   </div>
                   {/* 状态筛选 Tab */}
                   <div className="flex gap-2 flex-wrap">
-                    {['全部', '预审已通过', '已完成', '订单冻结'].map((status) => (
+                    {['全部', '预审已通过', '待修改', '已完成'].map((status) => (
                       <button
                         key={status}
                         onClick={() => setBidStatusFilter(status)}
@@ -898,9 +917,52 @@ export default function ClientWorkspace() {
                                   size="sm"
                                   variant="outline"
                                   className="border-slate-200 text-xs"
-                                  onClick={() => handleFreezeOrder(bid.id)}
+                                  onClick={() => handleModifyOrder(bid.id)}
                                 >
-                                  订单冻结
+                                  修改
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="border-slate-200 text-xs"
+                                  onClick={() => navigate(`/creators/${bid.creatorId}`)}
+                                >
+                                  查看创作者
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="border-purple-500 text-purple-600 hover:bg-purple-50 text-xs"
+                                  onClick={() => handleOpenVideoReview(bid)}
+                                >
+                                  <MessageSquare className="w-3 h-3 mr-1" />
+                                  详细审片
+                                </Button>
+                              </>
+                            ) : bid.status === '待修改' ? (
+                              <>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="border-slate-200 text-xs"
+                                  onClick={() => {
+                                    // 查看修改意见
+                                    const comments = modifyComments.get(bid.id)
+                                    if (comments && comments.length > 0) {
+                                      alert(`修改意见：\n${comments.map(c => `[${c.time}] ${c.content}`).join('\n')}`)
+                                    } else {
+                                      alert('暂无修改意见')
+                                    }
+                                  }}
+                                >
+                                  查看修改意见
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  className="bg-[#1dbf73] hover:bg-[#19a463] text-xs"
+                                  onClick={() => handleApproveOrder(bid.id)}
+                                >
+                                  确认通过
                                 </Button>
                                 <Button
                                   size="sm"
@@ -908,7 +970,7 @@ export default function ClientWorkspace() {
                                   className="border-slate-200 text-xs"
                                   onClick={() => handleModifyOrder(bid.id)}
                                 >
-                                  修改
+                                  继续修改
                                 </Button>
                                 <Button
                                   size="sm"
@@ -927,14 +989,6 @@ export default function ClientWorkspace() {
                                   onClick={() => handleApproveOrder(bid.id)}
                                 >
                                   确认通过
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="border-slate-200 text-xs"
-                                  onClick={() => handleFreezeOrder(bid.id)}
-                                >
-                                  订单冻结
                                 </Button>
                                 <Button
                                   size="sm"
@@ -995,118 +1049,72 @@ export default function ClientWorkspace() {
               </div>
             </TabsContent>
 
-            {/* Messages */}
-            <TabsContent value="messages">
-              <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-                <div className="divide-y divide-slate-100">
-                  {messages.map((msg) => (
-                    <div
-                      key={msg.id}
-                      className={`p-4 hover:bg-slate-50 cursor-pointer ${msg.unread ? 'bg-blue-50/30' : ''}`}
-                      onClick={() => setActiveTab('bids')}
-                    >
-                      <div className="flex items-start gap-4">
-                        <Avatar className="w-12 h-12">
-                          <AvatarImage src={msg.avatar} />
-                          <AvatarFallback>{msg.from[0]}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <p className="font-medium text-[#404145]">{msg.from}</p>
-                            <span className="text-sm text-[#74767e]">{msg.time}</span>
-                          </div>
-                          <p className="text-sm text-[#74767e] mt-1">{msg.content}</p>
-                        </div>
-                        {msg.unread && <span className="w-2 h-2 bg-red-500 rounded-full" />}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </TabsContent>
-
             {/* Finance */}
             <TabsContent value="finance">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* 左侧交易记录 */}
-                <div className="lg:col-span-2">
-                  <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-                    <div className="p-5 border-b border-slate-100">
-                      <h3 className="font-semibold text-[#404145]">交易记录</h3>
+              <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+                <div className="p-5 border-b border-slate-100">
+                  <h3 className="font-semibold text-[#404145]">交易记录</h3>
+                </div>
+
+                {/* 筛选区域 */}
+                <div className="p-5 border-b border-slate-100 bg-slate-50">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* 开始日期 */}
+                    <div>
+                      <label className="block text-sm font-medium text-[#404145] mb-2">开始日期</label>
+                      <input
+                        type="date"
+                        className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#1dbf73]"
+                      />
                     </div>
 
-                    {/* 筛选区域 */}
-                    <div className="p-5 border-b border-slate-100 bg-slate-50">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {/* 开始日期 */}
-                        <div>
-                          <label className="block text-sm font-medium text-[#404145] mb-2">开始日期</label>
-                          <input
-                            type="date"
-                            className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#1dbf73]"
-                          />
-                        </div>
-
-                        {/* 结束日期 */}
-                        <div>
-                          <label className="block text-sm font-medium text-[#404145] mb-2">结束日期</label>
-                          <input
-                            type="date"
-                            className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#1dbf73]"
-                          />
-                        </div>
-
-                        {/* 类型筛选 */}
-                        <div>
-                          <label className="block text-sm font-medium text-[#404145] mb-2">类型</label>
-                          <select className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#1dbf73]">
-                            <option>全部</option>
-                            <option>充值</option>
-                            <option>支出</option>
-                          </select>
-                        </div>
-                      </div>
+                    {/* 结束日期 */}
+                    <div>
+                      <label className="block text-sm font-medium text-[#404145] mb-2">结束日期</label>
+                      <input
+                        type="date"
+                        className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#1dbf73]"
+                      />
                     </div>
 
-                    <table className="w-full">
-                      <thead className="bg-slate-50">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">类型</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">任务名称</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">金额</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">日期</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100">
-                        {transactions.map((tx) => (
-                          <tr key={tx.id} className="hover:bg-slate-50">
-                            <td className="px-6 py-4">
-                              <Badge variant="secondary" className={tx.type === '充值' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}>
-                                {tx.type}
-                              </Badge>
-                            </td>
-                            <td className="px-6 py-4 text-sm text-[#404145]">{tx.title}</td>
-                            <td className={`px-6 py-4 font-medium ${tx.amount.startsWith('+') ? 'text-green-600' : 'text-red-600'}`}>
-                              {tx.amount}
-                            </td>
-                            <td className="px-6 py-4 text-sm text-slate-500">{tx.date}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                    {/* 类型筛选 */}
+                    <div>
+                      <label className="block text-sm font-medium text-[#404145] mb-2">类型</label>
+                      <select className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#1dbf73]">
+                        <option>全部</option>
+                        <option>充值</option>
+                        <option>支出</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
 
-                {/* 右侧账户余额 */}
-                <div className="space-y-4">
-                  <div className="bg-white rounded-xl p-5 shadow-sm border border-slate-100">
-                    <p className="text-[#74767e] text-sm">账户余额</p>
-                    <p className="text-3xl font-bold text-[#404145] mt-2">¥12,500</p>
-                    <Button className="w-full mt-4 bg-[#1dbf73] hover:bg-[#19a463]">
-                      立即充值
-                    </Button>
-                  </div>
-                </div>
+                <table className="w-full">
+                  <thead className="bg-slate-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">类型</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">任务名称</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">金额</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">日期</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {transactions.map((tx) => (
+                      <tr key={tx.id} className="hover:bg-slate-50">
+                        <td className="px-6 py-4">
+                          <Badge variant="secondary" className={tx.type === '充值' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}>
+                            {tx.type}
+                          </Badge>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-[#404145]">{tx.title}</td>
+                        <td className={`px-6 py-4 font-medium ${tx.amount.startsWith('+') ? 'text-green-600' : 'text-red-600'}`}>
+                          {tx.amount}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-slate-500">{tx.date}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </TabsContent>
           </Tabs>
@@ -1788,6 +1796,77 @@ export default function ClientWorkspace() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* 充值弹窗 */}
+      {showRechargeModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60] p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-[#1a1a1a]">账户充值</h3>
+              <button
+                onClick={() => setShowRechargeModal(false)}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors"
+              >
+                <X className="w-5 h-5 text-slate-500" />
+              </button>
+            </div>
+
+            <div className="flex flex-col items-center">
+              {/* 二维码 */}
+              <div className="w-48 h-48 bg-[#f5f5f5] rounded-xl flex items-center justify-center mb-4 overflow-hidden">
+                <img
+                  src="customer-service-qrcode.png"
+                  alt="客服二维码"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+
+              {/* 提示文字 */}
+              <div className="text-center space-y-2">
+                <p className="text-base font-semibold text-[#404145]">请添加客服微信进行充值</p>
+                <p className="text-sm text-[#74767e]">扫描二维码或搜索微信号：<span className="font-medium text-[#1dbf73]">relidou_service</span></p>
+              </div>
+
+              {/* 温馨提示 */}
+              <div className="mt-6 w-full bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm text-blue-900">
+                    <p className="font-medium mb-1">温馨提示</p>
+                    <ul className="space-y-0.5 text-blue-700 text-xs">
+                      <li>• 请在转账时备注您的账户手机号</li>
+                      <li>• 充值到账时间为工作日 9:00-18:00</li>
+                      <li>• 如有疑问，请联系客服咨询</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 关闭按钮 */}
+            <div className="mt-6">
+              <button
+                onClick={() => setShowRechargeModal(false)}
+                className="w-full py-3 bg-[#1dbf73] hover:bg-[#19a463] text-white rounded-xl transition-colors font-medium text-base"
+              >
+                我知道了
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 视频审片标注弹窗 */}
+      {showVideoReviewModal && currentReviewBid && (
+        <VideoReviewModal
+          bidId={currentReviewBid.id}
+          taskId={currentReviewBid.order}
+          videoUrl={currentReviewBid.highlightVideo}
+          authorName={currentReviewBid.creator}
+          onClose={() => setShowVideoReviewModal(false)}
+          onSubmit={handleReviewSubmit}
+        />
       )}
     </div>
   )

@@ -1,0 +1,2240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FrameCollab — 视频帧级协同标注平台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #09090f;
+  --surface: #111118;
+  --surface2: #18181f;
+  --surface3: #21212a;
+  --border: #2a2a38;
+  --border2: #353548;
+  --text: #e8e8f0;
+  --text2: #9090a8;
+  --text3: #5a5a72;
+  --accent: #6366f1;
+  --accent2: #818cf8;
+  --accent-glow: rgba(99,102,241,0.25);
+  --red: #ef4444;
+  --green: #22c55e;
+  --yellow: #eab308;
+  --cyan: #06b6d4;
+  --pink: #ec4899;
+  --orange: #f97316;
+  --font-head: 'Syne', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 13px;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  user-select: none;
+}
+
+/* ─── HEADER ──────────────────────────── */
+#header {
+  height: 52px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 16px;
+  flex-shrink: 0;
+  z-index: 100;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-head);
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: -0.3px;
+}
+.logo-icon {
+  width: 28px; height: 28px;
+  background: linear-gradient(135deg, var(--accent), var(--cyan));
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+}
+.logo span { color: var(--accent2); }
+
+.divider-v { width: 1px; height: 24px; background: var(--border); flex-shrink: 0; }
+
+.project-name {
+  font-family: var(--font-head);
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background .15s;
+}
+.project-name:hover { background: var(--surface3); }
+
+.header-spacer { flex: 1; }
+
+.role-switcher {
+  display: flex;
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 3px;
+  gap: 2px;
+}
+.role-btn {
+  padding: 4px 12px;
+  border-radius: 5px;
+  border: none;
+  background: transparent;
+  color: var(--text2);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .15s;
+  display: flex; align-items: center; gap: 6px;
+}
+.role-btn.active {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 0 12px var(--accent-glow);
+}
+.role-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: .7;
+}
+
+.hdr-btn {
+  height: 32px;
+  padding: 0 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .15s;
+  display: flex; align-items: center; gap: 6px;
+}
+.hdr-btn:hover { background: var(--surface3); border-color: var(--border2); }
+.hdr-btn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.hdr-btn.primary:hover { background: var(--accent2); border-color: var(--accent2); }
+
+.avatar {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.avatar-a { background: linear-gradient(135deg, #6366f1, #818cf8); color: #fff; }
+.avatar-c { background: linear-gradient(135deg, #06b6d4, #22c55e); color: #fff; }
+
+/* ─── MAIN LAYOUT ─────────────────────── */
+#main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ─── LEFT TOOLBAR ────────────────────── */
+#toolbar {
+  width: 56px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 0;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.tool-btn {
+  width: 40px; height: 40px;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text2);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .15s;
+  position: relative;
+  font-size: 16px;
+}
+.tool-btn:hover { background: var(--surface3); color: var(--text); }
+.tool-btn.active {
+  background: var(--accent-glow);
+  border-color: var(--accent);
+  color: var(--accent2);
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+.tool-sep { width: 24px; height: 1px; background: var(--border); margin: 4px 0; }
+
+.color-dot {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all .15s;
+  flex-shrink: 0;
+}
+.color-dot:hover { transform: scale(1.2); }
+.color-dot.active { border-color: #fff; box-shadow: 0 0 6px rgba(255,255,255,.4); }
+
+.color-palette {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 0;
+}
+
+.tool-tooltip {
+  position: absolute;
+  left: calc(100% + 12px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--surface3);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 5px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .15s;
+  z-index: 999;
+}
+.tool-btn:hover .tool-tooltip { opacity: 1; }
+
+/* ─── CENTER AREA ─────────────────────── */
+#center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #060608;
+  position: relative;
+}
+
+#video-area {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(ellipse at center, #0e0e18 0%, #060608 100%);
+}
+
+#video-wrapper {
+  position: relative;
+  display: inline-block;
+  box-shadow: 0 0 60px rgba(0,0,0,.8), 0 0 0 1px rgba(255,255,255,.05);
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: crosshair;
+}
+
+#main-video {
+  display: block;
+  max-width: 100%;
+  max-height: calc(100vh - 52px - 160px);
+  background: #000;
+}
+
+#annotation-canvas {
+  position: absolute;
+  top: 0; left: 0;
+  pointer-events: none;
+  border-radius: 4px;
+}
+#annotation-canvas.drawing { pointer-events: all; }
+
+/* Drop zone */
+#drop-zone {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: #060608;
+}
+#drop-zone.hidden { display: none; }
+.drop-icon { font-size: 48px; opacity: .4; }
+.drop-title {
+  font-family: var(--font-head);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+}
+.drop-sub { color: var(--text2); font-size: 13px; }
+.drop-actions { display: flex; gap: 10px; margin-top: 8px; }
+
+.btn {
+  padding: 10px 20px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .15s;
+}
+.btn:hover { background: var(--surface3); border-color: var(--border2); }
+.btn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.btn.primary:hover { background: var(--accent2); }
+
+#file-input { display: none; }
+
+/* ─── TIMELINE ────────────────────────── */
+#timeline-area {
+  height: 110px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+#video-controls {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.ctrl-btn {
+  width: 32px; height: 32px;
+  border: none; background: transparent;
+  color: var(--text2);
+  cursor: pointer;
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px;
+  transition: all .15s;
+}
+.ctrl-btn:hover { background: var(--surface3); color: var(--text); }
+
+#progress-bar-wrap {
+  flex: 1;
+  height: 4px;
+  background: var(--surface3);
+  border-radius: 2px;
+  position: relative;
+  cursor: pointer;
+}
+#progress-bar-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  pointer-events: none;
+  transition: width .05s linear;
+}
+#progress-thumb {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  box-shadow: 0 0 6px rgba(99,102,241,.6);
+}
+
+.time-display {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text2);
+  white-space: nowrap;
+  min-width: 120px;
+  text-align: center;
+}
+
+.speed-btn {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text2);
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 3px 8px;
+  cursor: pointer;
+}
+
+#timeline-track {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--surface2);
+  margin: 0;
+  padding: 0 16px;
+}
+
+#frame-ruler {
+  position: absolute;
+  top: 8px;
+  left: 16px; right: 16px;
+  height: 16px;
+  overflow: hidden;
+}
+
+#annotation-markers {
+  position: absolute;
+  bottom: 8px;
+  left: 16px; right: 16px;
+  height: 24px;
+}
+
+#playhead {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 2px;
+  background: var(--accent);
+  pointer-events: none;
+  z-index: 10;
+  left: 16px;
+}
+#playhead::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0; height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 7px solid var(--accent);
+}
+
+/* ─── RIGHT PANEL ─────────────────────── */
+#right-panel {
+  width: 320px;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+#panel-header {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border);
+  gap: 8px;
+}
+.panel-tab {
+  font-family: var(--font-head);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  color: var(--text2);
+  transition: all .15s;
+  border: none;
+  background: transparent;
+}
+.panel-tab.active { background: var(--surface3); color: var(--text); }
+
+.panel-count {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 10px;
+  padding: 1px 6px;
+  min-width: 18px;
+  text-align: center;
+}
+
+.panel-spacer { flex: 1; }
+
+#annotation-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+#annotation-list::-webkit-scrollbar { width: 4px; }
+#annotation-list::-webkit-scrollbar-track { background: transparent; }
+#annotation-list::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+.annotation-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: all .2s;
+  cursor: pointer;
+}
+.annotation-card:hover { border-color: var(--border2); background: var(--surface3); }
+.annotation-card.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent), 0 4px 20px var(--accent-glow);
+}
+
+.ann-card-header {
+  padding: 10px 12px 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ann-type-badge {
+  width: 22px; height: 22px;
+  border-radius: 5px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+.ann-meta { flex: 1; min-width: 0; }
+.ann-author {
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--text);
+}
+.ann-time {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--accent2);
+  margin-top: 1px;
+}
+.ann-frame-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  padding: 2px 6px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.ann-note {
+  padding: 4px 12px 10px;
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.5;
+  border-bottom: 1px solid var(--border);
+}
+
+.ann-comments { padding: 8px 12px; }
+.comment-item {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.comment-avatar {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.comment-body { flex: 1; min-width: 0; }
+.comment-header {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+.comment-author { font-weight: 600; font-size: 11px; color: var(--text); }
+.comment-ts { font-size: 10px; color: var(--text3); }
+.comment-text { font-size: 12px; color: var(--text2); line-height: 1.4; }
+.comment-reactions {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+}
+.reaction-chip {
+  font-size: 10px;
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1px 6px;
+  cursor: pointer;
+  display: flex; align-items: center; gap: 3px;
+  transition: all .15s;
+}
+.reaction-chip:hover { border-color: var(--border2); }
+.reaction-chip.active { background: var(--accent-glow); border-color: var(--accent); color: var(--accent2); }
+
+.reply-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 8px;
+  border-top: 1px solid var(--border);
+}
+.reply-input {
+  flex: 1;
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 10px;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 12px;
+  outline: none;
+  transition: border-color .15s;
+}
+.reply-input:focus { border-color: var(--accent); }
+.reply-input::placeholder { color: var(--text3); }
+.send-btn {
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  transition: all .15s;
+  flex-shrink: 0;
+}
+.send-btn:hover { background: var(--accent2); }
+
+/* ─── ADD ANNOTATION PANEL ────────────── */
+#add-panel {
+  border-top: 1px solid var(--border);
+  padding: 12px;
+  background: var(--surface);
+}
+#add-panel-inner {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 10px;
+}
+.add-panel-title {
+  font-family: var(--font-head);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text2);
+  margin-bottom: 8px;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+}
+#new-note-input {
+  width: 100%;
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 7px 10px;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 12px;
+  outline: none;
+  resize: none;
+  height: 60px;
+  transition: border-color .15s;
+  display: block;
+}
+#new-note-input:focus { border-color: var(--accent); }
+#new-note-input::placeholder { color: var(--text3); }
+.add-panel-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  align-items: center;
+}
+.frame-indicator {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text3);
+  flex: 1;
+}
+
+/* ─── ANNOTATION MARKER ON CANVAS ─────── */
+.marker-label {
+  position: absolute;
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  padding: 2px 5px;
+  border-radius: 4px;
+  pointer-events: none;
+  white-space: nowrap;
+  transform: translateY(-100%);
+  margin-top: -4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.4);
+}
+
+/* ─── FLOATING ANNOTATION POPUP ──────── */
+#float-popup {
+  position: absolute;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-lg);
+  padding: 10px 12px;
+  min-width: 220px;
+  max-width: 280px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.5);
+  z-index: 50;
+  display: none;
+}
+#float-popup.show { display: block; }
+.float-popup-title {
+  font-weight: 600;
+  font-size: 12px;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+.float-popup-note { font-size: 12px; color: var(--text2); line-height: 1.4; margin-bottom: 8px; }
+.float-popup-actions { display: flex; gap: 6px; }
+.flat-btn {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  background: var(--surface3);
+  color: var(--text2);
+  cursor: pointer;
+  transition: all .15s;
+}
+.flat-btn:hover { color: var(--text); border-color: var(--border2); }
+.flat-btn.danger:hover { color: var(--red); border-color: var(--red); }
+
+/* ─── EMPTY STATE ─────────────────────── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 10px;
+  padding: 20px;
+  text-align: center;
+}
+.empty-icon { font-size: 32px; opacity: .3; }
+.empty-title { font-family: var(--font-head); font-weight: 600; font-size: 14px; color: var(--text2); }
+.empty-sub { font-size: 12px; color: var(--text3); line-height: 1.5; }
+
+/* ─── TOAST ───────────────────────────── */
+#toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: var(--surface3);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.4);
+  opacity: 0;
+  transition: all .3s;
+  z-index: 9999;
+  pointer-events: none;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ─── FRAME SCRUB TOOLTIP ─────────────── */
+#scrub-tip {
+  position: fixed;
+  background: var(--surface3);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 3px 7px;
+  border-radius: 5px;
+  pointer-events: none;
+  display: none;
+  z-index: 200;
+}
+
+/* ─── SCROLLBAR GLOBAL ────────────────── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* ─── KEYBOARD HINT ───────────────────── */
+#kbd-hints {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  font-size: 11px;
+  color: var(--text2);
+  line-height: 1.8;
+  z-index: 50;
+  display: none;
+}
+kbd {
+  background: var(--surface3);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text);
+}
+
+/* ─── UPLOAD BUTTON ───────────────────── */
+.upload-area-active {
+  outline: 2px dashed var(--accent) !important;
+  outline-offset: -4px;
+}
+
+/* Resolved state */
+.annotation-card.resolved {
+  opacity: 0.5;
+}
+.annotation-card.resolved .ann-type-badge {
+  filter: grayscale(1);
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div id="header">
+  <div class="logo">
+    <div class="logo-icon">▶</div>
+    Frame<span>Collab</span>
+  </div>
+  <div class="divider-v"></div>
+  <div class="project-name" id="project-title">未命名项目 · 第1版</div>
+  <div class="header-spacer"></div>
+  <div class="role-switcher">
+    <button class="role-btn active" id="role-advertiser" onclick="switchRole('advertiser')">
+      <span class="role-dot"></span> 广告主
+    </button>
+    <button class="role-btn" id="role-creator" onclick="switchRole('creator')">
+      <span class="role-dot"></span> 创作者
+    </button>
+  </div>
+  <div class="divider-v"></div>
+  <button class="hdr-btn" onclick="showKbd()">⌨ 快捷键</button>
+  <button class="hdr-btn primary" onclick="exportAnnotations()">↓ 导出标注</button>
+  <div class="avatar avatar-a" id="current-avatar" title="当前用户">A</div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+
+  <!-- LEFT TOOLBAR -->
+  <div id="toolbar">
+    <button class="tool-btn active" id="tool-cursor" data-tool="cursor" onclick="selectTool('cursor')" title="选择">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M2 2l5 12 2.5-4 4 4L15 12.5l-4-4 4-2.5z"/></svg>
+      <span class="tool-tooltip">选择 (V)</span>
+    </button>
+    <button class="tool-btn" id="tool-arrow" data-tool="arrow" onclick="selectTool('arrow')" title="箭头">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M3 13L13 3M8 3h5v5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="tool-tooltip">箭头 (A)</span>
+    </button>
+    <button class="tool-btn" id="tool-rect" data-tool="rect" onclick="selectTool('rect')">
+      <svg width="16" height="16" viewBox="0 0 16 16"><rect x="2" y="4" width="12" height="8" rx="1" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+      <span class="tool-tooltip">矩形框 (R)</span>
+    </button>
+    <button class="tool-btn" id="tool-ellipse" data-tool="ellipse" onclick="selectTool('ellipse')">
+      <svg width="16" height="16" viewBox="0 0 16 16"><ellipse cx="8" cy="8" rx="6" ry="4" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+      <span class="tool-tooltip">椭圆 (E)</span>
+    </button>
+    <button class="tool-btn" id="tool-pen" data-tool="pen" onclick="selectTool('pen')">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M13.5 1.5l1 1L5 12l-2.5.5.5-2.5L13.5 1.5z" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>
+      <span class="tool-tooltip">画笔 (P)</span>
+    </button>
+    <button class="tool-btn" id="tool-text" data-tool="text" onclick="selectTool('text')">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><text x="3" y="13" font-size="12" font-weight="700">T</text></svg>
+      <span class="tool-tooltip">文字 (T)</span>
+    </button>
+    <div class="tool-sep"></div>
+    <div class="color-palette">
+      <div class="color-dot active" style="background:#6366f1" data-color="#6366f1" onclick="selectColor('#6366f1',this)"></div>
+      <div class="color-dot" style="background:#ef4444" data-color="#ef4444" onclick="selectColor('#ef4444',this)"></div>
+      <div class="color-dot" style="background:#eab308" data-color="#eab308" onclick="selectColor('#eab308',this)"></div>
+      <div class="color-dot" style="background:#22c55e" data-color="#22c55e" onclick="selectColor('#22c55e',this)"></div>
+      <div class="color-dot" style="background:#06b6d4" data-color="#06b6d4" onclick="selectColor('#06b6d4',this)"></div>
+      <div class="color-dot" style="background:#f97316" data-color="#f97316" onclick="selectColor('#f97316',this)"></div>
+      <div class="color-dot" style="background:#ec4899" data-color="#ec4899" onclick="selectColor('#ec4899',this)"></div>
+    </div>
+    <div class="tool-sep"></div>
+    <button class="tool-btn" onclick="undoLast()" title="撤销">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 7.5A4.5 4.5 0 1112 7.5"/><polyline points="1,5 3,7.5 5.5,5.5"/></svg>
+      <span class="tool-tooltip">撤销 (Ctrl+Z)</span>
+    </button>
+  </div>
+
+  <!-- CENTER -->
+  <div id="center">
+    <div id="video-area">
+
+      <!-- DROP ZONE -->
+      <div id="drop-zone">
+        <div class="drop-icon">🎬</div>
+        <div class="drop-title">拖入视频文件</div>
+        <div class="drop-sub">支持 MP4、MOV、WebM 等格式 · 或使用演示视频</div>
+        <div class="drop-actions">
+          <button class="btn primary" onclick="document.getElementById('file-input').click()">选择视频文件</button>
+          <button class="btn" onclick="loadDemoVideo()">加载演示视频</button>
+        </div>
+        <input type="file" id="file-input" accept="video/*" onchange="loadLocalVideo(this)">
+      </div>
+
+      <!-- VIDEO WRAPPER -->
+      <div id="video-wrapper" style="display:none;">
+        <video id="main-video" preload="metadata"></video>
+        <canvas id="annotation-canvas"></canvas>
+        <div id="float-popup">
+          <div class="float-popup-title" id="fp-title"></div>
+          <div class="float-popup-note" id="fp-note"></div>
+          <div class="float-popup-actions">
+            <button class="flat-btn" onclick="floatGoToAnnotation()">查看评论</button>
+            <button class="flat-btn danger" onclick="floatDeleteAnnotation()">删除</button>
+            <button class="flat-btn" onclick="closeFloatPopup()">关闭</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- TIMELINE -->
+    <div id="timeline-area">
+      <div id="video-controls">
+        <button class="ctrl-btn" id="btn-prev-frame" onclick="stepFrame(-1)" title="上一帧 (,)">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><rect x="2" y="2" width="2" height="10"/><polygon points="12,2 4,7 12,12"/></svg>
+        </button>
+        <button class="ctrl-btn" id="btn-play" onclick="togglePlay()">
+          <svg id="play-icon" width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><polygon points="3,2 11,7 3,12"/></svg>
+        </button>
+        <button class="ctrl-btn" id="btn-next-frame" onclick="stepFrame(1)" title="下一帧 (.)">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><rect x="10" y="2" width="2" height="10"/><polygon points="2,2 10,7 2,12"/></svg>
+        </button>
+        <div style="width:8px"></div>
+        <div class="time-display" id="time-display">00:00:00 / 00:00:00 · F0</div>
+        <div style="flex:1"></div>
+        <div id="progress-bar-wrap" onmousedown="seekStart(event)" onmousemove="seekHover(event)" onmouseleave="hideScrubTip()">
+          <div id="progress-bar-fill" style="width:0%"></div>
+          <div id="progress-thumb" style="left:0%"></div>
+        </div>
+        <div style="flex:1"></div>
+        <select class="speed-btn" onchange="setSpeed(this.value)">
+          <option value="0.25">0.25x</option>
+          <option value="0.5">0.5x</option>
+          <option value="1" selected>1x</option>
+          <option value="1.5">1.5x</option>
+          <option value="2">2x</option>
+        </select>
+        <button class="ctrl-btn" onclick="toggleMute()" title="静音">
+          <svg id="vol-icon" width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><path d="M2 5h2l4-3v10L4 9H2V5z"/><path d="M9 4.5a3 3 0 010 5M10.5 3a5 5 0 010 8"/></svg>
+        </button>
+      </div>
+
+      <!-- TIMELINE TRACK -->
+      <div id="timeline-track" onmousedown="timelineSeek(event)" onmousemove="timelineHover(event)" onmouseleave="hideScrubTip()">
+        <div id="playhead"></div>
+        <canvas id="frame-ruler" height="16"></canvas>
+        <div id="annotation-markers"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div id="right-panel">
+    <div id="panel-header">
+      <button class="panel-tab active" onclick="switchTab('annotations')">标注</button>
+      <div class="panel-count" id="ann-count">0</div>
+      <button class="panel-tab" onclick="switchTab('resolved')">已解决</button>
+      <div class="panel-spacer"></div>
+      <button class="hdr-btn" style="height:26px;font-size:11px;padding:0 10px;" onclick="filterCurrent()">当前帧</button>
+    </div>
+
+    <div id="annotation-list">
+      <div class="empty-state" id="empty-state">
+        <div class="empty-icon">💬</div>
+        <div class="empty-title">暂无标注</div>
+        <div class="empty-sub">在视频上绘制标注框或箭头，<br>然后在此处添加文字说明</div>
+      </div>
+    </div>
+
+    <div id="add-panel">
+      <div id="add-panel-inner">
+        <div class="add-panel-title">📌 添加标注说明</div>
+        <textarea id="new-note-input" placeholder="描述这个问题或建议... (Shift+Enter 提交)"></textarea>
+        <div class="add-panel-actions">
+          <div class="frame-indicator" id="frame-indicator">当前帧: F0</div>
+          <button class="btn" style="height:28px;padding:0 10px;font-size:11px;" onclick="cancelNewAnnotation()">取消</button>
+          <button class="btn primary" style="height:28px;padding:0 12px;font-size:11px;" onclick="submitAnnotation()">添加 ↵</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- SCRUB TIP -->
+<div id="scrub-tip"></div>
+
+<!-- KBD HINTS -->
+<div id="kbd-hints" id="kbd-panel">
+  <div style="font-family:var(--font-head);font-weight:700;margin-bottom:8px;color:var(--text)">快捷键</div>
+  <kbd>Space</kbd> 播放/暂停 &nbsp;
+  <kbd>,</kbd> 上一帧 &nbsp;
+  <kbd>.</kbd> 下一帧<br>
+  <kbd>V</kbd> 选择工具 &nbsp;
+  <kbd>A</kbd> 箭头 &nbsp;
+  <kbd>R</kbd> 矩形<br>
+  <kbd>E</kbd> 椭圆 &nbsp;
+  <kbd>P</kbd> 画笔 &nbsp;
+  <kbd>T</kbd> 文字<br>
+  <kbd>Ctrl+Z</kbd> 撤销 &nbsp;
+  <kbd>Del</kbd> 删除选中<br>
+  <kbd>Esc</kbd> 取消/关闭
+  <div style="margin-top:8px;"><button class="flat-btn" onclick="document.getElementById('kbd-hints').style.display='none'">关闭</button></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+const FPS = 30;
+let currentRole = 'advertiser';
+let currentColor = '#6366f1';
+let currentTool = 'cursor';
+let annotations = [];
+let annIdCounter = 1;
+let activeAnnotationId = null;
+let pendingShape = null;   // shape being drawn
+let isDrawing = false;
+let drawStart = null;
+let penPoints = [];
+let videoLoaded = false;
+let filterCurrentFrame = false;
+let resolvedView = false;
+let floatPopupAnnId = null;
+
+const ROLES = {
+  advertiser: { name: '广告主-张伟', short: 'A', avatarClass: 'avatar-a', color: '#6366f1' },
+  creator:    { name: '创作者-林晓',  short: 'C', avatarClass: 'avatar-c', color: '#06b6d4' }
+};
+
+const TOOL_ICONS = {
+  cursor: '↖', arrow: '↗', rect: '▭', ellipse: '◯', pen: '✏', text: 'T'
+};
+const TOOL_LABELS = {
+  cursor:'选择', arrow:'箭头', rect:'矩形', ellipse:'椭圆', pen:'画笔', text:'文字'
+};
+
+// ═══════════════════════════════════════════
+//  VIDEO
+// ═══════════════════════════════════════════
+const video = document.getElementById('main-video');
+const canvas = document.getElementById('annotation-canvas');
+const ctx = canvas.getContext('2d');
+const videoWrapper = document.getElementById('video-wrapper');
+const dropZone = document.getElementById('drop-zone');
+
+function loadDemoVideo() {
+  // Use a sample video - Big Buck Bunny excerpt
+  const src = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4';
+  setupVideo(src);
+  showToast('演示视频加载中...');
+  document.getElementById('project-title').textContent = '品牌广告样片 · 审核v1';
+}
+
+function loadLocalVideo(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const url = URL.createObjectURL(file);
+  setupVideo(url);
+  document.getElementById('project-title').textContent = file.name.replace(/\.[^.]+$/, '') + ' · 审核v1';
+}
+
+function setupVideo(src) {
+  video.src = src;
+  video.load();
+  video.onloadedmetadata = () => {
+    videoLoaded = true;
+    dropZone.classList.add('hidden');
+    videoWrapper.style.display = 'block';
+    syncCanvasSize();
+    buildRuler();
+    updateUI();
+    loadDemoAnnotations();
+    showToast('视频已加载 · 开始标注吧！');
+  };
+  video.onerror = () => {
+    // If CDN fails, show a fallback colored placeholder
+    videoLoaded = true;
+    dropZone.classList.add('hidden');
+    videoWrapper.style.display = 'block';
+    // Create a fake black video background
+    video.style.background = '#111';
+    canvas.width = 960; canvas.height = 540;
+    video.style.width = '960px'; video.style.height = '540px';
+    videoWrapper.style.width = '960px'; videoWrapper.style.height = '540px';
+    syncCanvasSize();
+    buildRuler();
+    updateUI();
+    loadDemoAnnotations();
+    showToast('加载网络视频失败，已进入演示模式');
+    // Simulate video with canvas
+    startCanvasSimulation();
+  };
+  video.addEventListener('timeupdate', onTimeUpdate);
+  video.addEventListener('ended', () => {
+    document.getElementById('play-icon').innerHTML = '<polygon points="3,2 11,7 3,12"/>';
+  });
+}
+
+function startCanvasSimulation() {
+  // Draw a sample frame on canvas to simulate video
+  const w = canvas.width, h = canvas.height;
+  const bg = ctx.createLinearGradient(0, 0, w, h);
+  bg.addColorStop(0, '#1a1a2e');
+  bg.addColorStop(1, '#16213e');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = 'rgba(255,255,255,0.05)';
+  for(let i = 0; i < 20; i++) {
+    ctx.beginPath();
+    ctx.arc(Math.random()*w, Math.random()*h, Math.random()*80+10, 0, Math.PI*2);
+    ctx.fill();
+  }
+  ctx.fillStyle = 'rgba(255,255,255,0.3)';
+  ctx.font = 'bold 24px Syne, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('演示模式 · 视频帧预览区域', w/2, h/2);
+  ctx.font = '14px DM Sans, sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.15)';
+  ctx.fillText('在此区域选择工具进行标注', w/2, h/2 + 36);
+  renderAnnotations();
+}
+
+function syncCanvasSize() {
+  const vw = video.videoWidth || 960;
+  const vh = video.videoHeight || 540;
+  const area = document.getElementById('video-area');
+  const maxW = area.clientWidth - 32;
+  const maxH = area.clientHeight - 24;
+  let scale = Math.min(maxW / vw, maxH / vh, 1);
+  const dw = Math.floor(vw * scale);
+  const dh = Math.floor(vh * scale);
+  video.style.width = dw + 'px';
+  video.style.height = dh + 'px';
+  canvas.width = dw;
+  canvas.height = dh;
+  canvas.style.width = dw + 'px';
+  canvas.style.height = dh + 'px';
+  videoWrapper.style.width = dw + 'px';
+  videoWrapper.style.height = dh + 'px';
+}
+
+function getFrameNumber(time) {
+  return Math.round((time || video.currentTime) * FPS);
+}
+
+function getVideoTime(frame) {
+  return frame / FPS;
+}
+
+function onTimeUpdate() {
+  updateUI();
+  renderAnnotations();
+}
+
+function togglePlay() {
+  if (!videoLoaded) return;
+  if (video.paused) {
+    video.play();
+    document.getElementById('play-icon').innerHTML = '<rect x="3" y="2" width="3" height="10"/><rect x="8" y="2" width="3" height="10"/>';
+  } else {
+    video.pause();
+    document.getElementById('play-icon').innerHTML = '<polygon points="3,2 11,7 3,12"/>';
+  }
+}
+
+function stepFrame(delta) {
+  if (!videoLoaded) return;
+  video.pause();
+  video.currentTime = Math.max(0, Math.min(video.duration || 0, video.currentTime + delta / FPS));
+  document.getElementById('play-icon').innerHTML = '<polygon points="3,2 11,7 3,12"/>';
+}
+
+function toggleMute() {
+  video.muted = !video.muted;
+}
+
+function setSpeed(val) {
+  video.playbackRate = parseFloat(val);
+}
+
+function updateUI() {
+  const cur = video.currentTime || 0;
+  const dur = video.duration || 0;
+  const frame = getFrameNumber(cur);
+  const pct = dur ? (cur / dur) * 100 : 0;
+
+  document.getElementById('time-display').textContent =
+    `${fmtTime(cur)} / ${fmtTime(dur)} · F${frame}`;
+  document.getElementById('frame-indicator').textContent = `当前帧: F${frame}`;
+  document.getElementById('progress-bar-fill').style.width = pct + '%';
+  document.getElementById('progress-thumb').style.left = pct + '%';
+
+  // Playhead
+  const track = document.getElementById('timeline-track');
+  const tw = track.clientWidth - 32;
+  document.getElementById('playhead').style.left = (16 + tw * pct / 100) + 'px';
+
+  renderAnnotationMarkers();
+  if (filterCurrentFrame) renderAnnotationList();
+}
+
+function fmtTime(s) {
+  if (!s || isNaN(s)) return '00:00:00';
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = Math.floor(s % 60);
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+}
+
+// Progress bar seeking
+let isSeeking = false;
+document.getElementById('progress-bar-wrap').addEventListener('mousedown', e => {
+  isSeeking = true;
+  doSeek(e);
+});
+document.addEventListener('mousemove', e => { if (isSeeking) doSeek(e); });
+document.addEventListener('mouseup', () => { isSeeking = false; });
+
+function doSeek(e) {
+  const bar = document.getElementById('progress-bar-wrap');
+  const rect = bar.getBoundingClientRect();
+  const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+  video.currentTime = pct * (video.duration || 0);
+}
+
+function seekStart(e) { doSeek(e); }
+function seekHover(e) {
+  const bar = document.getElementById('progress-bar-wrap');
+  const rect = bar.getBoundingClientRect();
+  const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+  const t = pct * (video.duration || 0);
+  showScrubTip(e.clientX, e.clientY, fmtTime(t) + ' F' + getFrameNumber(t));
+}
+
+function timelineSeek(e) {
+  const track = document.getElementById('timeline-track');
+  const rect = track.getBoundingClientRect();
+  const pct = Math.max(0, Math.min(1, (e.clientX - rect.left - 16) / (rect.width - 32)));
+  video.currentTime = pct * (video.duration || 0);
+}
+
+function timelineHover(e) {
+  const track = document.getElementById('timeline-track');
+  const rect = track.getBoundingClientRect();
+  const pct = Math.max(0, Math.min(1, (e.clientX - rect.left - 16) / (rect.width - 32)));
+  const t = pct * (video.duration || 0);
+  showScrubTip(e.clientX, e.clientY, fmtTime(t) + ' · F' + getFrameNumber(t));
+}
+
+function showScrubTip(x, y, text) {
+  const tip = document.getElementById('scrub-tip');
+  tip.style.display = 'block';
+  tip.style.left = (x - 30) + 'px';
+  tip.style.top = (y - 36) + 'px';
+  tip.textContent = text;
+}
+function hideScrubTip() {
+  document.getElementById('scrub-tip').style.display = 'none';
+}
+
+// ═══════════════════════════════════════════
+//  RULER
+// ═══════════════════════════════════════════
+function buildRuler() {
+  const rulerCanvas = document.getElementById('frame-ruler');
+  const track = document.getElementById('timeline-track');
+  const w = track.clientWidth - 32;
+  const h = 16;
+  rulerCanvas.width = w;
+  rulerCanvas.height = h;
+  rulerCanvas.style.width = w + 'px';
+  const rc = rulerCanvas.getContext('2d');
+  const dur = video.duration || 60;
+  const totalFrames = Math.floor(dur * FPS);
+
+  rc.clearRect(0, 0, w, h);
+  rc.strokeStyle = '#353548';
+  rc.fillStyle = '#5a5a72';
+  rc.font = '9px DM Mono, monospace';
+  rc.textAlign = 'center';
+
+  // Draw tick marks
+  const pixPerSec = w / dur;
+  for (let s = 0; s <= dur; s++) {
+    const x = Math.round(s * pixPerSec);
+    const isMajor = s % 5 === 0;
+    rc.strokeStyle = isMajor ? '#4a4a62' : '#2a2a38';
+    rc.beginPath();
+    rc.moveTo(x, isMajor ? 0 : 8);
+    rc.lineTo(x, 16);
+    rc.stroke();
+    if (isMajor && s > 0) {
+      rc.fillStyle = '#5a5a72';
+      rc.fillText(fmtTime(s), x, 9);
+    }
+  }
+}
+
+// ═══════════════════════════════════════════
+//  CANVAS DRAWING
+// ═══════════════════════════════════════════
+canvas.addEventListener('mousedown', onCanvasMouseDown);
+canvas.addEventListener('mousemove', onCanvasMouseMove);
+canvas.addEventListener('mouseup', onCanvasMouseUp);
+canvas.addEventListener('click', onCanvasClick);
+
+function getCanvasPos(e) {
+  const rect = canvas.getBoundingClientRect();
+  return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+}
+
+function onCanvasMouseDown(e) {
+  if (currentTool === 'cursor') return;
+  if (!videoLoaded) return;
+  video.pause();
+  document.getElementById('play-icon').innerHTML = '<polygon points="3,2 11,7 3,12"/>';
+
+  isDrawing = true;
+  drawStart = getCanvasPos(e);
+  pendingShape = null;
+
+  if (currentTool === 'pen') {
+    penPoints = [drawStart];
+  }
+
+  canvas.style.cursor = 'crosshair';
+}
+
+function onCanvasMouseMove(e) {
+  if (!isDrawing) return;
+  const pos = getCanvasPos(e);
+
+  if (currentTool === 'pen') {
+    penPoints.push(pos);
+  }
+
+  renderAnnotations();
+  drawPreview(pos);
+}
+
+function drawPreview(pos) {
+  if (!isDrawing || !drawStart) return;
+  ctx.save();
+  ctx.strokeStyle = currentColor;
+  ctx.fillStyle = currentColor + '30';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([]);
+
+  switch (currentTool) {
+    case 'rect': {
+      const x = Math.min(drawStart.x, pos.x);
+      const y = Math.min(drawStart.y, pos.y);
+      const w = Math.abs(pos.x - drawStart.x);
+      const h = Math.abs(pos.y - drawStart.y);
+      ctx.strokeRect(x, y, w, h);
+      ctx.fillRect(x, y, w, h);
+      break;
+    }
+    case 'ellipse': {
+      const cx = (drawStart.x + pos.x) / 2;
+      const cy = (drawStart.y + pos.y) / 2;
+      const rx = Math.abs(pos.x - drawStart.x) / 2;
+      const ry = Math.abs(pos.y - drawStart.y) / 2;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+    case 'arrow': {
+      drawArrow(ctx, drawStart.x, drawStart.y, pos.x, pos.y, currentColor, 2.5);
+      break;
+    }
+    case 'pen': {
+      if (penPoints.length < 2) break;
+      ctx.beginPath();
+      ctx.moveTo(penPoints[0].x, penPoints[0].y);
+      for (let i = 1; i < penPoints.length; i++) {
+        ctx.lineTo(penPoints[i].x, penPoints[i].y);
+      }
+      ctx.stroke();
+      break;
+    }
+  }
+  ctx.restore();
+}
+
+function onCanvasMouseUp(e) {
+  if (!isDrawing || currentTool === 'cursor') return;
+  const pos = getCanvasPos(e);
+  isDrawing = false;
+
+  if (currentTool === 'text') {
+    // handled in click
+    return;
+  }
+
+  // Build shape data
+  let shapeData = null;
+  switch (currentTool) {
+    case 'rect':
+      shapeData = { type: 'rect', x: Math.min(drawStart.x, pos.x), y: Math.min(drawStart.y, pos.y), w: Math.abs(pos.x - drawStart.x), h: Math.abs(pos.y - drawStart.y) };
+      break;
+    case 'ellipse':
+      shapeData = { type: 'ellipse', cx: (drawStart.x + pos.x)/2, cy: (drawStart.y + pos.y)/2, rx: Math.abs(pos.x - drawStart.x)/2, ry: Math.abs(pos.y - drawStart.y)/2 };
+      break;
+    case 'arrow':
+      shapeData = { type: 'arrow', x1: drawStart.x, y1: drawStart.y, x2: pos.x, y2: pos.y };
+      break;
+    case 'pen':
+      shapeData = { type: 'pen', points: [...penPoints] };
+      break;
+  }
+
+  if (shapeData && (currentTool === 'pen' ? penPoints.length > 3 : true)) {
+    pendingShape = { ...shapeData, color: currentColor, frame: getFrameNumber(), time: video.currentTime };
+    // Focus note input
+    document.getElementById('new-note-input').focus();
+    showToast('标注已绘制 · 请在右侧添加说明');
+  }
+
+  canvas.style.cursor = currentTool === 'cursor' ? 'default' : 'crosshair';
+  renderAnnotations();
+}
+
+function onCanvasClick(e) {
+  if (!videoLoaded) return;
+  const pos = getCanvasPos(e);
+
+  if (currentTool === 'text') {
+    const text = prompt('输入标注文字:');
+    if (text) {
+      pendingShape = { type: 'text', x: pos.x, y: pos.y, text, color: currentColor, frame: getFrameNumber(), time: video.currentTime };
+      submitAnnotation();
+    }
+    return;
+  }
+
+  if (currentTool === 'cursor') {
+    // Check if clicking on an annotation
+    const frame = getFrameNumber();
+    const ann = findAnnotationAtPos(pos, frame);
+    if (ann) {
+      showFloatPopup(ann, e.clientX, e.clientY);
+    } else {
+      closeFloatPopup();
+    }
+  }
+}
+
+function findAnnotationAtPos(pos, frame) {
+  const visible = annotations.filter(a => !a.resolved && Math.abs(a.frame - frame) <= 1);
+  for (let i = visible.length - 1; i >= 0; i--) {
+    const a = visible[i];
+    if (isPointOnShape(pos, a)) return a;
+  }
+  return null;
+}
+
+function isPointOnShape(pos, ann) {
+  const s = ann.shape;
+  const margin = 12;
+  switch (s.type) {
+    case 'rect':
+      return pos.x >= s.x - margin && pos.x <= s.x + s.w + margin &&
+             pos.y >= s.y - margin && pos.y <= s.y + s.h + margin;
+    case 'ellipse':
+      return Math.abs(pos.x - s.cx) <= s.rx + margin && Math.abs(pos.y - s.cy) <= s.ry + margin;
+    case 'arrow': {
+      const dx = s.x2 - s.x1, dy = s.y2 - s.y1;
+      const len = Math.sqrt(dx*dx + dy*dy);
+      if (len === 0) return false;
+      const t = Math.max(0, Math.min(1, ((pos.x - s.x1) * dx + (pos.y - s.y1) * dy) / (len * len)));
+      const px = s.x1 + t * dx - pos.x;
+      const py = s.y1 + t * dy - pos.y;
+      return Math.sqrt(px*px + py*py) < margin;
+    }
+    case 'pen': {
+      if (!s.points || s.points.length === 0) return false;
+      for (let i = 0; i < s.points.length - 1; i++) {
+        const p1 = s.points[i], p2 = s.points[i+1];
+        const dx = p2.x - p1.x, dy = p2.y - p1.y;
+        const len2 = dx*dx + dy*dy;
+        if (len2 === 0) continue;
+        const t = Math.max(0, Math.min(1, ((pos.x - p1.x)*dx + (pos.y - p1.y)*dy) / len2));
+        const nx = p1.x + t*dx - pos.x, ny = p1.y + t*dy - pos.y;
+        if (Math.sqrt(nx*nx + ny*ny) < margin) return true;
+      }
+      return false;
+    }
+    case 'text':
+      return Math.abs(pos.x - s.x) < 60 && Math.abs(pos.y - s.y) < 20;
+    default:
+      return false;
+  }
+}
+
+// ═══════════════════════════════════════════
+//  RENDER ANNOTATIONS
+// ═══════════════════════════════════════════
+function renderAnnotations() {
+  if (!videoLoaded) return;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const frame = getFrameNumber();
+  const visible = annotations.filter(a => !a.resolved && Math.abs(a.frame - frame) <= 1);
+
+  visible.forEach((ann, idx) => {
+    const isActive = ann.id === activeAnnotationId;
+    drawShape(ann.shape, isActive, idx + 1);
+  });
+
+  // Draw pending shape
+  if (pendingShape && !isDrawing) {
+    ctx.save();
+    ctx.strokeStyle = currentColor;
+    ctx.fillStyle = currentColor + '20';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([5, 3]);
+    drawShapePath(pendingShape);
+    ctx.restore();
+  }
+}
+
+function drawShape(s, isActive, index) {
+  ctx.save();
+  ctx.strokeStyle = s.color || '#6366f1';
+  ctx.fillStyle = (s.color || '#6366f1') + (isActive ? '30' : '18');
+  ctx.lineWidth = isActive ? 2.5 : 2;
+  ctx.setLineDash([]);
+  ctx.shadowColor = s.color || '#6366f1';
+  ctx.shadowBlur = isActive ? 8 : 4;
+
+  switch (s.type) {
+    case 'rect':
+      ctx.strokeRect(s.x, s.y, s.w, s.h);
+      ctx.fillRect(s.x, s.y, s.w, s.h);
+      // Number badge
+      drawBadge(ctx, s.x + 4, s.y - 10, index, s.color);
+      break;
+    case 'ellipse':
+      ctx.beginPath();
+      ctx.ellipse(s.cx, s.cy, s.rx, s.ry, 0, 0, Math.PI * 2);
+      ctx.fill(); ctx.stroke();
+      drawBadge(ctx, s.cx - s.rx + 4, s.cy - s.ry - 10, index, s.color);
+      break;
+    case 'arrow':
+      drawArrow(ctx, s.x1, s.y1, s.x2, s.y2, s.color, 2.5);
+      drawBadge(ctx, s.x1 - 8, s.y1 - 10, index, s.color);
+      break;
+    case 'pen':
+      if (!s.points || s.points.length < 2) break;
+      ctx.beginPath();
+      ctx.moveTo(s.points[0].x, s.points[0].y);
+      s.points.forEach(p => ctx.lineTo(p.x, p.y));
+      ctx.stroke();
+      drawBadge(ctx, s.points[0].x - 8, s.points[0].y - 10, index, s.color);
+      break;
+    case 'text':
+      ctx.shadowBlur = 0;
+      ctx.font = 'bold 14px DM Sans, sans-serif';
+      ctx.fillStyle = s.color;
+      ctx.strokeStyle = 'rgba(0,0,0,0.8)';
+      ctx.lineWidth = 3;
+      ctx.strokeText(s.text, s.x, s.y);
+      ctx.fillText(s.text, s.x, s.y);
+      drawBadge(ctx, s.x - 8, s.y - 20, index, s.color);
+      break;
+  }
+  ctx.restore();
+}
+
+function drawShapePath(s) {
+  switch (s.type) {
+    case 'rect':
+      ctx.strokeRect(s.x, s.y, s.w, s.h);
+      ctx.fillRect(s.x, s.y, s.w, s.h);
+      break;
+    case 'ellipse':
+      ctx.beginPath();
+      ctx.ellipse(s.cx, s.cy, s.rx, s.ry, 0, 0, Math.PI*2);
+      ctx.fill(); ctx.stroke();
+      break;
+    case 'arrow':
+      drawArrow(ctx, s.x1, s.y1, s.x2, s.y2, s.color, 2);
+      break;
+    case 'pen':
+      if (!s.points || s.points.length < 2) break;
+      ctx.beginPath();
+      ctx.moveTo(s.points[0].x, s.points[0].y);
+      s.points.forEach(p => ctx.lineTo(p.x, p.y));
+      ctx.stroke();
+      break;
+  }
+}
+
+function drawBadge(ctx, x, y, num, color) {
+  ctx.save();
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = color || '#6366f1';
+  const r = 9;
+  ctx.beginPath();
+  ctx.arc(x + r, y + r, r, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 10px DM Mono, monospace';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(num, x + r, y + r + 0.5);
+  ctx.restore();
+}
+
+function drawArrow(ctx, x1, y1, x2, y2, color, width) {
+  const dx = x2 - x1, dy = y2 - y1;
+  const len = Math.sqrt(dx*dx + dy*dy);
+  if (len < 1) return;
+  const nx = dx/len, ny = dy/len;
+  const hw = Math.max(width * 3, 10);
+  const hl = Math.min(hw * 1.5, len * 0.4);
+
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+  ctx.lineWidth = width;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x2 - nx * hl * 0.5, y2 - ny * hl * 0.5);
+  ctx.stroke();
+
+  // Arrowhead
+  ctx.beginPath();
+  ctx.moveTo(x2, y2);
+  ctx.lineTo(x2 - nx*hl - ny*hw, y2 - ny*hl + nx*hw);
+  ctx.lineTo(x2 - nx*hl + ny*hw, y2 - ny*hl - nx*hw);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+// ═══════════════════════════════════════════
+//  ANNOTATION MARKERS ON TIMELINE
+// ═══════════════════════════════════════════
+function renderAnnotationMarkers() {
+  const container = document.getElementById('annotation-markers');
+  container.innerHTML = '';
+  const dur = video.duration || 1;
+  const w = document.getElementById('timeline-track').clientWidth - 32;
+
+  annotations.forEach(ann => {
+    const pct = (ann.time / dur) * 100;
+    const el = document.createElement('div');
+    el.style.cssText = `position:absolute;left:${pct}%;bottom:0;transform:translateX(-50%);
+      width:10px;height:10px;border-radius:50%;background:${ann.shape.color};
+      cursor:pointer;border:1.5px solid rgba(255,255,255,0.3);
+      transition:transform .15s;box-shadow:0 0 6px ${ann.shape.color}60;`;
+    el.title = `F${ann.frame} · ${ann.author.name}`;
+    if (ann.resolved) { el.style.opacity = '0.4'; el.style.filter = 'grayscale(1)'; }
+    el.addEventListener('click', () => {
+      video.currentTime = ann.time;
+      setActiveAnnotation(ann.id);
+    });
+    el.addEventListener('mouseenter', () => el.style.transform = 'translateX(-50%) scale(1.5)');
+    el.addEventListener('mouseleave', () => el.style.transform = 'translateX(-50%) scale(1)');
+    container.appendChild(el);
+  });
+}
+
+// ═══════════════════════════════════════════
+//  ANNOTATION CRUD
+// ═══════════════════════════════════════════
+function submitAnnotation() {
+  const noteEl = document.getElementById('new-note-input');
+  const note = noteEl.value.trim();
+
+  if (!pendingShape && !note) {
+    showToast('请先在视频上绘制标注');
+    return;
+  }
+
+  const shape = pendingShape || { type: 'rect', x: 50, y: 50, w: 100, h: 60, color: currentColor, frame: getFrameNumber(), time: video.currentTime };
+
+  const ann = {
+    id: annIdCounter++,
+    frame: shape.frame || getFrameNumber(),
+    time: shape.time || video.currentTime,
+    shape: { ...shape, color: shape.color || currentColor },
+    note: note || '(无文字说明)',
+    author: { name: ROLES[currentRole].name, role: currentRole, short: ROLES[currentRole].short, color: ROLES[currentRole].color },
+    createdAt: new Date(),
+    comments: [],
+    resolved: false
+  };
+
+  annotations.push(ann);
+  pendingShape = null;
+  noteEl.value = '';
+
+  setActiveAnnotation(ann.id);
+  renderAnnotationList();
+  renderAnnotationMarkers();
+  renderAnnotations();
+  updateCount();
+  showToast(`标注 #${ann.id} 已添加`);
+
+  // Jump to that frame
+  video.currentTime = ann.time;
+}
+
+function cancelNewAnnotation() {
+  pendingShape = null;
+  document.getElementById('new-note-input').value = '';
+  renderAnnotations();
+}
+
+function setActiveAnnotation(id) {
+  activeAnnotationId = id;
+  renderAnnotations();
+  renderAnnotationList();
+
+  // Scroll the card into view
+  setTimeout(() => {
+    const card = document.getElementById('ann-card-' + id);
+    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 50);
+}
+
+function deleteAnnotation(id) {
+  annotations = annotations.filter(a => a.id !== id);
+  if (activeAnnotationId === id) activeAnnotationId = null;
+  renderAnnotations();
+  renderAnnotationList();
+  renderAnnotationMarkers();
+  updateCount();
+  closeFloatPopup();
+  showToast('标注已删除');
+}
+
+function resolveAnnotation(id) {
+  const ann = annotations.find(a => a.id === id);
+  if (ann) {
+    ann.resolved = !ann.resolved;
+    renderAnnotations();
+    renderAnnotationList();
+    renderAnnotationMarkers();
+    updateCount();
+    showToast(ann.resolved ? '标注已标记为已解决' : '标注已重新开启');
+  }
+}
+
+function addComment(annId) {
+  const input = document.getElementById('reply-' + annId);
+  if (!input) return;
+  const text = input.value.trim();
+  if (!text) return;
+
+  const ann = annotations.find(a => a.id === annId);
+  if (!ann) return;
+
+  ann.comments.push({
+    id: Date.now(),
+    author: { name: ROLES[currentRole].name, role: currentRole, short: ROLES[currentRole].short, color: ROLES[currentRole].color },
+    text,
+    createdAt: new Date(),
+    reactions: { '👍': 0, '✅': 0, '❤️': 0 },
+    myReactions: {}
+  });
+
+  input.value = '';
+  renderAnnotationList();
+  setActiveAnnotation(annId);
+  showToast('评论已发布');
+}
+
+function toggleReaction(annId, commentId, emoji) {
+  const ann = annotations.find(a => a.id === annId);
+  if (!ann) return;
+  const comment = ann.comments.find(c => c.id === commentId);
+  if (!comment) return;
+
+  const key = currentRole + '_' + emoji;
+  if (comment.myReactions[key]) {
+    comment.reactions[emoji]--;
+    delete comment.myReactions[key];
+  } else {
+    comment.reactions[emoji] = (comment.reactions[emoji] || 0) + 1;
+    comment.myReactions[key] = true;
+  }
+  renderAnnotationList();
+}
+
+function undoLast() {
+  if (pendingShape) {
+    pendingShape = null;
+    renderAnnotations();
+    showToast('已取消当前绘制');
+    return;
+  }
+  const myAnns = annotations.filter(a => a.author.role === currentRole);
+  if (myAnns.length === 0) { showToast('没有可撤销的操作'); return; }
+  const last = myAnns[myAnns.length - 1];
+  deleteAnnotation(last.id);
+  showToast('已撤销最近标注');
+}
+
+// ═══════════════════════════════════════════
+//  RENDER LIST
+// ═══════════════════════════════════════════
+function renderAnnotationList() {
+  const list = document.getElementById('annotation-list');
+  const emptyState = document.getElementById('empty-state');
+  const frame = getFrameNumber();
+
+  let filtered = annotations.filter(a => resolvedView ? a.resolved : !a.resolved);
+  if (filterCurrentFrame) {
+    filtered = filtered.filter(a => Math.abs(a.frame - frame) <= 1);
+  }
+
+  if (filtered.length === 0) {
+    list.innerHTML = '';
+    list.appendChild(emptyState);
+    emptyState.style.display = 'flex';
+    return;
+  }
+
+  emptyState.style.display = 'none';
+  list.innerHTML = '';
+
+  filtered.sort((a, b) => a.time - b.time).forEach((ann, idx) => {
+    const isActive = ann.id === activeAnnotationId;
+    const card = document.createElement('div');
+    card.className = 'annotation-card' + (isActive ? ' active' : '') + (ann.resolved ? ' resolved' : '');
+    card.id = 'ann-card-' + ann.id;
+    card.onclick = (e) => {
+      if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      video.currentTime = ann.time;
+      setActiveAnnotation(ann.id);
+    };
+
+    const typeIcon = { rect: '▭', ellipse: '◯', arrow: '↗', pen: '✏', text: 'T' }[ann.shape.type] || '●';
+    const timeSince = getRelativeTime(ann.createdAt);
+
+    let commentsHtml = '';
+    ann.comments.forEach(c => {
+      const reactionHtml = Object.entries(c.reactions).map(([emoji, count]) => {
+        const isMyReaction = c.myReactions && c.myReactions[currentRole + '_' + emoji];
+        return `<span class="reaction-chip ${isMyReaction ? 'active' : ''}" onclick="toggleReaction(${ann.id},${c.id},'${emoji}');event.stopPropagation()">
+          ${emoji} <span>${count || ''}</span>
+        </span>`;
+      }).join('');
+
+      commentsHtml += `<div class="comment-item">
+        <div class="comment-avatar" style="background:linear-gradient(135deg,${c.author.color},${c.author.color}99)">${c.author.short}</div>
+        <div class="comment-body">
+          <div class="comment-header">
+            <span class="comment-author">${c.author.name}</span>
+            <span class="comment-ts">${getRelativeTime(c.createdAt)}</span>
+          </div>
+          <div class="comment-text">${escHtml(c.text)}</div>
+          <div class="comment-reactions">${reactionHtml}</div>
+        </div>
+      </div>`;
+    });
+
+    card.innerHTML = `
+      <div class="ann-card-header">
+        <div class="ann-type-badge" style="background:${ann.shape.color}22;color:${ann.shape.color}">${typeIcon}</div>
+        <div class="ann-meta">
+          <div class="ann-author">${ann.author.name}</div>
+          <div class="ann-time">${timeSince}</div>
+        </div>
+        <div class="ann-frame-badge">F${ann.frame}</div>
+      </div>
+      ${ann.note ? `<div class="ann-note">${escHtml(ann.note)}</div>` : ''}
+      ${commentsHtml ? `<div class="ann-comments">${commentsHtml}</div>` : ''}
+      <div class="reply-input-wrap">
+        <div class="comment-avatar" style="background:linear-gradient(135deg,${ROLES[currentRole].color},${ROLES[currentRole].color}99);width:20px;height:20px;font-size:8px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;flex-shrink:0">${ROLES[currentRole].short}</div>
+        <input class="reply-input" id="reply-${ann.id}" placeholder="回复..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){addComment(${ann.id});event.preventDefault();}">
+        <button class="send-btn" onclick="addComment(${ann.id});event.stopPropagation()">↵</button>
+        <button class="flat-btn" style="margin-left:2px;font-size:10px;" onclick="resolveAnnotation(${ann.id});event.stopPropagation()">${ann.resolved ? '↩' : '✓'}</button>
+        <button class="flat-btn danger" style="font-size:10px;" onclick="deleteAnnotation(${ann.id});event.stopPropagation()">✕</button>
+      </div>`;
+
+    list.appendChild(card);
+  });
+}
+
+function updateCount() {
+  document.getElementById('ann-count').textContent = annotations.filter(a => !a.resolved).length;
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+
+function getRelativeTime(date) {
+  if (!date) return '';
+  const now = new Date();
+  const diff = Math.floor((now - new Date(date)) / 1000);
+  if (diff < 10) return '刚刚';
+  if (diff < 60) return diff + '秒前';
+  if (diff < 3600) return Math.floor(diff/60) + '分钟前';
+  if (diff < 86400) return Math.floor(diff/3600) + '小时前';
+  return Math.floor(diff/86400) + '天前';
+}
+
+// ═══════════════════════════════════════════
+//  FLOAT POPUP
+// ═══════════════════════════════════════════
+function showFloatPopup(ann, clientX, clientY) {
+  floatPopupAnnId = ann.id;
+  const popup = document.getElementById('float-popup');
+  const vw = videoWrapper.getBoundingClientRect();
+  const x = Math.min(clientX - vw.left + 12, vw.width - 300);
+  const y = Math.max(clientY - vw.top - 80, 8);
+  popup.style.left = x + 'px';
+  popup.style.top = y + 'px';
+  document.getElementById('fp-title').textContent = ann.author.name + ' · F' + ann.frame;
+  document.getElementById('fp-note').textContent = ann.note;
+  popup.classList.add('show');
+}
+
+function closeFloatPopup() {
+  document.getElementById('float-popup').classList.remove('show');
+  floatPopupAnnId = null;
+}
+
+function floatGoToAnnotation() {
+  if (!floatPopupAnnId) return;
+  setActiveAnnotation(floatPopupAnnId);
+  closeFloatPopup();
+}
+
+function floatDeleteAnnotation() {
+  if (!floatPopupAnnId) return;
+  deleteAnnotation(floatPopupAnnId);
+}
+
+// ═══════════════════════════════════════════
+//  TOOLS
+// ═══════════════════════════════════════════
+function selectTool(tool) {
+  currentTool = tool;
+  document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('tool-' + tool);
+  if (btn) btn.classList.add('active');
+  canvas.classList.toggle('drawing', tool !== 'cursor');
+  canvas.style.cursor = tool === 'cursor' ? 'default' : 'crosshair';
+}
+
+function selectColor(color, el) {
+  currentColor = color;
+  document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
+  if (el) el.classList.add('active');
+}
+
+// ═══════════════════════════════════════════
+//  ROLE
+// ═══════════════════════════════════════════
+function switchRole(role) {
+  currentRole = role;
+  document.getElementById('role-advertiser').classList.toggle('active', role === 'advertiser');
+  document.getElementById('role-creator').classList.toggle('active', role === 'creator');
+  const av = document.getElementById('current-avatar');
+  av.textContent = ROLES[role].short;
+  av.className = 'avatar ' + ROLES[role].avatarClass;
+  renderAnnotationList();
+  showToast('已切换为 ' + ROLES[role].name);
+}
+
+// ═══════════════════════════════════════════
+//  TABS & FILTER
+// ═══════════════════════════════════════════
+function switchTab(tab) {
+  resolvedView = tab === 'resolved';
+  document.querySelectorAll('.panel-tab').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  renderAnnotationList();
+}
+
+function filterCurrent() {
+  filterCurrentFrame = !filterCurrentFrame;
+  event.target.style.background = filterCurrentFrame ? 'var(--accent)' : '';
+  event.target.style.color = filterCurrentFrame ? '#fff' : '';
+  renderAnnotationList();
+}
+
+// ═══════════════════════════════════════════
+//  DEMO ANNOTATIONS
+// ═══════════════════════════════════════════
+function loadDemoAnnotations() {
+  annotations = [];
+  annIdCounter = 1;
+
+  const dur = video.duration || 60;
+
+  const demoData = [
+    {
+      frame: Math.floor(dur * FPS * 0.08),
+      time: dur * 0.08,
+      shape: { type: 'rect', x: 60, y: 40, w: 180, h: 100, color: '#ef4444' },
+      note: '这里的品牌LOGO太小了，需要放大至少1.5倍，确保在手机端可以清晰识别。',
+      role: 'advertiser',
+      comments: [
+        { text: '好的，我这边会调整。需要放在左上角还是右上角？', role: 'creator', reactions: { '👍': 2, '✅': 0, '❤️': 0 } }
+      ]
+    },
+    {
+      frame: Math.floor(dur * FPS * 0.18),
+      time: dur * 0.18,
+      shape: { type: 'arrow', x1: 320, y1: 200, x2: 220, y2: 280, color: '#eab308' },
+      note: '这个转场效果太突兀，建议改为渐变淡入，时长约0.5秒。',
+      role: 'advertiser',
+      comments: []
+    },
+    {
+      frame: Math.floor(dur * FPS * 0.32),
+      time: dur * 0.32,
+      shape: { type: 'ellipse', cx: 480, cy: 270, rx: 120, ry: 70, color: '#06b6d4' },
+      note: '产品特写可以再停留久一些，当前只有0.8秒，建议延长到1.5秒。',
+      role: 'creator',
+      comments: [
+        { text: '已收到，下一版本会调整时长。', role: 'advertiser', reactions: { '👍': 1, '✅': 1, '❤️': 0 } }
+      ]
+    },
+    {
+      frame: Math.floor(dur * FPS * 0.55),
+      time: dur * 0.55,
+      shape: { type: 'pen', points: generatePenPoints(50, 350, 200, 60), color: '#ec4899' },
+      note: '背景音乐在这里有点吵，建议降低至主音量的40%。',
+      role: 'advertiser',
+      comments: []
+    }
+  ];
+
+  demoData.forEach(d => {
+    const r = d.role;
+    const ann = {
+      id: annIdCounter++,
+      frame: d.frame,
+      time: d.time,
+      shape: { ...d.shape },
+      note: d.note,
+      author: { name: ROLES[r].name, role: r, short: ROLES[r].short, color: ROLES[r].color },
+      createdAt: new Date(Date.now() - Math.random() * 3600000),
+      comments: d.comments.map(c => ({
+        id: Date.now() + Math.random(),
+        author: { name: ROLES[c.role].name, role: c.role, short: ROLES[c.role].short, color: ROLES[c.role].color },
+        text: c.text,
+        createdAt: new Date(Date.now() - Math.random() * 1800000),
+        reactions: c.reactions,
+        myReactions: {}
+      })),
+      resolved: false
+    };
+    annotations.push(ann);
+  });
+
+  renderAnnotationList();
+  renderAnnotationMarkers();
+  renderAnnotations();
+  updateCount();
+}
+
+function generatePenPoints(startX, startY, length, amplitude) {
+  const pts = [];
+  for (let i = 0; i <= 30; i++) {
+    const t = i / 30;
+    pts.push({
+      x: startX + t * length,
+      y: startY + Math.sin(t * Math.PI * 3) * amplitude * 0.4 + Math.cos(t * Math.PI * 5) * amplitude * 0.2
+    });
+  }
+  return pts;
+}
+
+// ═══════════════════════════════════════════
+//  EXPORT
+// ═══════════════════════════════════════════
+function exportAnnotations() {
+  const data = annotations.map(a => ({
+    id: a.id,
+    frame: a.frame,
+    timecode: fmtTime(a.time),
+    type: a.shape.type,
+    author: a.author.name,
+    role: a.author.role,
+    note: a.note,
+    resolved: a.resolved,
+    comments: a.comments.map(c => ({ author: c.author.name, text: c.text }))
+  }));
+
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'framecollab-annotations.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('标注数据已导出为 JSON');
+}
+
+// ═══════════════════════════════════════════
+//  KEYBOARD
+// ═══════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+    if (e.key === 'Enter' && e.shiftKey && e.target.id === 'new-note-input') {
+      submitAnnotation();
+      e.preventDefault();
+    }
+    return;
+  }
+
+  switch (e.key) {
+    case ' ': togglePlay(); e.preventDefault(); break;
+    case ',': stepFrame(-1); break;
+    case '.': stepFrame(1); break;
+    case 'v': case 'V': selectTool('cursor'); break;
+    case 'a': case 'A': selectTool('arrow'); break;
+    case 'r': case 'R': selectTool('rect'); break;
+    case 'e': case 'E': selectTool('ellipse'); break;
+    case 'p': case 'P': selectTool('pen'); break;
+    case 't': case 'T': selectTool('text'); break;
+    case 'Escape': cancelNewAnnotation(); closeFloatPopup(); break;
+    case 'z': case 'Z': if (e.ctrlKey || e.metaKey) { undoLast(); e.preventDefault(); } break;
+    case 'Delete': case 'Backspace':
+      if (activeAnnotationId) deleteAnnotation(activeAnnotationId);
+      break;
+  }
+});
+
+// ═══════════════════════════════════════════
+//  DRAG & DROP VIDEO
+// ═══════════════════════════════════════════
+document.addEventListener('dragover', e => {
+  e.preventDefault();
+  if (!videoLoaded) document.getElementById('drop-zone').classList.add('upload-area-active');
+});
+document.addEventListener('dragleave', () => {
+  document.getElementById('drop-zone').classList.remove('upload-area-active');
+});
+document.addEventListener('drop', e => {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('upload-area-active');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('video/')) {
+    const url = URL.createObjectURL(file);
+    setupVideo(url);
+    document.getElementById('project-title').textContent = file.name.replace(/\.[^.]+$/, '') + ' · 审核v1';
+  }
+});
+
+// ═══════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════
+let toastTimer = null;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ═══════════════════════════════════════════
+//  KBD HINTS
+// ═══════════════════════════════════════════
+function showKbd() {
+  const el = document.getElementById('kbd-hints');
+  el.style.display = el.style.display === 'block' ? 'none' : 'block';
+}
+
+// ═══════════════════════════════════════════
+//  RESIZE
+// ═══════════════════════════════════════════
+window.addEventListener('resize', () => {
+  if (videoLoaded) {
+    syncCanvasSize();
+    buildRuler();
+    renderAnnotations();
+    renderAnnotationMarkers();
+  }
+});
+
+// ═══════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════
+renderAnnotationList();
+updateCount();
+</script>
+</body>
+</html>

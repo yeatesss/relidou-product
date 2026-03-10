@@ -8,7 +8,6 @@ import {
   Mic,
   Monitor,
   AlertCircle,
-  ChevronLeft,
   Bot,
   Maximize2,
 } from 'lucide-react'
@@ -18,6 +17,7 @@ import { useAuth } from '../contexts/AuthContext'
 const SERVICE = {
   id: 1,
   title: '美妆抖音信息流 15s 起量短视频制作（含脚本+拍摄+剪辑）',
+  publishTime: '2026-02-20T10:30:00',
   rating: 4.9,
   reviewCount: 256,
   submissionsReceived: 180,
@@ -28,7 +28,6 @@ const SERVICE = {
     avatar: '创',
     acceptanceRate: 90,
     avgReviewTime: '3小时',
-    totalOrders: 48,
   },
 
   coverImages: [
@@ -43,8 +42,7 @@ const SERVICE = {
     price: 36,
     firstReviewPrice: 12,
     secondReviewPrice: 24,
-    desc: '100字左右的简单用户生成内容视频，可以在家里或办公室拍摄',
-    items: '4 条 15s 竖版信息流视频',
+    items: '4条',
     acceptAI: '不接受',
     scene: '不限',
     style: '不限',
@@ -56,17 +54,13 @@ const SERVICE = {
     endTime: '2026-02-26T18:00',
   },
 
-  description: `**任务说明**
-本任务面向有抖音信息流投放需求的广告主，创作者需根据品牌提供的产品资料和投放目标，独立完成脚本策划、拍摄和剪辑。
-
-**交付规范**
-- 视频尺寸：1080×1920（9:16 竖版）
-- 时长：13-17 秒（平台推荐区间）
-- 格式：MP4，不低于 1080P
-- 不允许使用 AI 换脸、AI 配音
-
-**协同方式**
-接单后广告主将在 24 小时内发送产品资料与投放 Brief，创作者按约定时效提交初稿，广告主按盲盒机制审片验收。`,
+  description: {
+    basic: '本任务面向有抖音信息流投放需求的广告主，创作者需根据品牌提供的产品资料和投放目标，独立完成脚本策划、拍摄和剪辑。视频时长13-17秒，格式为MP4，不低于1080P。',
+    mandatory: '1. 视频尺寸：1080×1920（9:16 竖版）\n2. 时长：13-17秒（平台推荐区间）\n3. 不允许使用AI换脸、AI配音\n4. 必须包含产品特写镜头',
+    optional: '风格偏好：年轻活力、快节奏剪辑\n参考案例：可参考抖音同类产品爆款视频\n创意方向：突出产品核心卖点，前3秒抓住用户注意力',
+    reference: '已上传3个参考视频，展示期望的视频风格和剪辑节奏',
+    supplementary: '接单后广告主将在24小时内发送产品资料与投放Brief，创作者按约定时效提交初稿，广告主按盲盒机制审片验收。',
+  },
 }
 
 export default function OrderDetail() {
@@ -74,7 +68,6 @@ export default function OrderDetail() {
   const navigate = useNavigate()
   const { isAuthenticated } = useAuth()
   const [isVisible, setIsVisible] = useState(false)
-  const [activeImage, setActiveImage] = useState(0)
   const [ordered, setOrdered] = useState(false)
   const [showCodeModal, setShowCodeModal] = useState(false)
   const [orderCode, setOrderCode] = useState('')
@@ -146,140 +139,110 @@ export default function OrderDetail() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
           {/* ═══════════════════════════════════
-              左侧主内容：标题 / 广告主 / 主视觉 / 服务详情
+              左侧主内容：标题+发布信息 / 服务详情
           ═══════════════════════════════════ */}
           <div className="lg:col-span-2 space-y-6">
 
-            {/* ── 服务标题 ── */}
+            {/* ── 任务标题+发布信息 ── */}
             <div
               className={`bg-white rounded-xl p-6 shadow-sm transition-all duration-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
                 }`}
             >
-              <h1 className="text-xl sm:text-2xl font-bold text-[#1a1a1a] leading-snug">
+              <h1 className="text-xl sm:text-2xl font-bold text-[#1a1a1a] leading-snug mb-4">
                 {SERVICE.title}
               </h1>
+              <div className="flex flex-wrap items-center gap-4 text-sm text-[#74767e]">
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4" />
+                  <span>发布时间：{new Date(SERVICE.publishTime).toLocaleString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
+                </div>
+                <div className="w-px h-4 bg-[#e4e5e7]" />
+                <div className="flex items-center gap-2">
+                  <span>发布人：</span>
+                  <span className="font-medium text-[#1a1a1a]">{SERVICE.advertiser.name}</span>
+                </div>
+              </div>
             </div>
 
-            {/* ── 广告主信息区（含评分） ── */}
+            {/* ── 服务详情模块 ── */}
             <div
-              className={`bg-white rounded-xl p-6 shadow-sm transition-all duration-500 delay-75 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+              className={`bg-white rounded-xl shadow-sm transition-all duration-500 delay-100 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
                 }`}
             >
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                {/* 头像 + 名称 + 评分 */}
-                <div
-                  className="flex items-center gap-3 cursor-pointer group"
-                  onClick={() => navigate('/creators/1')}
-                >
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#1dbf73] to-[#003912] flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
-                    {SERVICE.advertiser.avatar}
+              <div className="p-6">
+                <h2 className="text-base font-bold text-[#1a1a1a] mb-4">服务详情</h2>
+
+                {/* 分段式详情展示 */}
+                <div className="border border-[#e4e5e7] rounded-lg overflow-hidden">
+                  {/* 基础要求 */}
+                  <div className="border-b border-[#e4e5e7] last:border-b-0">
+                    <div className="bg-gray-50 px-4 py-2 border-b border-[#e4e5e7]">
+                      <span className="text-sm font-medium text-[#1a1a1a]">基础要求</span>
+                    </div>
+                    <div className="px-4 py-3 text-sm text-[#74767e] leading-relaxed">
+                      {SERVICE.description.basic}
+                    </div>
                   </div>
+
+                  {/* 硬性要求 */}
+                  <div className="border-b border-[#e4e5e7] last:border-b-0">
+                    <div className="bg-gray-50 px-4 py-2 border-b border-[#e4e5e7]">
+                      <span className="text-sm font-medium text-[#1a1a1a]">硬性要求</span>
+                    </div>
+                    <div className="px-4 py-3 text-sm text-[#74767e] leading-relaxed whitespace-pre-line">
+                      {SERVICE.description.mandatory}
+                    </div>
+                  </div>
+
+                  {/* 非硬性要求 */}
+                  <div className="border-b border-[#e4e5e7] last:border-b-0">
+                    <div className="bg-gray-50 px-4 py-2 border-b border-[#e4e5e7]">
+                      <span className="text-sm font-medium text-[#1a1a1a]">非硬性要求</span>
+                    </div>
+                    <div className="px-4 py-3 text-sm text-[#74767e] leading-relaxed whitespace-pre-line">
+                      {SERVICE.description.optional}
+                    </div>
+                  </div>
+
+                  {/* 素材参考 */}
+                  <div className="border-b border-[#e4e5e7] last:border-b-0">
+                    <div className="bg-gray-50 px-4 py-2 border-b border-[#e4e5e7]">
+                      <span className="text-sm font-medium text-[#1a1a1a]">素材参考</span>
+                    </div>
+                    <div className="px-4 py-3">
+                      <p className="text-sm text-[#74767e] leading-relaxed mb-3">
+                        {SERVICE.description.reference}
+                      </p>
+                      {/* 素材缩略图网格 */}
+                      <div className="w-1/2">
+                        <div className="grid grid-cols-4 gap-2">
+                          {SERVICE.coverImages.map((img, i) => (
+                            <div
+                              key={i}
+                              className={`aspect-video rounded-lg bg-gradient-to-br ${img.bg} border-2 border-[#e4e5e7] overflow-hidden relative group cursor-pointer`}
+                            >
+                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                                <span className="text-xs text-white/80 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  {img.label}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 补充说明 */}
                   <div>
-                    <div className="font-semibold text-[#1a1a1a] group-hover:text-[#1dbf73] transition-colors">
-                      {SERVICE.advertiser.name}
+                    <div className="bg-gray-50 px-4 py-2 border-b border-[#e4e5e7]">
+                      <span className="text-sm font-medium text-[#1a1a1a]">补充说明</span>
                     </div>
-                    <div className="flex items-center gap-1 mt-0.5">
-                      <Star className="w-3.5 h-3.5 fill-[#ffb33e] text-[#ffb33e]" />
-                      <span className="text-sm font-medium text-[#1a1a1a]">{SERVICE.rating}</span>
-                      <span className="text-xs text-[#74767e]">（{SERVICE.reviewCount} 条评价）</span>
+                    <div className="px-4 py-3 text-sm text-[#74767e] leading-relaxed">
+                      {SERVICE.description.supplementary}
                     </div>
                   </div>
                 </div>
-
-                {/* 数据指标 */}
-                <div className="flex items-center gap-6">
-                  <div className="text-center">
-                    <div className="text-lg font-bold text-[#1a1a1a]">
-                      {SERVICE.advertiser.acceptanceRate}%
-                    </div>
-                    <div className="text-xs text-[#74767e] mt-0.5">验收通过率</div>
-                  </div>
-                  <div className="w-px h-6 bg-[#e4e5e7]" />
-                  <div className="text-center">
-                    <div className="text-lg font-bold text-[#1a1a1a]">
-                      {SERVICE.advertiser.avgReviewTime}
-                    </div>
-                    <div className="text-xs text-[#74767e] mt-0.5">平均验收时间</div>
-                  </div>
-                  <div className="w-px h-6 bg-[#e4e5e7]" />
-                  <div className="text-center">
-                    <div className="text-lg font-bold text-[#1a1a1a]">
-                      {SERVICE.advertiser.totalOrders}
-                    </div>
-                    <div className="text-xs text-[#74767e] mt-0.5">累计成交</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* ── 主视觉区 ── */}
-            <div
-              className={`bg-white rounded-xl overflow-hidden shadow-sm transition-all duration-500 delay-100 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-                }`}
-            >
-              {/* 主图 */}
-              <div
-                className={`relative w-full h-72 sm:h-96 bg-gradient-to-br ${SERVICE.coverImages[activeImage].bg} flex items-center justify-center`}
-              >
-                <div className="text-center text-white/80">
-                  <Maximize2 className="w-10 h-10 mx-auto mb-2 opacity-40" />
-                  <div className="text-sm opacity-60">{SERVICE.coverImages[activeImage].label}</div>
-                  <div className="text-xs opacity-40 mt-1">素材封面预览</div>
-                </div>
-                {/* 角标 */}
-                <div className="absolute top-4 left-4 bg-[#1dbf73] text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
-                  起量素材
-                </div>
-                {/* 切换箭头 */}
-                <button
-                  onClick={() =>
-                    setActiveImage((prev) => (prev - 1 + SERVICE.coverImages.length) % SERVICE.coverImages.length)
-                  }
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-black/30 hover:bg-black/50 rounded-full flex items-center justify-center text-white transition-colors"
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => setActiveImage((prev) => (prev + 1) % SERVICE.coverImages.length)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-black/30 hover:bg-black/50 rounded-full flex items-center justify-center text-white transition-colors"
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-                {/* 进度指示 */}
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">
-                  {SERVICE.coverImages.map((_, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setActiveImage(i)}
-                      className={`rounded-full transition-all ${i === activeImage ? 'w-5 h-2 bg-white' : 'w-2 h-2 bg-white/50'
-                        }`}
-                    />
-                  ))}
-                </div>
-              </div>
-              {/* 缩略图轨道 */}
-              <div className="flex gap-2 p-3 overflow-x-auto bg-[#fafafa]">
-                {SERVICE.coverImages.map((img, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setActiveImage(i)}
-                    className={`flex-shrink-0 w-16 h-12 rounded-lg bg-gradient-to-br ${img.bg} border-2 transition-all ${activeImage === i
-                        ? 'border-[#1dbf73] scale-105 shadow-sm'
-                        : 'border-transparent opacity-55 hover:opacity-90'
-                      }`}
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* ── 服务详情描述 ── */}
-            <div
-              className={`bg-white rounded-xl p-6 shadow-sm transition-all duration-500 delay-150 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-                }`}
-            >
-              <h2 className="text-base font-bold text-[#1a1a1a] mb-4">服务详情</h2>
-              <div className="text-sm text-[#74767e] leading-relaxed whitespace-pre-line">
-                {SERVICE.description}
               </div>
             </div>
           </div>
@@ -296,15 +259,25 @@ export default function OrderDetail() {
 
                 {/* 区块标题 */}
                 <div className="px-5 pt-5 pb-4 border-b border-[#f0f0f0]">
-                  <div className="flex items-center justify-between mb-0.5">
-                    <h2 className="font-bold text-[#1a1a1a] text-base">当前任务</h2>
-                    <span className="text-xs text-[#74767e] bg-[#f5f5f5] px-2.5 py-1 rounded-full">
-                      已投稿 {SERVICE.submissionsReceived} 单
-                    </span>
+                  <h2 className="font-bold text-[#1a1a1a] text-base mb-3">当前任务</h2>
+                  <div className="grid grid-cols-4 gap-3">
+                    <div className="text-center">
+                      <div className="text-xs font-semibold text-[#1a1a1a]">{SERVICE.submissionsAccepted}</div>
+                      <div className="text-[10px] text-[#74767e]">已验收</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xs font-semibold text-[#1a1a1a]">{SERVICE.submissionsReceived}</div>
+                      <div className="text-[10px] text-[#74767e]">已投稿</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xs font-semibold text-[#1a1a1a]">{SERVICE.advertiser.acceptanceRate}%</div>
+                      <div className="text-[10px] text-[#74767e]">验收通过率</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xs font-semibold text-[#1a1a1a]">{SERVICE.advertiser.avgReviewTime}</div>
+                      <div className="text-[10px] text-[#74767e]">平均验收时间</div>
+                    </div>
                   </div>
-                  <p className="text-xs text-[#74767e]">
-                    已验收 {SERVICE.submissionsAccepted}/{SERVICE.submissionsReceived} 单
-                  </p>
                 </div>
 
                 {/* 佣金价格区 */}
@@ -322,11 +295,6 @@ export default function OrderDetail() {
                       <div className="font-semibold text-[#1a1a1a]">¥{SERVICE.task.secondReviewPrice}</div>
                     </div>
                   </div>
-                </div>
-
-                {/* 简要描述 */}
-                <div className="px-5 py-4 border-b border-[#f0f0f0]">
-                  <p className="text-sm text-[#74767e] leading-relaxed">{SERVICE.task.desc}</p>
                 </div>
 
                 {/* 任务参数列表 */}

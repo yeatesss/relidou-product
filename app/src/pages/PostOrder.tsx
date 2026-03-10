@@ -32,6 +32,10 @@ export default function PostOrder() {
   const [isVisible, setIsVisible] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [showConfirmModal, setShowConfirmModal] = useState(false)
+  const [showQRCode, setShowQRCode] = useState(false)
+  const [showAIReviewModal, setShowAIReviewModal] = useState(false)
+  const [isAIReviewing, setIsAIReviewing] = useState(false)
+  const [aiReviewResult, setAiReviewResult] = useState<any>(null)
 
   // 表单数据更新
   const updateFormData = (updates: Partial<typeof formData>) => {
@@ -57,6 +61,7 @@ export default function PostOrder() {
     coverImages: [] as string[], // 参考视频/图片
     startTime: '', // 任务开始时间
     endTime: '', // 任务结束时间
+    orderCode: '', // 发单码
   })
 
   useEffect(() => {
@@ -78,6 +83,83 @@ export default function PostOrder() {
 
   // 确认发布（提交给运营审核）
   const confirmPublish = () => {
+    // 验证发单码
+    if (!formData.orderCode || formData.orderCode.trim() === '') {
+      alert('请先填写发单码！扫描客服二维码获取发单码。')
+      setShowConfirmModal(false)
+      return
+    }
+
+    // 验证发单码格式（示例：6位数字或字母）
+    const codeRegex = /^[A-Za-z0-9]{6}$/
+    if (!codeRegex.test(formData.orderCode.trim())) {
+      alert('发单码格式不正确，请检查后重新输入！')
+      setShowConfirmModal(false)
+      return
+    }
+
+    alert('任务已提交运营审核！')
+    navigate('/client-workspace')
+  }
+
+  // AI预审
+  const handleAIReview = async () => {
+    // 验证发单码
+    if (!formData.orderCode || formData.orderCode.trim() === '') {
+      alert('请先填写发单码！扫描客服二维码获取发单码。')
+      return
+    }
+
+    // 验证发单码格式
+    const codeRegex = /^[A-Za-z0-9]{6}$/
+    if (!codeRegex.test(formData.orderCode.trim())) {
+      alert('发单码格式不正确，请检查后重新输入！')
+      return
+    }
+
+    setShowAIReviewModal(true)
+    setIsAIReviewing(true)
+
+    // 模拟AI调用
+    await new Promise(resolve => setTimeout(resolve, 2000))
+
+    // 模拟AI返回结果
+    const mockAIResult = {
+      score: 75,
+      status: 'warning', // pass, warning, fail
+      suggestions: [
+        {
+          type: '基础要求',
+          content: '任务描述较为简单，建议补充更多细节，例如：视频的具体应用场景、目标受众画像、品牌调性要求等',
+          priority: 'medium'
+        },
+        {
+          type: '硬性要求',
+          content: '硬性要求部分填写较为完整，但建议明确禁止使用的内容类型，如：敏感词汇、争议话题等',
+          priority: 'low'
+        },
+        {
+          type: '任务参数',
+          content: '素材条数建议根据实际需求调整，4条素材可能数量较多，可考虑分批发布',
+          priority: 'medium'
+        },
+        {
+          type: '发单码验证',
+          content: '发单码已验证通过，可以正常发布任务',
+          priority: 'low',
+          isPass: true
+        }
+      ],
+      overall: '任务基本信息完整，发单码验证通过。建议优化任务描述，补充更多细节要求，以获得更符合预期的作品。'
+    }
+
+    setIsAIReviewing(false)
+    setAiReviewResult(mockAIResult)
+  }
+
+  // 确认发布（AI预审通过后）
+  const confirmPublishAfterReview = () => {
+    setShowAIReviewModal(false)
     alert('任务已提交运营审核！')
     navigate('/client-workspace')
   }
@@ -473,6 +555,55 @@ export default function PostOrder() {
                       <option value="24小时">24小时（特急）</option>
                     </select>
                   </div>
+
+                  {/* 分隔线 */}
+                  <div className="border-t border-[#e4e5e7] my-3" />
+
+                  {/* 发单码 */}
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <label className="text-xs text-[#74767e] w-20 flex-shrink-0">发单码</label>
+                      <input
+                        type="text"
+                        placeholder="请输入6位发单码"
+                        value={formData.orderCode}
+                        onChange={(e) => updateFormData({ orderCode: e.target.value.toUpperCase() })}
+                        maxLength={6}
+                        className="flex-1 px-3 py-1.5 text-sm border border-[#e4e5e7] rounded focus:outline-none focus:border-[#1dbf73]"
+                      />
+                    </div>
+
+                    {/* 客服二维码展开按钮 */}
+                    <button
+                      onClick={() => setShowQRCode(!showQRCode)}
+                      className="w-full text-xs text-[#1dbf73] hover:text-[#19a463] font-medium flex items-center justify-center gap-1"
+                    >
+                      <Info className="w-3.5 h-3.5" />
+                      {showQRCode ? '隐藏客服二维码' : '获取发单码：扫码添加客服'}
+                    </button>
+
+                    {/* 客服二维码 */}
+                    {showQRCode && (
+                      <div className="bg-[#f5f5f5] rounded-lg p-3">
+                        <div className="flex flex-col items-center">
+                          {/* 二维码图片 */}
+                          <div className="w-32 h-32 bg-white rounded-lg overflow-hidden mb-2">
+                            <img
+                              src="customer-service-qrcode.png"
+                              alt="客服二维码"
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+
+                          {/* 提示文字 */}
+                          <div className="text-center">
+                            <p className="text-xs font-medium text-[#404145]">扫描二维码添加客服</p>
+                            <p className="text-xs text-[#74767e] mt-0.5">微信号：relidou_service</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -491,6 +622,39 @@ export default function PostOrder() {
               </div>
               <h3 className="text-lg font-bold text-[#1a1a1a]">确认提交审核</h3>
             </div>
+
+            {/* 发单码提示 */}
+            <div className="bg-blue-50 border-l-4 border-blue-500 p-3 rounded-r-lg mb-4">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                <div className="text-xs text-blue-900">
+                  <p className="font-medium mb-1">发布前请确认</p>
+                  <ul className="space-y-0.5 text-blue-700">
+                    <li>• 确保已填写发单码（6位字符）</li>
+                    <li>• 如未获取发单码，请先扫码添加客服</li>
+                    <li>• 任务提交后预计24小时内完成审核</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* 发单码状态 */}
+            {formData.orderCode ? (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-green-600" />
+                  <span className="text-sm font-medium text-green-800">已填写发单码：{formData.orderCode}</span>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-amber-600" />
+                  <span className="text-sm font-medium text-amber-800">未填写发单码</span>
+                </div>
+              </div>
+            )}
+
             <p className="text-[#74767e] text-sm leading-relaxed mb-6">
               确认后将提交给运营审核，预计24小时内完成审核，确认提交吗？
             </p>
@@ -524,14 +688,154 @@ export default function PostOrder() {
               取消
             </Button>
             <Button
-              onClick={() => setShowConfirmModal(true)}
-              className="bg-[#1dbf73] hover:bg-[#19a463] text-white px-8"
+              onClick={handleAIReview}
+              className="bg-gradient-to-r from-[#1dbf73] to-[#19a463] hover:from-[#19a463] hover:to-[#158f57] text-white px-8 flex items-center gap-2"
             >
-              确认发布
+              <Bot className="w-4 h-4" />
+              AI预审发布
             </Button>
           </div>
         </div>
       </div>
+
+      {/* AI预审弹窗 */}
+      {showAIReviewModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[85vh] overflow-hidden flex flex-col">
+            {/* 弹窗头部 */}
+            <div className="px-6 py-4 border-b border-[#e4e5e7]">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-[#1dbf73] to-[#19a463] rounded-xl flex items-center justify-center">
+                    <Bot className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-[#1a1a1a]">AI智能预审</h3>
+                    <p className="text-xs text-[#74767e]">基于大语言模型智能分析任务质量</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowAIReviewModal(false)
+                    setAiReviewResult(null)
+                  }}
+                  className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors"
+                >
+                  <X className="w-4 h-4 text-slate-500" />
+                </button>
+              </div>
+            </div>
+
+            {/* 弹窗内容 */}
+            <div className="flex-1 overflow-y-auto px-6 py-4">
+              {isAIReviewing ? (
+                // AI分析中状态
+                <div className="flex flex-col items-center justify-center py-12">
+                  <div className="w-16 h-16 bg-gradient-to-br from-[#1dbf73]/10 to-[#19a463]/10 rounded-full flex items-center justify-center mb-4 animate-pulse">
+                    <Bot className="w-8 h-8 text-[#1dbf73]" />
+                  </div>
+                  <p className="text-base font-semibold text-[#404145] mb-2">AI正在分析您的任务...</p>
+                  <p className="text-sm text-[#74767e]">这可能需要几秒钟</p>
+                </div>
+              ) : aiReviewResult ? (
+                // AI分析结果
+                <div className="space-y-4">
+                  {/* 总体评分 */}
+                  <div className="bg-gradient-to-r from-[#f0faf5] to-[#dcfce7] rounded-xl p-4 border border-[#1dbf73]/20">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-[#404145]">任务完整度评分</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-2xl font-bold text-[#1dbf73]">{aiReviewResult.score}</span>
+                        <span className="text-sm text-[#74767e]">/100</span>
+                      </div>
+                    </div>
+                    <div className="w-full bg-white/50 rounded-full h-2">
+                      <div
+                        className="bg-gradient-to-r from-[#1dbf73] to-[#19a463] h-2 rounded-full transition-all"
+                        style={{ width: `${aiReviewResult.score}%` }}
+                      />
+                    </div>
+                    <p className="text-sm text-[#404145] mt-3 leading-relaxed">{aiReviewResult.overall}</p>
+                  </div>
+
+                  {/* 优化建议列表 */}
+                  <div>
+                    <h4 className="text-sm font-bold text-[#1a1a1a] mb-3 flex items-center gap-2">
+                      <Info className="w-4 h-4 text-[#1dbf73]" />
+                      优化建议
+                    </h4>
+                    <div className="space-y-3">
+                      {aiReviewResult.suggestions.map((suggestion: any, index: number) => (
+                        <div
+                          key={index}
+                          className={`border rounded-lg p-3 ${
+                            suggestion.isPass
+                              ? 'bg-green-50 border-green-200'
+                              : suggestion.priority === 'high'
+                              ? 'bg-red-50 border-red-200'
+                              : suggestion.priority === 'medium'
+                              ? 'bg-amber-50 border-amber-200'
+                              : 'bg-blue-50 border-blue-200'
+                          }`}
+                        >
+                          <div className="flex items-start gap-2">
+                            {suggestion.isPass ? (
+                              <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+                            ) : (
+                              <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                            )}
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-xs font-medium text-[#404145]">{suggestion.type}</span>
+                                {!suggestion.isPass && (
+                                  <span className={`text-xs px-2 py-0.5 rounded-full ${
+                                    suggestion.priority === 'high'
+                                      ? 'bg-red-100 text-red-700'
+                                      : suggestion.priority === 'medium'
+                                      ? 'bg-amber-100 text-amber-700'
+                                      : 'bg-blue-100 text-blue-700'
+                                  }`}>
+                                    {suggestion.priority === 'high' ? '重要' : suggestion.priority === 'medium' ? '建议' : '提示'}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-sm text-[#404145] leading-relaxed">{suggestion.content}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+
+            {/* 弹窗底部 */}
+            <div className="px-6 py-4 border-t border-[#e4e5e7] bg-gray-50">
+              {!isAIReviewing && aiReviewResult ? (
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => {
+                      setShowAIReviewModal(false)
+                      setAiReviewResult(null)
+                    }}
+                    className="flex-1 py-2.5 border border-[#e4e5e7] text-[#404145] rounded-lg hover:bg-white transition-colors font-medium text-sm"
+                  >
+                    返回修改
+                  </button>
+                  <button
+                    onClick={confirmPublishAfterReview}
+                    className="flex-1 py-2.5 bg-gradient-to-r from-[#1dbf73] to-[#19a463] hover:from-[#19a463] hover:to-[#158f57] text-white rounded-lg transition-colors font-medium text-sm flex items-center justify-center gap-2"
+                  >
+                    <CheckCircle className="w-4 h-4" />
+                    确认发布
+                  </button>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
