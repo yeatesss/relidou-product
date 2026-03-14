@@ -3,9 +3,6 @@ import {
   Search,
   Filter,
   MoreHorizontal,
-  Eye,
-  Ban,
-  CheckCircle,
   Mail,
   Phone,
   Calendar,
@@ -118,86 +115,68 @@ export default function AdminUsers() {
         </div>
       </div>
 
-      {/* Users Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-slate-50">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">用户信息</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">联系方式</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">公司</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">订单数</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">消费总额</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">状态</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">注册时间</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">操作</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filteredUsers.map((user) => (
-                <tr key={user.id} className="hover:bg-slate-50">
-                  <td className="px-4 py-4">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="w-10 h-10 bg-[#1dbf73]">
-                        <AvatarFallback className="text-white">{user.name[0]}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="text-sm font-medium text-slate-800">{user.name}</p>
-                        <p className="text-xs text-slate-500">{user.lastActive}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-4">
-                    <div className="text-sm">
-                      <p className="flex items-center gap-1 text-slate-600">
-                        <Mail className="w-3 h-3" />
-                        {user.email}
-                      </p>
-                      <p className="flex items-center gap-1 text-slate-500 mt-1">
-                        <Phone className="w-3 h-3" />
-                        {user.phone}
-                      </p>
-                    </div>
-                  </td>
-                  <td className="px-4 py-4 text-sm text-slate-600">{user.company}</td>
-                  <td className="px-4 py-4">
-                    <div className="flex items-center gap-1 text-sm text-slate-600">
-                      <ShoppingCart className="w-4 h-4" />
-                      {user.orders}
-                    </div>
-                  </td>
-                  <td className="px-4 py-4 text-sm font-medium text-[#1dbf73]">{user.totalSpent}</td>
-                  <td className="px-4 py-4">
-                    <Badge className={getStatusColor(user.status)}>{user.status}</Badge>
-                  </td>
-                  <td className="px-4 py-4 text-sm text-slate-500">
-                    <div className="flex items-center gap-1">
-                      <Calendar className="w-3 h-3" />
-                      {user.joinedAt}
-                    </div>
-                  </td>
-                  <td className="px-4 py-4">
-                    <div className="flex items-center gap-1">
-                      <button className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-700" title="查看详情">
-                        <Eye className="w-4 h-4" />
-                      </button>
-                      <button className="p-2 hover:bg-green-50 rounded-lg text-slate-500 hover:text-green-600" title="通过审核">
-                        <CheckCircle className="w-4 h-4" />
-                      </button>
-                      <button className="p-2 hover:bg-red-50 rounded-lg text-slate-500 hover:text-red-600" title="禁用">
-                        <Ban className="w-4 h-4" />
-                      </button>
-                      <button className="p-2 hover:bg-slate-100 rounded-lg text-slate-500">
-                        <MoreHorizontal className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      {/* Users Card Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {filteredUsers.map((user) => (
+          <div key={user.id} className="bg-white rounded-xl p-4 shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+            {/* 头像 + 名称 + 状态 */}
+            <div className="flex items-start gap-3 mb-3">
+              <Avatar className="w-14 h-14 bg-[#1dbf73]">
+                <AvatarFallback className="text-white text-lg font-medium">{user.name[0]}</AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between gap-2">
+                  <h3 className="text-base font-bold text-slate-800 truncate">{user.name}</h3>
+                  <Badge className={getStatusColor(user.status) + " shrink-0"}>{user.status}</Badge>
+                </div>
+                <p className="text-xs text-slate-500 mt-1 truncate">{user.company}</p>
+              </div>
+            </div>
+
+            {/* 联系方式 */}
+            <div className="space-y-1 mb-3">
+              <div className="flex items-center gap-2 text-xs text-slate-600">
+                <Mail className="w-3 h-3 shrink-0" />
+                <span className="truncate">{user.email}</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-slate-600">
+                <Phone className="w-3 h-3 shrink-0" />
+                <span>{user.phone}</span>
+              </div>
+            </div>
+
+            {/* 统计信息 */}
+            <div className="grid grid-cols-2 gap-2 mb-3">
+              <div className="bg-slate-50 rounded-lg p-2 text-center">
+                <div className="flex items-center justify-center gap-1 text-slate-500 text-xs mb-1">
+                  <ShoppingCart className="w-3 h-3" />
+                  <span>订单数</span>
+                </div>
+                <p className="text-lg font-bold text-slate-800">{user.orders}</p>
+              </div>
+              <div className="bg-slate-50 rounded-lg p-2 text-center">
+                <p className="text-slate-500 text-xs mb-1">消费总额</p>
+                <p className="text-lg font-bold text-[#1dbf73]">{user.totalSpent}</p>
+              </div>
+            </div>
+
+            {/* 注册时间 */}
+            <div className="flex items-center gap-1 text-xs text-slate-500 mb-3">
+              <Calendar className="w-3 h-3" />
+              <span>注册于 {user.joinedAt}</span>
+            </div>
+
+            {/* 操作按钮 */}
+            <div className="flex gap-2">
+              <button className="flex-1 px-3 py-2 bg-[#1dbf73] hover:bg-[#19a463] text-white text-xs font-medium rounded-lg transition-colors">
+                查看详情
+              </button>
+              <button className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-700 border border-slate-200" title="更多操作">
+                <MoreHorizontal className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   )

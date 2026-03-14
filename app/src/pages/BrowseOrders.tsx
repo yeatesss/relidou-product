@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Search, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 
 // ─── 平台 Tabs ────────────────────────────────────────────────
 const platformTabs = ['全部', '抖音', '快手', '小红书', '视频号']
@@ -25,7 +26,7 @@ const ALL_TASKS = [
     id: 1,
     title: '美妆抖音信息流视频素材制作',
     platforms: ['抖音', '快手'],
-    creator: { name: '小鱼工作室', avatar: '鱼', rating: 4.9, reviews: 128 },
+    advertiser: { name: '花漾美妆', avatar: '花' },
     price: 200,
     duration: '普通72小时',
     isUrgent: false,
@@ -34,7 +35,7 @@ const ALL_TASKS = [
     id: 2,
     title: '本地生活探店视频拍摄剪辑',
     platforms: ['小红书', '抖音'],
-    creator: { name: '探店达人小王', avatar: '王', rating: 4.8, reviews: 96 },
+    advertiser: { name: '美味餐饮', avatar: '味' },
     price: 300,
     duration: '普通72小时',
     isUrgent: false,
@@ -43,7 +44,7 @@ const ALL_TASKS = [
     id: 3,
     title: '电商产品种草视频KOC真人出镜',
     platforms: ['抖音', '小红书'],
-    creator: { name: '种草女王', avatar: '草', rating: 4.9, reviews: 215 },
+    advertiser: { name: '潮流服饰', avatar: '潮' },
     price: 150,
     duration: '加急48小时',
     isUrgent: true,
@@ -52,7 +53,7 @@ const ALL_TASKS = [
     id: 4,
     title: '小说短剧情演绎视频制作',
     platforms: ['抖音', '快手'],
-    creator: { name: '短剧工厂', avatar: '剧', rating: 4.7, reviews: 73 },
+    advertiser: { name: '网络文学', avatar: '文' },
     price: 500,
     duration: '普通72小时',
     isUrgent: false,
@@ -61,7 +62,7 @@ const ALL_TASKS = [
     id: 5,
     title: '品牌宣传片创意视频拍摄',
     platforms: ['抖音', '视频号'],
-    creator: { name: '创意视觉', avatar: '创', rating: 4.8, reviews: 187 },
+    advertiser: { name: '互联科技', avatar: '科' },
     price: 800,
     duration: '普通72小时',
     isUrgent: false,
@@ -70,7 +71,7 @@ const ALL_TASKS = [
     id: 6,
     title: '快手三农带货视频真人出镜',
     platforms: ['快手'],
-    creator: { name: '乡村小哥', avatar: '哥', rating: 4.6, reviews: 54 },
+    advertiser: { name: '农家特产', avatar: '农' },
     price: 120,
     duration: '加急48小时',
     isUrgent: true,
@@ -79,7 +80,7 @@ const ALL_TASKS = [
     id: 7,
     title: '小红书种草图文+视频全套',
     platforms: ['小红书'],
-    creator: { name: '小红书达人', avatar: '红', rating: 4.9, reviews: 302 },
+    advertiser: { name: '生活好物', avatar: '好' },
     price: 250,
     duration: '普通72小时',
     isUrgent: false,
@@ -88,7 +89,7 @@ const ALL_TASKS = [
     id: 9,
     title: '游戏类信息流竖屏素材制作',
     platforms: ['抖音', '快手'],
-    creator: { name: '游戏工作室', avatar: '游', rating: 4.8, reviews: 89 },
+    advertiser: { name: '游戏发行商', avatar: '游' },
     price: 180,
     duration: '特急24小时',
     isUrgent: true,
@@ -97,7 +98,7 @@ const ALL_TASKS = [
     id: 10,
     title: '金融行业合规口播视频',
     platforms: ['抖音', '视频号'],
-    creator: { name: '财经达人', avatar: '财', rating: 5.0, reviews: 67 },
+    advertiser: { name: '财富管理', avatar: '财' },
     price: 600,
     duration: '普通72小时',
     isUrgent: false,
@@ -106,7 +107,7 @@ const ALL_TASKS = [
     id: 11,
     title: '美食商家探店种草短视频',
     platforms: ['抖音', '小红书'],
-    creator: { name: '美食达人', avatar: '食', rating: 4.9, reviews: 241 },
+    advertiser: { name: '味道餐厅', avatar: '餐' },
     price: 280,
     duration: '加急48小时',
     isUrgent: true,
@@ -115,7 +116,7 @@ const ALL_TASKS = [
     id: 12,
     title: '服装穿搭视频UGC素材采集',
     platforms: ['小红书', '抖音'],
-    creator: { name: '时尚博主', avatar: '尚', rating: 4.6, reviews: 112 },
+    advertiser: { name: '时尚品牌', avatar: '尚' },
     price: 90,
     duration: '普通72小时',
     isUrgent: false,
@@ -173,7 +174,7 @@ export default function BrowseOrders() {
     if (sortBy === '佣金从低到高') return a.price - b.price
     if (sortBy === '佣金从高到低') return b.price - a.price
     if (sortBy === '最新上架') return b.id - a.id
-    return b.creator.reviews - a.creator.reviews // 成交最多
+    return 0 // 成交最多暂无数据，保持原顺序
   })
 
   const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE))
@@ -366,6 +367,14 @@ function TaskCard({
               {p}
             </span>
           ))}
+        </div>
+
+        {/* 广告主信息 */}
+        <div className="flex items-center gap-1.5 mb-3">
+          <Avatar className="w-6 h-6 bg-[#1dbf73]">
+            <AvatarFallback className="text-white text-[10px] font-medium">{task.advertiser.avatar}</AvatarFallback>
+          </Avatar>
+          <span className="text-xs text-[#74767e] truncate">{task.advertiser.name}</span>
         </div>
 
         {/* 价格 + 时效 */}

@@ -14,12 +14,16 @@ import {
   X,
   LogOut,
   ChevronDown,
+  Briefcase,
+  CheckCircle,
 } from 'lucide-react'
 // Button component not used in this file
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 
 const sidebarItems = [
   { path: '/admin/dashboard', icon: LayoutDashboard, label: '数据概览' },
+  { path: '/admin/advertiser-cert', icon: Briefcase, label: '广告主认证' },
+  { path: '/admin/task-review', icon: CheckCircle, label: '任务审核' },
   { path: '/admin/orders', icon: ShoppingCart, label: '订单管理' },
   { path: '/admin/users', icon: Users, label: '甲方用户' },
   { path: '/admin/creators', icon: Video, label: '创作者管理' },

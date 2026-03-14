@@ -31,8 +31,6 @@ export default function PostOrder() {
   const { isAuthenticated } = useAuth()
   const [isVisible, setIsVisible] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  const [showConfirmModal, setShowConfirmModal] = useState(false)
-  const [showQRCode, setShowQRCode] = useState(false)
   const [showAIReviewModal, setShowAIReviewModal] = useState(false)
   const [isAIReviewing, setIsAIReviewing] = useState(false)
   const [aiReviewResult, setAiReviewResult] = useState<any>(null)
@@ -61,7 +59,6 @@ export default function PostOrder() {
     coverImages: [] as string[], // 参考视频/图片
     startTime: '', // 任务开始时间
     endTime: '', // 任务结束时间
-    orderCode: '', // 发单码
   })
 
   useEffect(() => {
@@ -83,40 +80,12 @@ export default function PostOrder() {
 
   // 确认发布（提交给运营审核）
   const confirmPublish = () => {
-    // 验证发单码
-    if (!formData.orderCode || formData.orderCode.trim() === '') {
-      alert('请先填写发单码！扫描客服二维码获取发单码。')
-      setShowConfirmModal(false)
-      return
-    }
-
-    // 验证发单码格式（示例：6位数字或字母）
-    const codeRegex = /^[A-Za-z0-9]{6}$/
-    if (!codeRegex.test(formData.orderCode.trim())) {
-      alert('发单码格式不正确，请检查后重新输入！')
-      setShowConfirmModal(false)
-      return
-    }
-
     alert('任务已提交运营审核！')
     navigate('/client-workspace')
   }
 
   // AI预审
   const handleAIReview = async () => {
-    // 验证发单码
-    if (!formData.orderCode || formData.orderCode.trim() === '') {
-      alert('请先填写发单码！扫描客服二维码获取发单码。')
-      return
-    }
-
-    // 验证发单码格式
-    const codeRegex = /^[A-Za-z0-9]{6}$/
-    if (!codeRegex.test(formData.orderCode.trim())) {
-      alert('发单码格式不正确，请检查后重新输入！')
-      return
-    }
-
     setShowAIReviewModal(true)
     setIsAIReviewing(true)
 
@@ -142,15 +111,9 @@ export default function PostOrder() {
           type: '任务参数',
           content: '素材条数建议根据实际需求调整，4条素材可能数量较多，可考虑分批发布',
           priority: 'medium'
-        },
-        {
-          type: '发单码验证',
-          content: '发单码已验证通过，可以正常发布任务',
-          priority: 'low',
-          isPass: true
         }
       ],
-      overall: '任务基本信息完整，发单码验证通过。建议优化任务描述，补充更多细节要求，以获得更符合预期的作品。'
+      overall: '任务基本信息完整。建议优化任务描述，补充更多细节要求，以获得更符合预期的作品。'
     }
 
     setIsAIReviewing(false)
@@ -558,52 +521,6 @@ export default function PostOrder() {
 
                   {/* 分隔线 */}
                   <div className="border-t border-[#e4e5e7] my-3" />
-
-                  {/* 发单码 */}
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <label className="text-xs text-[#74767e] w-20 flex-shrink-0">发单码</label>
-                      <input
-                        type="text"
-                        placeholder="请输入6位发单码"
-                        value={formData.orderCode}
-                        onChange={(e) => updateFormData({ orderCode: e.target.value.toUpperCase() })}
-                        maxLength={6}
-                        className="flex-1 px-3 py-1.5 text-sm border border-[#e4e5e7] rounded focus:outline-none focus:border-[#1dbf73]"
-                      />
-                    </div>
-
-                    {/* 客服二维码展开按钮 */}
-                    <button
-                      onClick={() => setShowQRCode(!showQRCode)}
-                      className="w-full text-xs text-[#1dbf73] hover:text-[#19a463] font-medium flex items-center justify-center gap-1"
-                    >
-                      <Info className="w-3.5 h-3.5" />
-                      {showQRCode ? '隐藏客服二维码' : '获取发单码：扫码添加客服'}
-                    </button>
-
-                    {/* 客服二维码 */}
-                    {showQRCode && (
-                      <div className="bg-[#f5f5f5] rounded-lg p-3">
-                        <div className="flex flex-col items-center">
-                          {/* 二维码图片 */}
-                          <div className="w-32 h-32 bg-white rounded-lg overflow-hidden mb-2">
-                            <img
-                              src="customer-service-qrcode.png"
-                              alt="客服二维码"
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-
-                          {/* 提示文字 */}
-                          <div className="text-center">
-                            <p className="text-xs font-medium text-[#404145]">扫描二维码添加客服</p>
-                            <p className="text-xs text-[#74767e] mt-0.5">微信号：relidou_service</p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
                 </div>
               </div>
             </div>
@@ -612,69 +529,6 @@ export default function PostOrder() {
         </div>
       </div>
 
-      {/* 确认发布弹窗 */}
-      {showConfirmModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-2xl">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 bg-[#1dbf73]/10 rounded-full flex items-center justify-center flex-shrink-0">
-                <CheckCircle className="w-6 h-6 text-[#1dbf73]" />
-              </div>
-              <h3 className="text-lg font-bold text-[#1a1a1a]">确认提交审核</h3>
-            </div>
-
-            {/* 发单码提示 */}
-            <div className="bg-blue-50 border-l-4 border-blue-500 p-3 rounded-r-lg mb-4">
-              <div className="flex items-start gap-2">
-                <AlertCircle className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                <div className="text-xs text-blue-900">
-                  <p className="font-medium mb-1">发布前请确认</p>
-                  <ul className="space-y-0.5 text-blue-700">
-                    <li>• 确保已填写发单码（6位字符）</li>
-                    <li>• 如未获取发单码，请先扫码添加客服</li>
-                    <li>• 任务提交后预计24小时内完成审核</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            {/* 发单码状态 */}
-            {formData.orderCode ? (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-600" />
-                  <span className="text-sm font-medium text-green-800">已填写发单码：{formData.orderCode}</span>
-                </div>
-              </div>
-            ) : (
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
-                <div className="flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 text-amber-600" />
-                  <span className="text-sm font-medium text-amber-800">未填写发单码</span>
-                </div>
-              </div>
-            )}
-
-            <p className="text-[#74767e] text-sm leading-relaxed mb-6">
-              确认后将提交给运营审核，预计24小时内完成审核，确认提交吗？
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowConfirmModal(false)}
-                className="flex-1 py-2.5 border border-[#e4e5e7] text-[#404145] rounded-lg hover:bg-[#f5f5f5] transition-colors font-medium"
-              >
-                取消
-              </button>
-              <button
-                onClick={confirmPublish}
-                className="flex-1 py-2.5 bg-[#1dbf73] text-white rounded-lg hover:bg-[#19a463] transition-colors font-medium"
-              >
-                确认提交
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* 固定底部按钮栏 */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#e4e5e7] shadow-lg z-50">

@@ -264,7 +264,7 @@ const getStatusColor = (status: string) => {
       return 'bg-orange-100 text-orange-700'
     case '已完成':
       return 'bg-blue-100 text-blue-700'
-    case '订单冻结':
+    case '已冻结':
       return 'bg-gray-200 text-gray-700'
     default:
       return 'bg-slate-100 text-slate-700'
@@ -306,6 +306,13 @@ export default function ClientWorkspace() {
   const [showRechargeModal, setShowRechargeModal] = useState(false)
   const [showVideoReviewModal, setShowVideoReviewModal] = useState(false)
   const [currentReviewBid, setCurrentReviewBid] = useState<any>(null)
+  const [showBidRatingModal, setShowBidRatingModal] = useState(false)
+  const [currentRatingBid, setCurrentRatingBid] = useState<any>(null)
+  const [rating, setRating] = useState(0)
+  const [ratingComment, setRatingComment] = useState('')
+  const [hoveredRating, setHoveredRating] = useState(0)
+  const [bidReviews, setBidReviews] = useState<Map<number, { rating: number, comment: string, time: string }>>(new Map())
+  const [isViewMode, setIsViewMode] = useState(false)
 
   useEffect(() => {
     // 检查登录状态
@@ -540,6 +547,42 @@ export default function ClientWorkspace() {
   const handleViewAuth = (bid: any) => {
     setCurrentAuthBid(bid)
     setShowAuthModal(true)
+  }
+
+  const handleReview = (bid: any) => {
+    const existingReview = bidReviews.get(bid.id)
+    if (existingReview) {
+      // 查看模式
+      setCurrentRatingBid(bid)
+      setRating(existingReview.rating)
+      setRatingComment(existingReview.comment)
+      setIsViewMode(true)
+      setShowBidRatingModal(true)
+    } else {
+      // 新建评价模式
+      setCurrentRatingBid(bid)
+      setRating(0)
+      setRatingComment('')
+      setIsViewMode(false)
+      setShowBidRatingModal(true)
+    }
+  }
+
+  const submitRating = () => {
+    if (rating === 0) {
+      alert('请选择评分星级')
+      return
+    }
+    if (currentRatingBid) {
+      const now = new Date().toLocaleString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+      setBidReviews(prev => new Map(prev).set(currentRatingBid.id, { rating, comment: ratingComment, time: now }))
+      alert('评价成功！')
+      setShowBidRatingModal(false)
+      setCurrentRatingBid(null)
+      setRating(0)
+      setRatingComment('')
+      setIsViewMode(false)
+    }
   }
 
   const handleModifyOrder = (bidId: number) => {
@@ -805,7 +848,7 @@ export default function ClientWorkspace() {
                   </div>
                   {/* 状态筛选 Tab */}
                   <div className="flex gap-2 flex-wrap">
-                    {['全部', '预审已通过', '待修改', '已完成'].map((status) => (
+                    {['全部', '预审已通过', '待修改', '已完成', '已冻结'].map((status) => (
                       <button
                         key={status}
                         onClick={() => setBidStatusFilter(status)}
@@ -824,7 +867,7 @@ export default function ClientWorkspace() {
                   {myBids
                     .filter((bid) => {
                       const matchesSearch = bid.order.toLowerCase().includes(bidSearchKeyword.toLowerCase())
-                      const bidStatus = frozenBids.has(bid.id) ? '订单冻结' : approvedBids.has(bid.id) ? '已完成' : bid.status
+                      const bidStatus = frozenBids.has(bid.id) ? '已冻结' : approvedBids.has(bid.id) ? '已完成' : bid.status
                       const matchesStatus = bidStatusFilter === '全部' || bidStatus === bidStatusFilter
                       return matchesSearch && matchesStatus
                     })
@@ -838,8 +881,8 @@ export default function ClientWorkspace() {
                           <div className="flex-1">
                             <div className="flex items-center justify-between">
                               <p className="font-semibold text-[#404145] text-sm">{bid.creator}</p>
-                              <Badge className={getStatusColor(frozenBids.has(bid.id) ? '订单冻结' : approvedBids.has(bid.id) ? '已完成' : bid.status)}>
-                                {frozenBids.has(bid.id) ? '订单冻结' : approvedBids.has(bid.id) ? '已完成' : bid.status}
+                              <Badge className={getStatusColor(frozenBids.has(bid.id) ? '已冻结' : approvedBids.has(bid.id) ? '已完成' : bid.status)}>
+                                {frozenBids.has(bid.id) ? '已冻结' : approvedBids.has(bid.id) ? '已完成' : bid.status}
                               </Badge>
                             </div>
                             <div className="flex items-center gap-3 mt-1">
@@ -884,7 +927,7 @@ export default function ClientWorkspace() {
                           {/* 操作按钮 */}
                           <div className="flex gap-2 ml-auto items-start">
                             {frozenBids.has(bid.id) ? (
-                              <Badge className={getStatusColor('订单冻结')}>订单冻结</Badge>
+                              <Badge className={getStatusColor('已冻结')}>已冻结</Badge>
                             ) : approvedBids.has(bid.id) || bid.status === '已完成' ? (
                               <>
                                 <Button
@@ -903,6 +946,13 @@ export default function ClientWorkspace() {
                                 >
                                   查看授权书
                                 </Button>
+                                <Button
+                                  size="sm"
+                                  className={bidReviews.has(bid.id) ? 'bg-blue-500 hover:bg-blue-600 text-white text-xs' : 'bg-[#1dbf73] hover:bg-[#19a463] text-xs'}
+                                  onClick={() => handleReview(bid)}
+                                >
+                                  {bidReviews.has(bid.id) ? '查看评价' : '评价'}
+                                </Button>
                               </>
                             ) : bid.status === '预审已通过' ? (
                               <>
@@ -912,14 +962,6 @@ export default function ClientWorkspace() {
                                   onClick={() => handleApproveOrder(bid.id)}
                                 >
                                   确认通过
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="border-slate-200 text-xs"
-                                  onClick={() => handleModifyOrder(bid.id)}
-                                >
-                                  修改
                                 </Button>
                                 <Button
                                   size="sm"
@@ -943,22 +985,6 @@ export default function ClientWorkspace() {
                               <>
                                 <Button
                                   size="sm"
-                                  variant="outline"
-                                  className="border-slate-200 text-xs"
-                                  onClick={() => {
-                                    // 查看修改意见
-                                    const comments = modifyComments.get(bid.id)
-                                    if (comments && comments.length > 0) {
-                                      alert(`修改意见：\n${comments.map(c => `[${c.time}] ${c.content}`).join('\n')}`)
-                                    } else {
-                                      alert('暂无修改意见')
-                                    }
-                                  }}
-                                >
-                                  查看修改意见
-                                </Button>
-                                <Button
-                                  size="sm"
                                   className="bg-[#1dbf73] hover:bg-[#19a463] text-xs"
                                   onClick={() => handleApproveOrder(bid.id)}
                                 >
@@ -967,10 +993,11 @@ export default function ClientWorkspace() {
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  className="border-slate-200 text-xs"
-                                  onClick={() => handleModifyOrder(bid.id)}
+                                  className="border-purple-500 text-purple-600 hover:bg-purple-50 text-xs"
+                                  onClick={() => handleOpenVideoReview(bid)}
                                 >
-                                  继续修改
+                                  <MessageSquare className="w-3 h-3 mr-1" />
+                                  继续审片
                                 </Button>
                                 <Button
                                   size="sm"
@@ -1198,124 +1225,182 @@ export default function ClientWorkspace() {
             <div className="flex-1 overflow-y-auto p-8 bg-slate-50">
               <div className="bg-white max-w-2xl mx-auto p-8 shadow-lg">
                 {/* 授权书标题 */}
-                <div className="text-center mb-8 pb-4 border-b-2 border-slate-200">
+                <div className="text-center mb-6 pb-4 border-b-2 border-slate-200">
                   <h1 className="text-2xl font-bold text-[#1a1a1a] mb-2">视频内容授权书</h1>
                   <p className="text-sm text-[#74767e]">电子合同编号：{currentAuthBid.id ? `AUTH-${currentAuthBid.id}-${new Date().getFullYear()}` : 'AUTH-001-2026'}</p>
+                  <p className="text-xs text-[#74767e] mt-1">生成日期：{new Date().toLocaleDateString('zh-CN')}</p>
                 </div>
 
-                {/* 甲方信息 */}
+                {/* 一、合同双方 */}
                 <div className="mb-6">
-                  <h2 className="text-lg font-bold text-[#1a1a1a] mb-3">甲方（广告主）</h2>
-                  <div className="bg-slate-50 p-4 rounded-lg space-y-2 text-sm">
-                    <div className="flex">
-                      <span className="text-[#74767e] w-24">公司名称：</span>
-                      <span className="font-medium text-[#404145]">热力豆科技有限公司</span>
+                  <h2 className="text-base font-bold text-[#1a1a1a] mb-3">一、合同双方</h2>
+
+                  {/* 甲方信息 */}
+                  <div className="mb-3">
+                    <p className="text-sm font-semibold text-[#1a1a1a] mb-2">甲方（广告主）</p>
+                    <div className="bg-slate-50 p-3 rounded-lg space-y-1 text-sm">
+                      <div className="flex">
+                        <span className="text-[#74767e] w-28 shrink-0">企业名称：</span>
+                        <span className="font-medium text-[#404145]">热力豆科技有限公司</span>
+                      </div>
+                      <div className="flex">
+                        <span className="text-[#74767e] w-28 shrink-0">统一社会信用代码：</span>
+                        <span className="font-medium text-[#404145]">91330100MA2ABCDE5</span>
+                      </div>
+                      <div className="flex">
+                        <span className="text-[#74767e] w-28 shrink-0">联系人：</span>
+                        <span className="font-medium text-[#404145]">王晓寒</span>
+                      </div>
+                      <div className="flex">
+                        <span className="text-[#74767e] w-28 shrink-0">联系邮箱：</span>
+                        <span className="font-medium text-[#404145]">relidou@163.com</span>
+                      </div>
                     </div>
-                    <div className="flex">
-                      <span className="text-[#74767e] w-24">联系人：</span>
-                      <span className="font-medium text-[#404145]">广告主负责人</span>
-                    </div>
-                    <div className="flex">
-                      <span className="text-[#74767e] w-24">联系邮箱：</span>
-                      <span className="font-medium text-[#404145]">contact@reluodou.com</span>
+                  </div>
+
+                  {/* 乙方信息 */}
+                  <div>
+                    <p className="text-sm font-semibold text-[#1a1a1a] mb-2">乙方（创作者）</p>
+                    <div className="bg-slate-50 p-3 rounded-lg space-y-1 text-sm">
+                      <div className="flex">
+                        <span className="text-[#74767e] w-28 shrink-0">创作者：</span>
+                        <span className="font-medium text-[#404145]">{currentAuthBid.creator}</span>
+                      </div>
+                      <div className="flex">
+                        <span className="text-[#74767e] w-28 shrink-0">联系电话：</span>
+                        <span className="font-medium text-[#404145]">139****8765</span>
+                      </div>
+                      <div className="flex">
+                        <span className="text-[#74767e] w-28 shrink-0">身份证号：</span>
+                        <span className="font-medium text-[#404145]">330106********1234</span>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                {/* 乙方信息 */}
+                {/* 二、授权作品 */}
                 <div className="mb-6">
-                  <h2 className="text-lg font-bold text-[#1a1a1a] mb-3">乙方（创作者）</h2>
-                  <div className="bg-slate-50 p-4 rounded-lg space-y-2 text-sm">
-                    <div className="flex">
-                      <span className="text-[#74767e] w-24">创作者：</span>
-                      <span className="font-medium text-[#404145]">{currentAuthBid.creator}</span>
-                    </div>
-                    <div className="flex">
-                      <span className="text-[#74767e] w-24">作品名称：</span>
-                      <span className="font-medium text-[#404145]">{currentAuthBid.order}</span>
-                    </div>
-                    <div className="flex">
-                      <span className="text-[#74767e] w-24">任务金额：</span>
-                      <span className="font-medium text-[#1dbf73]">{currentAuthBid.price}</span>
+                  <h2 className="text-base font-bold text-[#1a1a1a] mb-3">二、授权作品</h2>
+                  <div className="bg-slate-50 p-3 rounded-lg">
+                    <table className="w-full text-sm">
+                      <tbody>
+                        <tr className="border-b border-slate-200">
+                          <td className="py-2 text-[#74767e] w-28">项目名称</td>
+                          <td className="py-2 font-medium text-[#404145]">{currentAuthBid.order}</td>
+                        </tr>
+                        <tr className="border-b border-slate-200">
+                          <td className="py-2 text-[#74767e]">订单编号</td>
+                          <td className="py-2 font-medium text-[#404145]">{currentAuthBid.id || 'ORD-2026-001'}</td>
+                        </tr>
+                        <tr>
+                          <td className="py-2 text-[#74767e]">任务金额</td>
+                          <td className="py-2 font-bold text-[#1dbf73]">{currentAuthBid.price}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <div className="mt-3 pt-3 border-t border-slate-200">
+                      <p className="text-xs text-[#74767e] mb-2">授权文件：</p>
+                      <p className="text-sm text-[#404145] leading-relaxed">
+                        1. 高光时刻视频（精彩片段）<br />
+                        2. 水印版视频（添加水印）<br />
+                        3. 无水印高清视频（最终交付版本）
+                      </p>
                     </div>
                   </div>
                 </div>
 
-                {/* 授权内容 */}
+                {/* 三、授权内容 */}
                 <div className="mb-6">
-                  <h2 className="text-lg font-bold text-[#1a1a1a] mb-3">授权内容</h2>
-                  <div className="bg-slate-50 p-4 rounded-lg text-sm leading-relaxed text-[#404145] space-y-3">
-                    <p>
-                      <strong>1. 授权权利：</strong>
-                      乙方（创作者）同意将视频作品的完整著作权，包括但不限于复制权、发行权、信息网络传播权、改编权、翻译权、汇编权、表演权、放映权、广播权、制作权等全部著作财产权授权给甲方使用。
-                    </p>
-                    <p>
-                      <strong>2. 授权范围：</strong>
-                      甲方可在其指定的商业渠道、平台及宣传材料中使用该视频，包括但不限于抖音、快手、视频号、公众号、电视广告、电商平台等各类媒体平台。
-                    </p>
-                    <p>
-                      <strong>3. 授权期限：</strong>
-                      自授权书签署之日起，授权期限为<span className="text-[#1dbf73] font-bold">永久</span>有效。
-                    </p>
-                    <p>
-                      <strong>4. 授权地域：</strong>
-                      全球范围内。
-                    </p>
-                    <p>
-                      <strong>5. 使用方式：</strong>
-                      甲方有权对视频进行剪辑、配音、添加字幕、特效处理等二次创作，无需另行征得乙方同意。
-                    </p>
-                    <p>
-                      <strong>6. 独占性：</strong>
-                      本授权为独占性授权，乙方不得将同一作品或其衍生作品授权给第三方使用。
-                    </p>
+                  <h2 className="text-base font-bold text-[#1a1a1a] mb-3">三、授权内容</h2>
+                  <div className="bg-slate-50 p-3 rounded-lg text-sm leading-relaxed text-[#404145] space-y-2">
+                    <p><strong>1. 授权权利：</strong>乙方将视频作品的完整著作权授权给甲方，包括但不限于复制权、发行权、信息网络传播权、改编权、翻译权、汇编权。</p>
+                    <p><strong>2. 授权范围：</strong>短视频平台（抖音、快手、小红书、视频号、B站）、电视媒体、网络平台、线下场景、电商平台等。</p>
+                    <p><strong>3. 授权期限：</strong><span className="text-[#1dbf73] font-bold">永久</span>有效。</p>
+                    <p><strong>4. 授权地域：</strong>全球范围。</p>
+                    <p><strong>5. 使用方式：</strong>甲方有权对视频进行剪辑、配音、添加字幕、特效处理等二次创作，无需另行征得乙方同意。</p>
+                    <p><strong>6. 独占性：</strong>本授权为独占性授权，乙方不得将同一作品授权给第三方使用。</p>
                   </div>
                 </div>
 
-                {/* 法律效力 */}
+                {/* 四、费用说明 */}
                 <div className="mb-6">
-                  <h2 className="text-lg font-bold text-[#1a1a1a] mb-3">法律效力</h2>
-                  <div className="bg-slate-50 p-4 rounded-lg text-sm leading-relaxed text-[#404145]">
-                    <p className="mb-3">
+                  <h2 className="text-base font-bold text-[#1a1a1a] mb-3">四、费用说明</h2>
+                  <div className="bg-slate-50 p-3 rounded-lg">
+                    <table className="w-full text-sm">
+                      <tbody>
+                        <tr className="border-b border-slate-200">
+                          <td className="py-2 text-[#74767e]">任务总价</td>
+                          <td className="py-2 font-medium text-[#404145] text-right">{currentAuthBid.price}</td>
+                        </tr>
+                        <tr className="border-b border-slate-200">
+                          <td className="py-2 text-[#74767e]">第一次验收（30%）</td>
+                          <td className="py-2 font-medium text-[#404145] text-right">¥360.00</td>
+                        </tr>
+                        <tr>
+                          <td className="py-2 text-[#74767e]">第二次验收（70%）</td>
+                          <td className="py-2 font-medium text-[#404145] text-right">¥840.00</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <div className="mt-3 pt-3 border-t border-slate-200 text-center">
+                      <span className="text-sm font-medium text-[#1dbf73]">✅ 已全额支付</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 五、法律效力 */}
+                <div className="mb-6">
+                  <h2 className="text-base font-bold text-[#1a1a1a] mb-3">五、法律效力</h2>
+                  <div className="bg-slate-50 p-3 rounded-lg text-sm leading-relaxed text-[#404145] space-y-2">
+                    <p>
                       <strong>1. 电子合同效力：</strong>
-                      本授权书以电子合同形式签署，具有与纸质合同同等的法律效力。平台采用时间戳和哈希值技术确保合同的完整性和不可篡改性。
-                    </p>
-                    <p className="mb-3">
-                      <strong>2. 法律证据：</strong>
-                      本授权书附带的时间戳（{new Date().toLocaleString('zh-CN')}）和哈希值值作为法律证据，可用于司法诉讼、版权登记等法律程序。
+                      本授权书以电子合同形式签署，采用时间戳技术，具有与纸质合同同等的法律效力。
+                      <span className="block mt-1 text-xs text-[#74767e]">时间戳：{new Date().toLocaleString('zh-CN')}</span>
                     </p>
                     <p>
-                      <strong>3. 权利保证：</strong>
+                      <strong>2. 权利保证：</strong>
                       乙方保证对其创作的视频作品拥有完整的著作权，不存在侵犯第三方知识产权的情形。如因版权纠纷产生的一切法律责任由乙方承担。
                     </p>
                   </div>
                 </div>
 
-                {/* 签署信息 */}
-                <div className="grid grid-cols-2 gap-6 mb-6">
-                  <div className="border border-slate-200 rounded-lg p-4">
-                    <p className="text-sm font-bold text-[#1a1a1a] mb-2">甲方（广告主）</p>
-                    <div className="text-xs text-[#74767e] space-y-1">
-                      <p>签署日期：{new Date().toLocaleDateString('zh-CN')}</p>
-                      <p>时间戳：{Date.now()}</p>
-                      <p>哈希值：{Math.random().toString(36).substring(2, 15)}{Math.random().toString(36).substring(2, 15)}</p>
+                {/* 六、签署信息 */}
+                <div className="mb-6">
+                  <h2 className="text-base font-bold text-[#1a1a1a] mb-3">六、签署信息</h2>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="border border-slate-200 rounded-lg p-3">
+                      <p className="text-xs font-bold text-[#1a1a1a] mb-2">甲方（广告主）</p>
+                      <div className="text-xs text-[#74767e] space-y-1">
+                        <p>签署日期：{new Date().toLocaleDateString('zh-CN')}</p>
+                        <p>时间戳：{Date.now()}</p>
+                      </div>
+                    </div>
+                    <div className="border border-slate-200 rounded-lg p-3">
+                      <p className="text-xs font-bold text-[#1a1a1a] mb-2">乙方（创作者）</p>
+                      <div className="text-xs text-[#74767e] space-y-1">
+                        <p>签署日期：{new Date().toLocaleDateString('zh-CN')}</p>
+                        <p>时间戳：{Date.now()}</p>
+                      </div>
                     </div>
                   </div>
-                  <div className="border border-slate-200 rounded-lg p-4">
-                    <p className="text-sm font-bold text-[#1a1a1a] mb-2">乙方（创作者）</p>
-                    <div className="text-xs text-[#74767e] space-y-1">
-                      <p>签署日期：{new Date().toLocaleDateString('zh-CN')}</p>
-                      <p>时间戳：{Date.now()}</p>
-                      <p>哈希值：{Math.random().toString(36).substring(2, 15)}{Math.random().toString(36).substring(2, 15)}</p>
-                    </div>
+                  <div className="mt-3 text-center">
+                    <span className="text-sm font-medium text-[#1dbf73]">✅ 已生效</span>
                   </div>
                 </div>
 
-                {/* 免责声明 */}
-                <div className="bg-[#fff7ed] border-l-4 border-[#f97316] p-4 rounded-r-lg">
-                  <p className="text-sm text-[#9a7a69]">
+                {/* 七、免责声明 */}
+                <div className="bg-[#fff7ed] border-l-4 border-[#f97316] p-3 rounded-r-lg">
+                  <p className="text-xs text-[#9a7a69] leading-relaxed">
                     <strong>免责声明：</strong>
-                    本授权书由平台根据甲乙双方交易记录自动生成。平台仅提供技术支持和存储服务，不对授权内容的真实性和合法性承担责任。如授权内容与事实不符，由提供虚假信息的一方承担全部法律责任。
+                    本授权书由热力豆平台根据甲乙双方交易记录自动生成。平台仅提供技术支持和存储服务，不对授权内容的真实性和合法性承担责任。如授权内容与事实不符，由提供虚假信息的一方承担全部法律责任。
+                  </p>
+                </div>
+
+                {/* 底部说明 */}
+                <div className="mt-6 text-center">
+                  <p className="text-xs text-[#74767e]">
+                    本授权书由热力豆平台自动生成<br />
+                    生成时间：{new Date().toLocaleString('zh-CN')}
                   </p>
                 </div>
               </div>
@@ -1867,6 +1952,125 @@ export default function ClientWorkspace() {
           onClose={() => setShowVideoReviewModal(false)}
           onSubmit={handleReviewSubmit}
         />
+      )}
+
+      {/* 评价弹窗 */}
+      {showBidRatingModal && currentRatingBid && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl">
+            {/* 头部 */}
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-[#1a1a1a]">{isViewMode ? '查看评价' : '评价创作者'}</h3>
+              <button
+                onClick={() => {
+                  setShowBidRatingModal(false)
+                  setIsViewMode(false)
+                }}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors"
+              >
+                <X className="w-5 h-5 text-slate-500" />
+              </button>
+            </div>
+
+            {/* 创作者信息 */}
+            <div className="flex items-center gap-3 mb-6 p-4 bg-slate-50 rounded-xl">
+              <Avatar className="w-12 h-12">
+                <AvatarImage src={currentRatingBid.avatar} />
+                <AvatarFallback>{currentRatingBid.creator[0]}</AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                <p className="font-semibold text-[#1a1a1a]">{currentRatingBid.creator}</p>
+                <p className="text-sm text-[#74767e]">{currentRatingBid.order}</p>
+                {isViewMode && bidReviews.has(currentRatingBid.id) && (
+                  <p className="text-xs text-[#1dbf73] mt-1">评价时间：{bidReviews.get(currentRatingBid.id)?.time}</p>
+                )}
+              </div>
+            </div>
+
+            {/* 星级评分 */}
+            <div className="mb-6">
+              <p className="text-sm font-medium text-[#1a1a1a] mb-3">{isViewMode ? '评分' : '请为这次合作评分'}</p>
+              <div className="flex items-center gap-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <div key={star} className="transition-transform">
+                    <Star
+                      className={`w-8 h-8 ${
+                        rating >= star
+                          ? 'fill-yellow-400 text-yellow-400'
+                          : 'fill-slate-200 text-slate-200'
+                      } ${!isViewMode ? 'cursor-pointer hover:scale-110' : ''}`}
+                      onMouseEnter={() => !isViewMode && setHoveredRating(star)}
+                      onMouseLeave={() => !isViewMode && setHoveredRating(0)}
+                      onClick={() => !isViewMode && setRating(star)}
+                    />
+                  </div>
+                ))}
+              </div>
+              <p className="text-sm text-[#74767e] mt-2">
+                {rating > 0 && (
+                  <span className="font-medium text-[#1dbf73]">
+                    {rating === 5 && '非常满意！'}
+                    {rating === 4 && '很满意'}
+                    {rating === 3 && '一般'}
+                    {rating === 2 && '不满意'}
+                    {rating === 1 && '非常不满意'}
+                  </span>
+                )}
+              </p>
+            </div>
+
+            {/* 评价内容 */}
+            <div className="mb-6">
+              <label className="text-sm font-medium text-[#1a1a1a] mb-2 block">{isViewMode ? '评价内容' : '评价内容（选填）'}</label>
+              {isViewMode ? (
+                <div className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-[#404145] min-h-[80px]">
+                  {ratingComment || '无评价内容'}
+                </div>
+              ) : (
+                <textarea
+                  value={ratingComment}
+                  onChange={(e) => setRatingComment(e.target.value)}
+                  placeholder="分享您的合作体验..."
+                  rows={3}
+                  className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#1dbf73] resize-none"
+                />
+              )}
+            </div>
+
+            {/* 按钮 */}
+            <div className="flex gap-3">
+              {isViewMode ? (
+                <button
+                  onClick={() => {
+                    setShowBidRatingModal(false)
+                    setIsViewMode(false)
+                  }}
+                  className="w-full py-3 bg-[#1dbf73] text-white rounded-xl hover:bg-[#19a463] transition-colors font-medium text-base"
+                >
+                  关闭
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={() => {
+                      setShowBidRatingModal(false)
+                      setIsViewMode(false)
+                    }}
+                    className="flex-1 py-3 border border-[#e4e5e7] text-[#404145] rounded-xl hover:bg-[#f5f5f5] transition-colors font-medium text-base"
+                  >
+                    取消
+                  </button>
+                  <button
+                    onClick={submitRating}
+                    className="flex-1 py-3 bg-[#1dbf73] text-white rounded-xl hover:bg-[#19a463] transition-colors font-medium text-base"
+                  >
+                    提交评价
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

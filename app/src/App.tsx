@@ -33,6 +33,8 @@ import AdminCreators from './admin/pages/AdminCreators'
 import AdminReviews from './admin/pages/AdminReviews'
 import AdminContent from './admin/pages/AdminContent'
 import AdminSettings from './admin/pages/AdminSettings'
+import AdminAdvertiserCert from './admin/pages/AdminAdvertiserCert'
+import AdminTaskReview from './admin/pages/AdminTaskReview'
 
 function App() {
   const [scrolled, setScrolled] = useState(false)
@@ -54,6 +56,8 @@ function App() {
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} />
           <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="advertiser-cert" element={<AdminAdvertiserCert />} />
+          <Route path="task-review" element={<AdminTaskReview />} />
           <Route path="orders" element={<AdminOrders />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="creators" element={<AdminCreators />} />

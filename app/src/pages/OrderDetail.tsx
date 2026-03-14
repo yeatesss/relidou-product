@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
   ChevronRight,
-  Star,
   Clock,
   Film,
   Mic,
@@ -10,8 +9,11 @@ import {
   AlertCircle,
   Bot,
   Maximize2,
+  Award,
+  TrendingUp,
 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 
 // ─── Mock 数据 ────────────────────────────────────────────────
 const SERVICE = {
@@ -28,6 +30,8 @@ const SERVICE = {
     avatar: '创',
     acceptanceRate: 90,
     avgReviewTime: '3小时',
+    cumulativeAccepted: '500单',
+    cumulativePayout: '10000元',
   },
 
   coverImages: [
@@ -72,6 +76,8 @@ export default function OrderDetail() {
   const [showCodeModal, setShowCodeModal] = useState(false)
   const [orderCode, setOrderCode] = useState('')
   const [codeError, setCodeError] = useState('')
+  const [showImageModal, setShowImageModal] = useState(false)
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0)
 
   useEffect(() => {
     setIsVisible(true)
@@ -143,34 +149,16 @@ export default function OrderDetail() {
           ═══════════════════════════════════ */}
           <div className="lg:col-span-2 space-y-6">
 
-            {/* ── 任务标题+发布信息 ── */}
+            {/* ── 任务标题 + 服务详情 ── */}
             <div
-              className={`bg-white rounded-xl p-6 shadow-sm transition-all duration-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-                }`}
-            >
-              <h1 className="text-xl sm:text-2xl font-bold text-[#1a1a1a] leading-snug mb-4">
-                {SERVICE.title}
-              </h1>
-              <div className="flex flex-wrap items-center gap-4 text-sm text-[#74767e]">
-                <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4" />
-                  <span>发布时间：{new Date(SERVICE.publishTime).toLocaleString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
-                </div>
-                <div className="w-px h-4 bg-[#e4e5e7]" />
-                <div className="flex items-center gap-2">
-                  <span>发布人：</span>
-                  <span className="font-medium text-[#1a1a1a]">{SERVICE.advertiser.name}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* ── 服务详情模块 ── */}
-            <div
-              className={`bg-white rounded-xl shadow-sm transition-all duration-500 delay-100 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+              className={`bg-white rounded-xl shadow-sm transition-all duration-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
                 }`}
             >
               <div className="p-6">
-                <h2 className="text-base font-bold text-[#1a1a1a] mb-4">服务详情</h2>
+                {/* 标题 */}
+                <h1 className="text-xl sm:text-2xl font-bold text-[#1a1a1a] leading-snug mb-4">
+                  {SERVICE.title}
+                </h1>
 
                 {/* 分段式详情展示 */}
                 <div className="border border-[#e4e5e7] rounded-lg overflow-hidden">
@@ -219,6 +207,10 @@ export default function OrderDetail() {
                           {SERVICE.coverImages.map((img, i) => (
                             <div
                               key={i}
+                              onClick={() => {
+                                setSelectedImageIndex(i)
+                                setShowImageModal(true)
+                              }}
                               className={`aspect-video rounded-lg bg-gradient-to-br ${img.bg} border-2 border-[#e4e5e7] overflow-hidden relative group cursor-pointer`}
                             >
                               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
@@ -248,7 +240,7 @@ export default function OrderDetail() {
           </div>
 
           {/* ═══════════════════════════════════
-              右侧 sticky：任务信息区（当前任务）
+              右侧 sticky：任务信息区
           ═══════════════════════════════════ */}
           <div>
             <div
@@ -257,87 +249,128 @@ export default function OrderDetail() {
             >
               <div className="bg-white rounded-xl shadow-sm border border-[#e4e5e7] overflow-hidden">
 
-                {/* 区块标题 */}
-                <div className="px-5 pt-5 pb-4 border-b border-[#f0f0f0]">
-                  <h2 className="font-bold text-[#1a1a1a] text-base mb-3">当前任务</h2>
-                  <div className="grid grid-cols-4 gap-3">
-                    <div className="text-center">
-                      <div className="text-xs font-semibold text-[#1a1a1a]">{SERVICE.submissionsAccepted}</div>
-                      <div className="text-[10px] text-[#74767e]">已验收</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-xs font-semibold text-[#1a1a1a]">{SERVICE.submissionsReceived}</div>
-                      <div className="text-[10px] text-[#74767e]">已投稿</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-xs font-semibold text-[#1a1a1a]">{SERVICE.advertiser.acceptanceRate}%</div>
-                      <div className="text-[10px] text-[#74767e]">验收通过率</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-xs font-semibold text-[#1a1a1a]">{SERVICE.advertiser.avgReviewTime}</div>
-                      <div className="text-[10px] text-[#74767e]">平均验收时间</div>
+                {/* 广告主信息区块 */}
+                <div className="px-4 pt-3 pb-3 border-b border-[#f0f0f0]">
+                  {/* 头像 + 名称 */}
+                  <div className="flex items-center gap-2.5 mb-3">
+                    <Avatar className="w-10 h-10 bg-[#1dbf73]">
+                      <AvatarFallback className="text-white text-sm font-medium">{SERVICE.advertiser.avatar}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-sm font-bold text-[#1a1a1a] truncate">{SERVICE.advertiser.name}</h3>
+                      <p className="text-xs text-[#74767e] mt-0.5">累计验收3000单</p>
                     </div>
                   </div>
-                </div>
 
-                {/* 佣金价格区 */}
-                <div className="px-5 pt-4 pb-4 bg-[#f0faf5] border-b border-[#d4f0e3]">
-                  <div className="text-xs text-[#74767e] mb-1">佣金价格</div>
-                  <div className="text-3xl font-bold text-[#1dbf73] mb-2">¥{SERVICE.task.price}</div>
-                  <div className="flex gap-4 text-sm">
-                    <div>
-                      <span className="text-[#74767e] text-xs">第一次验收预估</span>
-                      <div className="font-semibold text-[#1a1a1a]">¥{SERVICE.task.firstReviewPrice}</div>
-                    </div>
-                    <div className="w-px bg-[#c5e8d5]" />
-                    <div>
-                      <span className="text-[#74767e] text-xs">第二次验收预估</span>
-                      <div className="font-semibold text-[#1a1a1a]">¥{SERVICE.task.secondReviewPrice}</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 任务参数列表 */}
-                <div className="px-5 pt-4 pb-2 space-y-0">
-                  {[
-                    { icon: <Film className="w-4 h-4 text-[#1dbf73]" />, label: '素材条数', value: SERVICE.task.items },
-                    { icon: <Bot className="w-4 h-4 text-[#1dbf73]" />, label: 'AI 创作', value: SERVICE.task.acceptAI },
-                    { icon: <Monitor className="w-4 h-4 text-[#1dbf73]" />, label: '场景要求', value: SERVICE.task.scene },
-                    { icon: <AlertCircle className="w-4 h-4 text-[#1dbf73]" />, label: '视频风格', value: SERVICE.task.style },
-                    { icon: <Mic className="w-4 h-4 text-[#1dbf73]" />, label: '配音要求', value: SERVICE.task.dubbing },
-                    { icon: <Monitor className="w-4 h-4 text-[#1dbf73]" />, label: '投放平台', value: SERVICE.task.platform },
-                    { icon: <Maximize2 className="w-4 h-4 text-[#1dbf73]" />, label: '分辨率', value: SERVICE.task.resolution },
-                    { icon: <Clock className="w-4 h-4 text-[#1dbf73]" />, label: '任务时效', value: SERVICE.taskTime },
-                  ].map((row) => (
-                    <div
-                      key={row.label}
-                      className="flex items-center justify-between py-2.5 border-b border-[#f5f5f5] last:border-0"
-                    >
-                      <div className="flex items-center gap-2 text-[#74767e] text-sm">
-                        {row.icon}
-                        <span>{row.label}</span>
+                  {/* 统计信息卡片 */}
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {/* 验收通过率 */}
+                    <div className="bg-slate-50 rounded-lg p-2">
+                      <div className="flex items-center gap-1 text-[#74767e] text-[10px] mb-1">
+                        <Award className="w-3 h-3" />
+                        <span>验收通过率</span>
                       </div>
-                      <span className="text-sm font-medium text-[#1a1a1a]">{row.value}</span>
+                      <p className="text-sm font-bold text-[#1dbf73]">{SERVICE.advertiser.acceptanceRate}%</p>
                     </div>
-                  ))}
+
+                    {/* 平均验收时间 */}
+                    <div className="bg-slate-50 rounded-lg p-2">
+                      <div className="flex items-center gap-1 text-[#74767e] text-[10px] mb-1">
+                        <Clock className="w-3 h-3" />
+                        <span>平均验收时间</span>
+                      </div>
+                      <p className="text-sm font-bold text-[#1a1a1a]">{SERVICE.advertiser.avgReviewTime}</p>
+                    </div>
+
+                    {/* 累计支出 */}
+                    <div className="bg-slate-50 rounded-lg p-2">
+                      <div className="flex items-center gap-1 text-[#74767e] text-[10px] mb-1">
+                        <TrendingUp className="w-3 h-3" />
+                        <span>累计支出</span>
+                      </div>
+                      <p className="text-sm font-bold text-[#1a1a1a]">{SERVICE.advertiser.cumulativePayout}</p>
+                    </div>
+                  </div>
                 </div>
 
-                {/* 任务时间 */}
-                <div className="px-5 py-4 bg-[#f0faf5] border-t border-[#d4f0e3]">
-                  <div className="text-xs text-[#74767e] mb-2">任务时间</div>
-                  <div className="text-sm text-[#1a1a1a]">
-                    {new Date(SERVICE.task.startTime).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}
-                    {' ~ '}
-                    {new Date(SERVICE.task.endTime).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                {/* 任务信息区块 */}
+                <div className="px-4">
+                  {/* 任务信息大卡片 */}
+                  <div className="rounded-lg p-3 mb-3">
+                    {/* 时间统计 */}
+                    <div className="mb-3 pb-3 border-b border-slate-200">
+                      <div className="flex items-center justify-between">
+                        {/* 截止时间 - 居左 */}
+                        <div className="flex-1">
+                          <div className="flex items-center gap-1 text-[#74767e] text-[10px] mb-1">
+                            <Clock className="w-3 h-3" />
+                            <span>截止时间</span>
+                          </div>
+                          <p className="text-xs font-medium text-[#1a1a1a]">
+                            {new Date(SERVICE.task.endTime).toLocaleString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                        </div>
+
+                        {/* 已验收/已投稿 - 居右 */}
+                        <div className="text-right">
+                          <p className="text-[#74767e] text-[10px] mb-1">已验收/已投稿</p>
+                          <p className="text-base font-bold text-[#1a1a1a]">{SERVICE.submissionsAccepted}/{SERVICE.submissionsReceived}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 任务参数 */}
+                    <div className="mb-3 pb-3 border-b border-slate-200">
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+                        {[
+                          { icon: <Clock className="w-3.5 h-3.5 text-[#1dbf73]" />, label: '任务时效', value: SERVICE.task.taskTime },
+                          { icon: <Film className="w-3.5 h-3.5 text-[#1dbf73]" />, label: '素材条数', value: SERVICE.task.items },
+                          { icon: <Bot className="w-3.5 h-3.5 text-[#1dbf73]" />, label: 'AI 创作', value: SERVICE.task.acceptAI },
+                          { icon: <Monitor className="w-3.5 h-3.5 text-[#1dbf73]" />, label: '场景要求', value: SERVICE.task.scene },
+                          { icon: <AlertCircle className="w-3.5 h-3.5 text-[#1dbf73]" />, label: '视频风格', value: SERVICE.task.style },
+                          { icon: <Mic className="w-3.5 h-3.5 text-[#1dbf73]" />, label: '配音要求', value: SERVICE.task.dubbing },
+                          { icon: <Monitor className="w-3.5 h-3.5 text-[#1dbf73]" />, label: '投放平台', value: SERVICE.task.platform },
+                          { icon: <Maximize2 className="w-3.5 h-3.5 text-[#1dbf73]" />, label: '分辨率', value: SERVICE.task.resolution },
+                        ].map((row) => (
+                          <div key={row.label}>
+                            <div className="flex items-center gap-1 text-[#74767e] text-[10px] mb-1">
+                              {row.icon}
+                              <span>{row.label}</span>
+                            </div>
+                            <p className="text-xs font-medium text-[#1a1a1a]">{row.value}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 佣金价格 */}
+                    <div>
+                      <div className="text-xs text-[#74767e] mb-2">佣金价格</div>
+                      <div className="flex items-center gap-3">
+                        <div className="text-2xl font-bold text-[#1dbf73]">¥{SERVICE.task.price}</div>
+                        <div className="w-px bg-[#1dbf73]/30 h-6"></div>
+                        <div className="flex gap-3 text-xs flex-1">
+                          <div>
+                            <span className="text-[#74767e] text-[10px]">第一次验收</span>
+                            <div className="font-semibold text-[#1a1a1a]">¥{SERVICE.task.firstReviewPrice}</div>
+                          </div>
+                          <div className="w-px bg-[#1dbf73]/30"></div>
+                          <div>
+                            <span className="text-[#74767e] text-[10px]">第二次验收</span>
+                            <div className="font-semibold text-[#1a1a1a]">¥{SERVICE.task.secondReviewPrice}</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
                 {/* 立即下单按钮 */}
-                <div className="px-5 pb-5 pt-3">
+                <div className="px-4 pb-4">
                   <button
                     onClick={handleOrderClick}
                     disabled={ordered}
-                    className={`w-full py-3.5 rounded-xl font-bold text-base transition-all duration-200 ${ordered
+                    className={`w-full py-3 rounded-lg font-bold text-sm transition-all duration-200 ${ordered
                         ? 'bg-[#e4e5e7] text-[#74767e] cursor-not-allowed'
                         : 'bg-[#1dbf73] hover:bg-[#19a463] text-white shadow-lg shadow-[#1dbf73]/25 hover:scale-[1.02]'
                       }`}
@@ -351,6 +384,58 @@ export default function OrderDetail() {
 
         </div>
       </div>
+
+      {/* 图片查看弹窗 */}
+      {showImageModal && (
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4" onClick={() => setShowImageModal(false)}>
+          <div className="relative max-w-5xl w-full" onClick={(e) => e.stopPropagation()}>
+            {/* 关闭按钮 */}
+            <button
+              onClick={() => setShowImageModal(false)}
+              className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors"
+            >
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            {/* 图片 */}
+            <div className={`aspect-video rounded-xl bg-gradient-to-br ${SERVICE.coverImages[selectedImageIndex].bg} flex items-center justify-center`}>
+              <span className="text-white/60 text-lg">{SERVICE.coverImages[selectedImageIndex].label}</span>
+            </div>
+
+            {/* 图片信息 */}
+            <div className="text-center mt-4">
+              <p className="text-white text-sm">{SERVICE.coverImages[selectedImageIndex].label}</p>
+              <p className="text-white/60 text-xs mt-1">
+                {selectedImageIndex + 1} / {SERVICE.coverImages.length}
+              </p>
+            </div>
+
+            {/* 左右切换按钮 */}
+            {SERVICE.coverImages.length > 1 && (
+              <>
+                <button
+                  onClick={() => setSelectedImageIndex((prev) => (prev === 0 ? SERVICE.coverImages.length - 1 : prev - 1))}
+                  className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-16 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => setSelectedImageIndex((prev) => (prev === SERVICE.coverImages.length - 1 ? 0 : prev + 1))}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-16 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* 抢单码验证弹窗 */}
       {showCodeModal && (

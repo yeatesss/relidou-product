@@ -2,87 +2,118 @@ import { useState, useEffect } from 'react'
 import {
   Users,
   ShoppingCart,
-  Video,
+  Briefcase,
+  CheckCircle,
+  Clock,
   DollarSign,
   Activity,
   ArrowUpRight,
   ArrowDownRight,
-  TrendingDown,
+  AlertCircle,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
-
-const stats = [
-  {
-    title: '今日订单',
-    value: '128',
-    change: '+12.5%',
-    trend: 'up',
-    icon: ShoppingCart,
-    color: 'bg-blue-500',
-  },
-  {
-    title: '新增用户',
-    value: '86',
-    change: '+8.2%',
-    trend: 'up',
-    icon: Users,
-    color: 'bg-green-500',
-  },
-  {
-    title: '新增创作者',
-    value: '24',
-    change: '-2.1%',
-    trend: 'down',
-    icon: Video,
-    color: 'bg-purple-500',
-  },
-  {
-    title: '平台收入',
-    value: '¥45,280',
-    change: '+18.3%',
-    trend: 'up',
-    icon: DollarSign,
-    color: 'bg-[#1dbf73]',
-  },
-]
-
-const recentOrders = [
-  { id: 'ORD-2026-001', title: '美妆品牌抖音短视频', client: '花漾美妆', creator: '小明影视', amount: '¥1,200', status: '进行中' },
-  { id: 'ORD-2026-002', title: '产品展示视频拍摄', client: '优品家居', creator: '摄影达人', amount: '¥2,500', status: '待确认' },
-  { id: 'ORD-2026-003', title: '企业宣传片剪辑', client: '互联科技', creator: '动画工坊', amount: '¥5,000', status: '已完成' },
-  { id: 'ORD-2026-004', title: 'APP演示动画', client: '智慧生活', creator: '三维视界', amount: '¥8,000', status: '进行中' },
-  { id: 'ORD-2026-005', title: '直播切片制作', client: '电竞俱乐部', creator: '直播小助手', amount: '¥800', status: '待付款' },
-]
-
-const recentUsers = [
-  { name: '张女士', type: '甲方', email: 'zhang@example.com', joined: '10分钟前', status: '活跃' },
-  { name: '李明', type: '创作者', email: 'liming@example.com', joined: '25分钟前', status: '审核中' },
-  { name: '王小花', type: '甲方', email: 'wang@example.com', joined: '1小时前', status: '活跃' },
-  { name: '陈大伟', type: '创作者', email: 'chen@example.com', joined: '2小时前', status: '活跃' },
-]
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case '进行中':
-    case '活跃':
-      return 'bg-green-100 text-green-700'
-    case '待确认':
-    case '待付款':
-    case '审核中':
-      return 'bg-yellow-100 text-yellow-700'
-    case '已完成':
-      return 'bg-blue-100 text-blue-700'
-    default:
-      return 'bg-slate-100 text-slate-700'
-  }
-}
+import { Button } from '@/components/ui/button'
+import { useNavigate } from 'react-router-dom'
+import { dashboardStats } from '../data/mockData'
 
 export default function AdminDashboard() {
   const [isVisible, setIsVisible] = useState(false)
+  const navigate = useNavigate()
 
   useEffect(() => {
     setIsVisible(true)
   }, [])
+
+  const statsCards = [
+    {
+      title: '总用户数',
+      value: dashboardStats.totalUsers.toLocaleString(),
+      change: `+${dashboardStats.newUsersToday}`,
+      trend: 'up' as const,
+      icon: Users,
+      color: 'bg-blue-500',
+      desc: '今日新增',
+    },
+    {
+      title: '广告主',
+      value: dashboardStats.totalAdvertisers.toLocaleString(),
+      change: `${dashboardStats.pendingAdvertiserCertifications} 待审核`,
+      trend: 'neutral' as const,
+      icon: Briefcase,
+      color: 'bg-purple-500',
+      desc: '企业认证',
+      link: '/admin/advertiser-cert',
+    },
+    {
+      title: '创作者',
+      value: dashboardStats.totalCreators.toLocaleString(),
+      change: `${dashboardStats.pendingCreatorVerifications} 待审核`,
+      trend: 'neutral' as const,
+      icon: CheckCircle,
+      color: 'bg-green-500',
+      desc: '资料审核',
+      link: '/admin/creators',
+    },
+    {
+      title: '平台收入',
+      value: dashboardStats.totalRevenue,
+      change: `今日 ${dashboardStats.todayRevenue}`,
+      trend: 'up' as const,
+      icon: DollarSign,
+      color: 'bg-[#1dbf73]',
+      desc: '累计收入',
+    },
+  ]
+
+  const taskStats = [
+    {
+      title: '待审核任务',
+      value: dashboardStats.pendingTasks,
+      color: 'bg-yellow-500',
+      icon: Clock,
+      link: '/admin/task-review',
+    },
+    {
+      title: '进行中任务',
+      value: dashboardStats.activeTasks,
+      color: 'bg-blue-500',
+      icon: Activity,
+    },
+    {
+      title: '已完成任务',
+      value: dashboardStats.completedTasks,
+      color: 'bg-green-500',
+      icon: CheckCircle,
+    },
+  ]
+
+  const orderStats = [
+    {
+      title: '待接单',
+      value: dashboardStats.pendingOrders,
+      color: 'bg-orange-500',
+      icon: Clock,
+    },
+    {
+      title: '进行中',
+      value: dashboardStats.inProgressOrders,
+      color: 'bg-blue-500',
+      icon: Activity,
+      link: '/admin/orders',
+    },
+    {
+      title: '已完成',
+      value: dashboardStats.completedOrders,
+      color: 'bg-green-500',
+      icon: CheckCircle,
+    },
+    {
+      title: '已冻结',
+      value: dashboardStats.frozenOrders,
+      color: 'bg-red-500',
+      icon: AlertCircle,
+    },
+  ]
 
   return (
     <div className={`space-y-6 transition-all duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
@@ -92,184 +123,182 @@ export default function AdminDashboard() {
           <h1 className="text-2xl font-bold text-slate-800">数据概览</h1>
           <p className="text-slate-500 mt-1">欢迎回来，管理员。今日平台运营数据如下：</p>
         </div>
-        <div className="flex gap-2">
-          <select className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#1dbf73]">
-            <option>今日</option>
-            <option>昨日</option>
-            <option>本周</option>
-            <option>本月</option>
-          </select>
+        <div className="text-sm text-slate-500">
+          最后更新：{new Date().toLocaleString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
         </div>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, index) => {
+        {statsCards.map((stat, index) => {
           const Icon = stat.icon
-          const TrendIcon = stat.trend === 'up' ? ArrowUpRight : ArrowDownRight
           return (
             <div
               key={stat.title}
-              className="bg-white rounded-xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition-shadow"
+              className="bg-white rounded-xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition-shadow cursor-pointer"
               style={{ animationDelay: `${index * 100}ms` }}
+              onClick={() => stat.link && navigate(stat.link)}
             >
               <div className="flex items-start justify-between">
-                <div>
+                <div className="flex-1">
                   <p className="text-slate-500 text-sm">{stat.title}</p>
                   <p className="text-2xl font-bold text-slate-800 mt-1">{stat.value}</p>
+                  <p className="text-xs text-slate-400 mt-1">{stat.desc}</p>
                 </div>
-                <div className={`w-12 h-12 ${stat.color} rounded-xl flex items-center justify-center`}>
+                <div className={`w-12 h-12 ${stat.color} rounded-xl flex items-center justify-center flex-shrink-0`}>
                   <Icon className="w-6 h-6 text-white" />
                 </div>
               </div>
-              <div className="flex items-center gap-2 mt-4">
-                <span className={`flex items-center text-sm ${stat.trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
-                  <TrendIcon className="w-4 h-4 mr-1" />
+              <div className="flex items-center gap-2 mt-3">
+                <span className={`flex items-center text-sm ${
+                  stat.trend === 'up' ? 'text-green-600' :
+                  stat.trend === 'down' ? 'text-red-600' :
+                  'text-yellow-600'
+                }`}>
+                  {stat.trend === 'up' && <ArrowUpRight className="w-4 h-4 mr-1" />}
                   {stat.change}
                 </span>
-                <span className="text-slate-400 text-sm">较昨日</span>
+                {stat.link && (
+                  <span className="text-xs text-[#1dbf73] ml-auto">查看详情 →</span>
+                )}
               </div>
             </div>
           )
         })}
       </div>
 
-      {/* Charts & Tables Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Activity Chart Placeholder */}
-        <div className="lg:col-span-2 bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+      {/* Task & Order Stats */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Task Statistics */}
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold text-slate-800">平台活跃度</h2>
-            <div className="flex gap-2">
-              <Badge variant="secondary" className="bg-[#1dbf73]/10 text-[#1dbf73]">订单</Badge>
-              <Badge variant="secondary" className="bg-blue-100 text-blue-600">用户</Badge>
-            </div>
+            <h2 className="text-lg font-semibold text-slate-800">任务统计</h2>
+            <span className="text-sm text-slate-500">共 {dashboardStats.totalTasks.toLocaleString()} 个任务</span>
           </div>
-          <div className="h-64 bg-slate-50 rounded-xl flex items-center justify-center">
-            <div className="text-center">
-              <Activity className="w-12 h-12 text-slate-300 mx-auto mb-2" />
-              <p className="text-slate-400">数据图表区域</p>
-              <p className="text-slate-300 text-sm">（可接入 ECharts 等图表库）</p>
-            </div>
+          <div className="grid grid-cols-3 gap-4">
+            {taskStats.map((stat) => {
+              const Icon = stat.icon
+              return (
+                <div
+                  key={stat.title}
+                  className="text-center p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer"
+                  onClick={() => stat.link && navigate(stat.link)}
+                >
+                  <div className={`w-10 h-10 ${stat.color} rounded-lg flex items-center justify-center mx-auto mb-2`}>
+                    <Icon className="w-5 h-5 text-white" />
+                  </div>
+                  <p className="text-xl font-bold text-slate-800">{stat.value}</p>
+                  <p className="text-xs text-slate-500 mt-1">{stat.title}</p>
+                </div>
+              )
+            })}
           </div>
         </div>
 
-        {/* Quick Stats */}
+        {/* Order Statistics */}
         <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
-          <h2 className="text-lg font-semibold text-slate-800 mb-6">待处理事项</h2>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-yellow-50 rounded-xl border border-yellow-100">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-yellow-500 rounded-lg flex items-center justify-center">
-                  <ShoppingCart className="w-5 h-5 text-white" />
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-semibold text-slate-800">订单统计</h2>
+            <span className="text-sm text-slate-500">共 {dashboardStats.totalOrders.toLocaleString()} 个订单</span>
+          </div>
+          <div className="grid grid-cols-4 gap-3">
+            {orderStats.map((stat) => {
+              const Icon = stat.icon
+              return (
+                <div
+                  key={stat.title}
+                  className="text-center p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer"
+                  onClick={() => stat.link && navigate(stat.link)}
+                >
+                  <div className={`w-8 h-8 ${stat.color} rounded-lg flex items-center justify-center mx-auto mb-2`}>
+                    <Icon className="w-4 h-4 text-white" />
+                  </div>
+                  <p className="text-lg font-bold text-slate-800">{stat.value}</p>
+                  <p className="text-xs text-slate-500 mt-1">{stat.title}</p>
                 </div>
-                <div>
-                  <p className="font-medium text-slate-800">待审核订单</p>
-                  <p className="text-sm text-slate-500">需要审核的订单</p>
-                </div>
-              </div>
-              <span className="text-2xl font-bold text-yellow-600">12</span>
-            </div>
-            <div className="flex items-center justify-between p-4 bg-blue-50 rounded-xl border border-blue-100">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
-                  <Users className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <p className="font-medium text-slate-800">待审核创作者</p>
-                  <p className="text-sm text-slate-500">新申请的创作者</p>
-                </div>
-              </div>
-              <span className="text-2xl font-bold text-blue-600">8</span>
-            </div>
-            <div className="flex items-center justify-between p-4 bg-red-50 rounded-xl border border-red-100">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center">
-                  <TrendingDown className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <p className="font-medium text-slate-800">投诉举报</p>
-                  <p className="text-sm text-slate-500">需要处理的投诉</p>
-                </div>
-              </div>
-              <span className="text-2xl font-bold text-red-600">3</span>
-            </div>
+              )
+            })}
           </div>
         </div>
       </div>
 
-      {/* Tables Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Orders */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-          <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-slate-800">最近订单</h2>
-            <button className="text-[#1dbf73] text-sm hover:underline">查看全部</button>
+      {/* Financial Overview */}
+      <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+        <h2 className="text-lg font-semibold text-slate-800 mb-6">财务概览</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-gradient-to-br from-[#1dbf73]/5 to-[#1dbf73]/10 rounded-xl p-5 border border-[#1dbf73]/20">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm text-slate-600">平台总收入</span>
+              <DollarSign className="w-5 h-5 text-[#1dbf73]" />
+            </div>
+            <p className="text-3xl font-bold text-[#1dbf73]">{dashboardStats.totalRevenue}</p>
+            <p className="text-xs text-slate-500 mt-2">累计所有任务收入</p>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-slate-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">订单号</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">标题</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">金额</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">状态</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {recentOrders.map((order) => (
-                  <tr key={order.id} className="hover:bg-slate-50">
-                    <td className="px-6 py-4 text-sm text-slate-600">{order.id}</td>
-                    <td className="px-6 py-4 text-sm text-slate-800 font-medium">{order.title}</td>
-                    <td className="px-6 py-4 text-sm text-[#1dbf73] font-medium">{order.amount}</td>
-                    <td className="px-6 py-4">
-                      <Badge className={getStatusColor(order.status)}>{order.status}</Badge>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-5 border border-blue-200">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm text-slate-600">本月收入</span>
+              <Activity className="w-5 h-5 text-blue-600" />
+            </div>
+            <p className="text-3xl font-bold text-blue-600">{dashboardStats.monthRevenue}</p>
+            <p className="text-xs text-slate-500 mt-2">本月截至今日收入</p>
+          </div>
+
+          <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-5 border border-orange-200">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm text-slate-600">待结算金额</span>
+              <Clock className="w-5 h-5 text-orange-600" />
+            </div>
+            <p className="text-3xl font-bold text-orange-600">{dashboardStats.pendingPayments}</p>
+            <p className="text-xs text-slate-500 mt-2">等待结算给创作者</p>
           </div>
         </div>
+      </div>
 
-        {/* Recent Users */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-          <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-slate-800">最新用户</h2>
-            <button className="text-[#1dbf73] text-sm hover:underline">查看全部</button>
+      {/* Pending Actions */}
+      <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+        <h2 className="text-lg font-semibold text-slate-800 mb-6">待处理事项</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div
+            className="flex items-center gap-4 p-4 bg-yellow-50 rounded-xl border border-yellow-100 hover:bg-yellow-100 transition-colors cursor-pointer"
+            onClick={() => navigate('/admin/advertiser-cert')}
+          >
+            <div className="w-12 h-12 bg-yellow-500 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Briefcase className="w-6 h-6 text-white" />
+            </div>
+            <div className="flex-1">
+              <p className="font-semibold text-slate-800">广告主认证审核</p>
+              <p className="text-sm text-slate-500">{dashboardStats.pendingAdvertiserCertifications} 家待审核</p>
+            </div>
+            <ArrowUpRight className="w-5 h-5 text-yellow-600" />
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-slate-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">用户</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">类型</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">注册时间</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">状态</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {recentUsers.map((user, index) => (
-                  <tr key={index} className="hover:bg-slate-50">
-                    <td className="px-6 py-4">
-                      <div>
-                        <p className="text-sm font-medium text-slate-800">{user.name}</p>
-                        <p className="text-xs text-slate-500">{user.email}</p>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <Badge variant="secondary" className={user.type === '甲方' ? 'bg-blue-100 text-blue-600' : 'bg-purple-100 text-purple-600'}>
-                        {user.type}
-                      </Badge>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-slate-600">{user.joined}</td>
-                    <td className="px-6 py-4">
-                      <Badge className={getStatusColor(user.status)}>{user.status}</Badge>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+
+          <div
+            className="flex items-center gap-4 p-4 bg-blue-50 rounded-xl border border-blue-100 hover:bg-blue-100 transition-colors cursor-pointer"
+            onClick={() => navigate('/admin/task-review')}
+          >
+            <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
+              <ShoppingCart className="w-6 h-6 text-white" />
+            </div>
+            <div className="flex-1">
+              <p className="font-semibold text-slate-800">任务发布审核</p>
+              <p className="text-sm text-slate-500">{dashboardStats.pendingTasks} 个待审核</p>
+            </div>
+            <ArrowUpRight className="w-5 h-5 text-blue-600" />
+          </div>
+
+          <div
+            className="flex items-center gap-4 p-4 bg-purple-50 rounded-xl border border-purple-100 hover:bg-purple-100 transition-colors cursor-pointer"
+            onClick={() => navigate('/admin/creators')}
+          >
+            <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Users className="w-6 h-6 text-white" />
+            </div>
+            <div className="flex-1">
+              <p className="font-semibold text-slate-800">创作者资料审核</p>
+              <p className="text-sm text-slate-500">{dashboardStats.pendingCreatorVerifications} 人待审核</p>
+            </div>
+            <ArrowUpRight className="w-5 h-5 text-purple-600" />
           </div>
         </div>
       </div>
